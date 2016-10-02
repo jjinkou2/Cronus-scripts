@@ -92,7 +92,6 @@ define CharacterToPlay                = Momiji;
  /*      Definition        */
 /*------------------------*/
 
-define idx_DataStart                = 0;
 
 define Nb_Event                     = 3; // Morning, Afternoon, Evening
 define Nb_Days                      = 10;
@@ -120,16 +119,39 @@ define S_Start_Vacation             = 50;
 define S_End_Vacation               = 51;
 
 define S_Start_Game                 = 80;
-define S_End_Game                     = 81;
+define S_End_Game                   = 81;
 
 define S_IDLE                       = 100;
+
+// indices used for the data structure
+// -----------------------------------
+
+define idx_DataStart                = 0;
+
+define idx_intro                    = 1;
+define idx_left_char                = 5;
+define idx_right_char               = 10;
+define idx_start_vacation           = 15;
+define idx_greeting                 = 20;
+define idx_select_rock_stage        = 25;
+define idx_abort_rock_play          = 30;
+define idx_hotel                    = 35;
+define idx_mission                  = 40;
+define idx_go_bed                   = 45;
+
+// End Flags. 254 and 255 should never be used in the
+// data segment for other purposes.
+//-----------------------------------------------------
+define EOS							= 254; // End of State
+define EOD							= 255; // End of Data Segment
+//-----------------------------------------------------
 
 
 // LED Colors
 // ----------------
 
 define GREEN                        = 1;
-define BLUE                            = 2;
+define BLUE                         = 2;
 define RED_BLINK                    = 3;
 
   /*-----------------------*/
@@ -138,7 +160,7 @@ define RED_BLINK                    = 3;
 
 // State variables
 // ---------------
-int State                             = S_IDLE;
+int State                            = S_IDLE;
 int Play                             = FALSE;
 int StateInput;
 
@@ -147,23 +169,12 @@ int StateInput;
 int NumDay = 1;
 int loop_event = Nb_Event;   // Morning , Afternoon, Evening
 
-// indices used for the data structure
-// -----------------------------------
-
-int idx_intro;
-int idx_greeting;
-int idx_select_rock_stage;
-int idx_abort_rock_play;
-int idx_hotel;
-int idx_mission;
-int idx_go_bed;
-int idx_character;
 
 int VAR1, NextCmd;      // to circulate thru the data structure
 
 // Debug
 //------
-int debug                              = TRUE;
+int debug                            = TRUE;
 int five_sec                         = 5000;
 
 
@@ -173,36 +184,59 @@ int five_sec                         = 5000;
 
 // 255 represents the end of an event
 
-//      value,       Wait(x50ms),     N° event
+//  Idx, value,       Wait(x50ms),     N° event
 //---------------------------------------------------------------
 //      Introduction
-//      ...
 data(
+    idx_intro,
+        PS4_CIRCLE,      30,         //  Intro screen
+        PS4_OPTIONS,     10,         //  skip intro video
+        PS4_OPTIONS,     80,         //
+    EOS,                 0,
+
+//      ...
 //      Select Character
 //            Left Side of Marie Rose
+    idx_left_char,
         PS4_LEFT,        5,         //  Kasumi
         PS4_LEFT,        5,         //  Momiji
         PS4_LEFT,        5,         //  Hitomi
         PS4_LEFT,        5,         //  Helena
-        255,             0,
+        PS4_CIRCLE,      100,       //  Confirm choice
+    EOS,                 0,
+
 //            Right Side of Marie Rose
+    idx_right_char,
         PS4_RIGHT,       5,         //  Honoka
         PS4_RIGHT,       5,         //  NyoTengu
         PS4_RIGHT,       5,         //  Kokoro
         PS4_RIGHT,       5,         //  Ayane
-        255,             0,
+        PS4_CIRCLE,      100,       //  Confirm choice
+    EOS,                 0,
+
 //      Start Vacation
+    idx_start_vacation,
+        PS4_OPTIONS,     10,         //  skip character intro
+        PS4_OPTIONS,     80,         //
+        PS4_LEFT,        10,         //  don't take a partner
+        PS4_CIRCLE,      100,         //
+        PS4_LEFT,        10,         //  Go to Rock Stage
+        PS4_LEFT,        10,         //  to do => ajust nb of left
+    EOS,                 0,
 //      ...
 
 //       One Day event
+    idx_greeting,
         PS4_CIRCLE,      30,         //  greetings
-        255,             0,
+    EOS,                0,
 
+    idx_select_rock_stage,
         PS4_LEFT,        10,         //  Go to Rock Stage
         PS4_LEFT,        10,         //
         PS4_LEFT,        10,         //
-        255,             0,
+    EOS,                 0,
 
+    idx_abort_rock_play,
         PS4_CIRCLE,      15,         //  Select Rock Stage
         PS4_DOWN,        10,         //
         PS4_CIRCLE,      80,         //  Select Rock Game
@@ -212,8 +246,9 @@ data(
         PS4_CIRCLE,      10,         //
         PS4_LEFT,        5,          //
         PS4_CIRCLE,      80,         //  Mission Aborted
-        255,             0,
+    EOS,                 0,
 
+    idx_hotel,
         PS4_CIRCLE,      60,         // End Of Day
         PS4_CIRCLE,      100,        //
         PS4_CIRCLE,      100,        // End Of Dialogue
@@ -229,31 +264,35 @@ data(
         PS4_LEFT,        10,         //
         PS4_CIRCLE,      10,         // throw away gift
         PS4_CROSS,       50,        // exit girl's closet
-        255,             0,
+    EOS,                 0,
 
     // if nb day < 14  else go to end vacation
-
+    idx_mission,
         PS4_TOUCH,       10,         // quit mission
-        PS4_UP,             10,         //
-        PS4_UP,             30,         //
+        PS4_UP,          10,         //
+        PS4_UP,          30,         //
         PS4_CIRCLE,      50,         //
         PS4_LEFT,        10,         //
         PS4_CIRCLE,      10,         //
         PS4_TOUCH,       10,         // quit mission
-        255,             0,
+    EOS,                 0,
 
+    idx_go_bed,
         PS4_DOWN,        10,         // Start go to bed
         PS4_DOWN,        10,         //
         PS4_CIRCLE,      150,         //
         PS4_CIRCLE,      100,        // go to new morning
-        255,                 0,
+    EOS,                 0,
 
 
 //       End Vacation
 
         PS4_LEFT,        5,          //
-        255,             0
-        );                           // end of combo2
+    EOS,                 0,
+
+// End of Data
+    EOD
+);                           // end of combo2
 
 
   /*----------------------------*/
@@ -267,8 +306,10 @@ init {
 
 // indices initialisation
 // ----------------------
-    idx_intro                    = idx_DataStart;
-    idx_greeting                = idx_intro;
+    idx_intro                   = idx_DataStart;
+    idx_left_char               = idx_intro;
+    idx_right_char              = idx_left_char + 12;
+    idx_greeting                = idx_right_char + 12;
     idx_select_rock_stage       = idx_greeting + 4;
     idx_abort_rock_play         = idx_select_rock_stage + 8;
     idx_hotel                   = idx_abort_rock_play + 18;
@@ -418,12 +459,12 @@ combo cb_Send_Input{
     StateInput=S_Start_Input;
 
     NextCmd = dbyte(VAR1);
-    if (NextCmd!=255) set_val(dbyte(VAR1),100);
+    if (NextCmd!=EOS) set_val(dbyte(VAR1),100);
     else              StateInput=S_End_Input;
 
     wait(100);
 
-    if (NextCmd!=255) set_val(dbyte(VAR1),0);
+    if (NextCmd!=EOS) set_val(dbyte(VAR1),0);
     wait(dbyte(VAR1 + 1) * 50);
 }
 
@@ -455,3 +496,24 @@ function DebugState(idx_Data) {
     VAR1 = idx_Data;
     combo_run(cb_Test);
 }
+
+// Returns the starting index of a combo
+
+function get_state_index(state_id) {
+    i = 0;
+    while(TRUE) {//-----------------------
+        v = dbyte(i);
+        if(v == state_id) {
+            return(i + 1);
+        } else {//====================
+            while(v != EOC && v != EOD) {//#
+                i = i + 1;
+                v = dbyte(i);
+            }//#
+            if(v == EOD) break;
+            else i = i + 2;
+        }//=============================
+    }//-----------------------------------
+    return(-1);
+}
+
