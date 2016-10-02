@@ -184,7 +184,7 @@ int five_sec                         = 5000;
 
 // 255 represents the end of an event
 
-//  Idx, value,       Wait(x50ms),     N° event
+//  Idx, Button,       Wait(x50ms),     Event
 //---------------------------------------------------------------
 //      Introduction
 data(
@@ -506,7 +506,7 @@ function get_state_index(state_id) {
         if(v == state_id) {
             return(i + 1);
         } else {//====================
-            while(v != EOC && v != EOD) {//#
+            while(v != EOS && v != EOD) {//#
                 i = i + 1;
                 v = dbyte(i);
             }//#
