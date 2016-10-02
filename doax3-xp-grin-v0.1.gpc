@@ -1,0 +1,457 @@
+//Posted by jjinkou2, a member of the community in the CronusMAX Forums - http://cronusmax.com/forums
+ 
+//Posted : Thursday 29th of September, 2016 18:50 UTC  
+ 
+ 
+ /*
+  ____   ___    _    __  _______  
+ |  _ \ / _ \  / \   \ \/ /___ /  
+ | | | | | | |/ _ \   \  /  |_ \  
+ | |_| | |_| / ___ \  /  \ ___) | 
+ |____/ \___/_/   \_\/_/\_\____/  
+   ____      _        __  ______  
+  / ___|_ __(_)_ __   \ \/ /  _ \ 
+ | |  _| '__| | '_ \   \  /| |_) |
+ | |_| | |  | | | | |  /  \|  __/ 
+  \____|_|  |_|_| |_| /_/\_\_|                                             V0.1
+____________________________________________________________________________                                 
+ 
+Licence : MIT
+Author  : jinkou 
+ 
+Total byte size: 2105 bytes (51.39%)
+Total variables used: 47 of which 30 are dedicated to combos (41.96%)
+ 
+  /*------------------------*/
+ /*  How to start           */
+/*--------------------------/-----------------------------------------------
+ 
+    1) Before starting the script, just change the character 
+       in the config paragraph below (§CAR_Config)
+ 
+    2) Start the script with Triangle. You can Pause the script too. You
+       must start the script when the game is at the beginning.
+ 
+    3) If the script broke, press Square to stop the script. 
+       Then, manually avance the game to the beginning of a day
+       and press R2. 
+       Caution : You will have to stop manually the script at day 14.
+       ---------
+ 
+/*---------------------------------------------------------------------------
+ 
+  /*------------------------*/
+ /*  Commands of the script */
+/*--------------------------/-----------------------------------------------
+ 
+    Color Led:
+    ----------
+        - BLUE             : Script is Stopped
+        - BLINKING RED     : Script is on Pause
+        - GREEN            : Script is Playing
+ 
+    Commands:
+    ---------
+    - Press Triangle to start the script at the begining of the 
+      game (intro screen).
+    - Re-Press Triangle to Pause / play the script anywhere 
+      (not fully tested).
+ 
+    - Press Square to Stop the script.
+ 
+    - If the script is stopped, pressing R2   
+        will start it at the beginning of the day. 
+        You will have to reach the beginning of the day before pressing R2.  
+ 
+/*-------------------------------------------------------------------------*/
+ 
+ 
+ /*-----------------------*/
+ /*      Characters           */
+/*------------------------*/
+define Kasumi                        = 0;
+define Momiji                        = 2;
+define Hitomi                        = 4;
+define Helena                        = 6;
+define MarieRose                    = 8;
+define Honoka                        = 10;
+define NyoTengu                        = 12;
+define Kokoro                        = 14;
+define Ayane                        = 16;
+ 
+ 
+   /*------------------------*/
+  /*      Configuration         */
+ /*       (§CAR_Config)        */
+/*-------------------------*/
+ 
+define CharacterToPlay                = Momiji;
+ 
+ 
+  /*-----------------------*/
+ /*      Definition        */
+/*------------------------*/
+ 
+define idx_DataStart                = 0;
+ 
+define Nb_Event                     = 3; // Morning, Afternoon, Evening
+define Nb_Days                      = 10;
+ 
+ 
+// State Definition
+// ----------------
+ 
+ 
+define S_Start_Input                = 1;
+define S_End_Input                  = 2;
+define S_EndWait                    = 3;
+ 
+define S_Start_Intro                = 10;
+ 
+define S_Start_Day                  = 20;
+define S_End_Day                    = 21;
+define S_Start_Stage                = 22;
+define S_Start_RockPlay             = 23;
+define S_Hotel                      = 24;
+define S_Mission                    = 25;
+define S_Go_Bed                     = 26;
+ 
+define S_Start_Vacation             = 50;
+define S_End_Vacation               = 51;
+ 
+define S_Start_Game                 = 80;
+define S_End_Game                     = 81;
+ 
+define S_IDLE                       = 100;
+ 
+ 
+// LED Colors
+// ----------------
+ 
+define GREEN                        = 1;
+define BLUE                            = 2;
+define RED_BLINK                    = 3;
+ 
+  /*-----------------------*/
+ /*      Variables         */
+/*------------------------*/
+ 
+// State variables
+// ---------------
+int State                             = S_IDLE;
+int Play                             = FALSE;
+int StateInput;
+ 
+// Days and loop vacation
+//-----------------------
+int NumDay = 1;
+int loop_event = Nb_Event;   // Morning , Afternoon, Evening
+ 
+// indices used for the data structure
+// -----------------------------------
+ 
+int idx_intro;
+int idx_greeting;
+int idx_select_rock_stage;
+int idx_abort_rock_play;
+int idx_hotel;
+int idx_mission;
+int idx_go_bed;
+int idx_character;
+ 
+int VAR1, NextCmd;      // to circulate thru the data structure
+ 
+// Debug
+//------
+int debug                              = TRUE;
+int five_sec                         = 5000;
+ 
+ 
+  /*----------------------------*/
+ /*      Data Structure         */
+/*----------------------------*/
+ 
+// 255 represents the end of an event
+ 
+//      value,       Wait(x50ms),     N° event
+//---------------------------------------------------------------
+//      Introduction
+//      ...
+data(
+//      Select Character
+//            Left Side of Marie Rose
+        PS4_LEFT,        5,         //  Kasumi
+        PS4_LEFT,        5,         //  Momiji
+        PS4_LEFT,        5,         //  Hitomi
+        PS4_LEFT,        5,         //  Helena
+        255,             0,
+//            Right Side of Marie Rose
+        PS4_RIGHT,       5,         //  Honoka
+        PS4_RIGHT,       5,         //  NyoTengu
+        PS4_RIGHT,       5,         //  Kokoro
+        PS4_RIGHT,       5,         //  Ayane
+        255,             0,
+//      Start Vacation
+//      ...
+ 
+//       One Day event
+        PS4_CIRCLE,      30,         //  greetings
+        255,             0,
+ 
+        PS4_LEFT,        10,         //  Go to Rock Stage
+        PS4_LEFT,        10,         //
+        PS4_LEFT,        10,         //
+        255,             0,
+ 
+        PS4_CIRCLE,      15,         //  Select Rock Stage
+        PS4_DOWN,        10,         //
+        PS4_CIRCLE,      80,         //  Select Rock Game
+ 
+        PS4_OPTIONS,     10,         //  Abort Mission
+        PS4_UP,          5,          //
+        PS4_CIRCLE,      10,         //
+        PS4_LEFT,        5,          //
+        PS4_CIRCLE,      80,         //  Mission Aborted
+        255,             0,
+ 
+        PS4_CIRCLE,      60,         // End Of Day
+        PS4_CIRCLE,      100,        //
+        PS4_CIRCLE,      100,        // End Of Dialogue
+        PS4_CIRCLE,      100,        // Start of Zack Gift
+        PS4_CIRCLE,      50 ,        //
+        PS4_SQUARE,      70,         // Open girl's
+        PS4_LEFT,        5,         //
+        PS4_LEFT,        5,         //
+        PS4_LEFT,        5,         //
+        PS4_CIRCLE,      10,         // select gift
+        PS4_LEFT,        10,         //
+        PS4_CIRCLE,      10,         //
+        PS4_LEFT,        10,         //
+        PS4_CIRCLE,      10,         // throw away gift
+        PS4_CROSS,       50,        // exit girl's closet
+        255,             0,
+ 
+    // if nb day < 14  else go to end vacation
+ 
+        PS4_TOUCH,       10,         // quit mission
+        PS4_UP,             10,         //
+        PS4_UP,             30,         //
+        PS4_CIRCLE,      50,         //
+        PS4_LEFT,        10,         //
+        PS4_CIRCLE,      10,         //
+        PS4_TOUCH,       10,         // quit mission
+        255,             0,
+ 
+        PS4_DOWN,        10,         // Start go to bed
+        PS4_DOWN,        10,         //
+        PS4_CIRCLE,      150,         //
+        PS4_CIRCLE,      100,        // go to new morning
+        255,                 0,
+ 
+ 
+//       End Vacation
+ 
+        PS4_LEFT,        5,          //
+        255,             0
+        );                           // end of combo2
+ 
+ 
+  /*----------------------------*/
+ /*      Main and Init          */
+/*----------------------------*/
+ 
+init {
+ 
+    SwitchLED(BLUE);
+    State = S_Start_Game;
+ 
+// indices initialisation
+// ----------------------
+    idx_intro                    = idx_DataStart;
+    idx_greeting                = idx_intro;
+    idx_select_rock_stage       = idx_greeting + 4;
+    idx_abort_rock_play         = idx_select_rock_stage + 8;
+    idx_hotel                   = idx_abort_rock_play + 18;
+    idx_mission                 = idx_hotel + 32;
+    idx_go_bed                  = idx_mission + 16;
+}
+ 
+main {
+    set_val(TRACE_3,State);  // Look at the state definition to know where the automata is stuck
+ 
+    if (debug) {
+        SwitchLED(GREEN);
+        debug=FALSE;
+    //    combo_run(cb_wait);
+    }
+ 
+    //Press Triangle to pause/play the script.
+    if(event_press(PS4_TRIANGLE)) { 
+       //Play = !Play;
+       // LED
+       if (Play)     {
+               SwitchLED(GREEN);    
+               if (State == S_Start_Game) State = S_Start_Intro;
+       }
+       else    SwitchLED(RED_BLINK); 
+    }
+ 
+    // Press Square to Stop the script
+    if(event_press(PS4_SQUARE)) {
+        State=S_IDLE;  
+        Play = FALSE;
+        SwitchLED(BLUE);
+    }
+ 
+    // If the script is stopped, pressing R2   
+      // will restart it at the beginning of the day
+      if ((State==S_IDLE) && event_press(PS4_R2)) { 
+            State=S_Start_Day;
+            SwitchLED(GREEN);    
+            //Play = TRUE;
+    }
+ 
+    // for debug test . Use it if you want to test a specific state 
+    if(event_press(PS4_L2)) DebugState(idx_greeting);
+ 
+ 
+    if (Play) {
+ 
+ 
+        if (State==S_Start_Intro)   combo_run(cb_Intro);
+ 
+        if (State==S_Start_Day)     combo_run(cb_Morning_Greeting);
+        if (State==S_Start_Stage)   combo_run (cb_Start_Stage);
+ 
+        if (State==S_Start_RockPlay && !combo_running(cb_Start_RockPlay)) {
+            loop_event = loop_event - 1;
+            combo_restart (cb_Start_RockPlay);
+        }
+ 
+        if (State==S_Hotel)         combo_run (cb_Hotel);
+        if (State==S_Mission)       combo_run (cb_Mission);
+        if (State==S_Go_Bed)        combo_run (cb_Bed);
+ 
+        if (State==S_End_Day) {
+            NumDay = NumDay + 1;
+            if (NumDay > Nb_Days) {
+                State   = S_End_Vacation;
+                NumDay  = 1;
+            }
+            else {
+                set_val(TRACE_4,NumDay);
+                State   = S_Start_Day;
+            }
+        }
+ 
+        if (State==S_End_Vacation)  State = S_IDLE;
+ 
+        if((NextCmd!=255) && !combo_running(cb_Send_Input) && StateInput==S_Start_Input){
+            VAR1 = VAR1 + 2;
+            combo_restart(cb_Send_Input);
+        }
+    }
+}
+ 
+  /*-----------------------*/
+ /*      Combos           */
+/*-----------------------*/
+ 
+combo cb_wait{
+    wait(five_sec);
+    State=S_Start_Day;
+}
+ 
+combo cb_Intro{
+    VAR1  = idx_intro;
+    call(cb_Send_Input);
+    State = S_Start_Day;
+}
+ 
+combo cb_Morning_Greeting{
+    VAR1  = idx_greeting;
+    call(cb_Send_Input);
+    State = S_Start_Stage;
+}
+ 
+combo cb_Start_Stage{
+    VAR1 = idx_select_rock_stage;
+    call(cb_Send_Input);
+    State=S_Start_RockPlay;
+}
+ 
+combo cb_Start_RockPlay{
+    VAR1 = idx_abort_rock_play;
+    call(cb_Send_Input);
+    set_val(TRACE_2,loop_event);
+ 
+    if (!loop_event) {
+        State=S_Hotel;
+        loop_event=Nb_Event;
+    }
+}
+ 
+combo cb_Hotel{
+    VAR1 = idx_hotel;
+    call(cb_Send_Input);
+    State=S_Mission;
+}
+ 
+combo cb_Mission{
+    VAR1 = idx_mission;
+    call(cb_Send_Input);
+    State = S_Go_Bed;
+}
+ 
+combo cb_Bed{
+    VAR1 = idx_go_bed;
+    call(cb_Send_Input);
+    State = S_End_Day;
+}
+ 
+combo cb_Test{
+    call(cb_Send_Input);
+    State = S_IDLE;
+}
+ 
+combo cb_Send_Input{
+    StateInput=S_Start_Input;
+ 
+    NextCmd = dbyte(VAR1);
+    if (NextCmd!=255) set_val(dbyte(VAR1),100);
+    else              StateInput=S_End_Input;
+ 
+    wait(100);
+ 
+    if (NextCmd!=255) set_val(dbyte(VAR1),0);
+    wait(dbyte(VAR1 + 1) * 50);
+}
+ 
+ 
+  /*-----------------------*/
+ /*      Functions         */
+/*------------------------*/
+ 
+function SwitchLED(Color){
+// Find the correct color
+    if (Color==GREEN) {
+               set_led(LED_1, 0);
+               set_led(LED_2, 0);
+               set_led(LED_3, 1);         
+    }
+    else if (Color==BLUE){
+            set_led(LED_1, 1);  
+            set_led(LED_2, 0);
+            set_led(LED_3, 0); 
+    }
+    else if (Color==RED_BLINK){
+            set_led(LED_1, 0);  
+            set_led(LED_2, 2);
+            set_led(LED_3, 0); 
+    }
+}
+ 
+function DebugState(idx_Data) {
+    VAR1 = idx_Data;
+    combo_run(cb_Test);
+}
