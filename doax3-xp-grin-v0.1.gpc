@@ -387,7 +387,8 @@ main {
 
         if (State==S_End_Vacation)  State = S_IDLE;
 
-        if((NextCmd!=255) && !combo_running(cb_Send_Input) && StateInput==S_Start_Input){
+        if((NextCmd!=255) && !combo_running(cb_Send_Input)
+                          && StateInput==S_Start_Input){
             VAR1 = VAR1 + 2;
             combo_restart(cb_Send_Input);
         }
@@ -499,14 +500,14 @@ function DebugState(idx_Data) {
 
 // Returns the starting index of a combo
 
-function get_state_index(state_id) {
+function get_combo_index(combo_id) {
     i = 0;
     while(TRUE) {//-----------------------
         v = dbyte(i);
-        if(v == state_id) {
+        if(v == combo_id) {
             return(i + 1);
         } else {//====================
-            while(v != EOS && v != EOD) {//#
+            while(v != EOC && v != EOD) {//#
                 i = i + 1;
                 v = dbyte(i);
             }//#

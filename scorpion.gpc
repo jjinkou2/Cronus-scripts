@@ -1,53 +1,53 @@
 //Posted by falconpunch323, a member of the community in the CronusMAX Forums - http://cronusmax.com/forums
- 
-//Posted : Saturday 1st of October, 2016 12:36 UTC  
- 
- 
+
+//Posted : Saturday 1st of October, 2016 12:36 UTC
+
+
 define BACK_PUNCH    =  17; // TRIANGLE, Y
-define BACK_KICK     =  18; // CIRCLE, B  
+define BACK_KICK     =  18; // CIRCLE, B
 define FRONT_KICK    =  19; // CROSS, A
 define FRONT_PUNCH   =  20; // SQUARE, X
-define R1            =   3; // R1, RB    
-define R2            =   4; // R2, RT    
-define THROW         =   6; // L1, LB    
-define L2            =   7; // L2, LT    
-define UP            =  13; // DPAD UP  
+define R1            =   3; // R1, RB
+define R2            =   4; // R2, RT
+define THROW         =   6; // L1, LB
+define L2            =   7; // L2, LT
+define UP            =  13; // DPAD UP
 define DOWN          =  14; // DPAD DOWN
-define LEFT          =  15; // DPAD LEFT  
-define RIGHT         =  16; // DPAD RIGHT  
+define LEFT          =  15; // DPAD LEFT
+define RIGHT         =  16; // DPAD RIGHT
 define MOVE_X        =  11; // LEFT ANALOG X
 define MOVE_Y        =  12; // LEFT ANALOG Y
-define BACK          = 128; // BACK FLAG    
+define BACK          = 128; // BACK FLAG
 define FORWARD       = 129; // FORWARD FLAG
- 
-// End Flags. 254 and 255 should never be used in the 
-// data segment for other purposes.                  
+
+// End Flags. 254 and 255 should never be used in the
+// data segment for other purposes.
 //-----------------------------------------------------
-define EOC              = 254; // End of Combo      
-define EOD              = 255; // End of Data Segment 
+define EOC              = 254; // End of Combo
+define EOD              = 255; // End of Data Segment
 //-----------------------------------------------------
- 
+
 //Define Combos
 //--------------------------------------
-define Combo_1              =0;     // 
-define Combo_2              =1;     // 
+define Combo_1              =0;     //
+define Combo_2              =1;     //
 define Combo_3              =2;     //
 define Combo_4              =3;     //
 define Combo_5              =4;     //
-define Combo_6              =5;     // 
-define Combo_7              =6;     // 
-define Combo_8              =7;     // 
-define Fatality1            =8;     // 
-define Fatality2            =9;     // 
+define Combo_6              =5;     //
+define Combo_7              =6;     //
+define Combo_8              =7;     //
+define Fatality1            =8;     //
+define Fatality2            =9;     //
 //--------------------------------------
- 
+
 //Define Combo Adjusters
 //--------------------------------------
-define L1_PRESS                 =10;    // 
-define L2_PRESS                 =11;    // 
+define L1_PRESS                 =10;    //
+define L2_PRESS                 =11;    //
 define L2_PRESSoverhead         =12;    //
 //--------------------------------------
- 
+
 // Combo Data
 //--------------------------------------
 data(
@@ -93,10 +93,10 @@ FRONT_KICK,100,
 2,FORWARD,100,
 BACK_PUNCH,100,
 4,0,200,
- 
+
 EOC,
- 
- 
+
+
 Combo_2,
 2,FORWARD,100,
 BACK_PUNCH,100,
@@ -143,9 +143,9 @@ FRONT_KICK,100,
 2,FORWARD,100,
 BACK_PUNCH,100,
 4,0,200,
- 
- 
- 
+
+
+
 EOC,
 Combo_3,
 1,FRONT_PUNCH,100,
@@ -193,10 +193,10 @@ FRONT_KICK,100,
 2,FORWARD,100,
 BACK_PUNCH,100,
 4,0,200,
- 
+
 EOC,
- 
- 
+
+
 Combo_4,
 2,BACK,100,
 BACK_PUNCH,100,
@@ -247,9 +247,9 @@ FRONT_KICK,100,
 2,FORWARD,100,
 BACK_PUNCH,100,
 4,0,200,
- 
+
 EOC,
- 
+
 Combo_5,
 2,BACK,100,
 BACK_PUNCH,100,
@@ -288,7 +288,7 @@ BACK_PUNCH,100,
 BACK_KICK,100,
 4,0,200,
 EOC,
- 
+
 Combo_6,
 2,FORWARD,100,
 BACK_PUNCH,100,
@@ -308,13 +308,13 @@ Combo_8,
 FRONT_KICK,100,
 R2,100,
 4,0,150,
- 
+
 EOC,
- 
+
 L1_PRESS,
- 
+
 EOC,
- 
+
 L2_PRESS,
 7,DOWN,100,
 4,0,5,
@@ -355,7 +355,7 @@ BACK_PUNCH,100,
 BACK_PUNCH,100,
 4,0,120,
 EOC,
- 
+
 L2_PRESSoverhead,
 7,DOWN,100,
 4,0,5,
@@ -387,8 +387,8 @@ BACK_PUNCH,100,
 BACK_PUNCH,100,
 4,0,120,
 EOC,
- 
- 
+
+
 Fatality1,
 1,FORWARD,100,
 4,0,8,
@@ -411,278 +411,278 @@ Fatality2,
 1,BACK_KICK,100,
 4,0,200,
 EOC,
- 
+
 EOD );
 //End Of Combo Data
 //--------------------------------------
- 
+
 //Unmaps
 unmap PS4_L3;
 unmap PS4_LY;
 unmap PS4_LX;
- 
+
 int i = -1, b, v;
 int back = LEFT, forward = RIGHT;
-int button_1, button_2, button_3, button_4, button_5;  
-int value_1, value_2, value_3, value_4, value_5;  
-int wait_time;                              
-int switch;                              
-int delay_t;                                                              
-int cancel;  
+int button_1, button_2, button_3, button_4, button_5;
+int value_1, value_2, value_3, value_4, value_5;
+int wait_time;
+int switch;
+int delay_t;
+int cancel;
 int L2_press;
 int L1_press;
-int L2_PRESSoverheaD; 
-main {                                      
-     //Determine L1/L2 Press                                      
-     if(event_press(PS4_L2)) {
-       L2_press =TRUE;
-     }                                        
-     if(event_press(PS4_L1)) {
-       L1_press =TRUE;
-     }      
- 
- 
-    // Determine Back and Forward            
+int L2_PRESSoverheaD;
+main {
+    //Determine L1/L2 Press
+    if(event_press(PS4_L2)) {
+        L2_press =TRUE;
+    }
+    if(event_press(PS4_L1)) {
+        L1_press =TRUE;
+    }
+
+
+    // Determine Back and Forward
     if(get_val(RIGHT) ) {
-        back = LEFT; forward = RIGHT;            
+        back = LEFT; forward = RIGHT;
     } else if(get_val(LEFT)) {
-        back = RIGHT; forward = LEFT;          
-    }                                          
- 
-    // If there is a combo to be executed      
-    if(i >= 0 ) {                                
-        // Execute the combo step-by-step      
-        if(!combo_running(execute_step)) {      
-            if(get_step_values()) {              
-                if(wait_time == 0) {              
+        back = RIGHT; forward = LEFT;
+    }
+
+    // If there is a combo to be executed
+    if(i >= 0 ) {
+        // Execute the combo step-by-step
+        if(!combo_running(execute_step)) {
+            if(get_step_values()) {
+                if(wait_time == 0) {
                     combo_run(execute_step_no_wait);
-                } else {                        
-                    combo_run(execute_step);    
-                }                                
-            } else { 
-              //Determine combo on L1/L2 Press
-                if(L2_press) {
-                   L2_press = FALSE;
-                    if (L2_PRESSoverheaD == 1){
-                     i = get_combo_index(L2_PRESSoverhead);
-                     L2_PRESSoverheaD =0
                 } else {
-                   i = get_combo_index(L2_PRESS);   
-}
-                }else if(L1_press) {
-                   L1_press = FALSE;
-                   i = get_combo_index(L1_PRESS); 
- 
-                }else{     
-                   i = -1;                          
-                } 
-            }                                    
-        }                                        
- 
-    // CANCEL combos condition-----------------------------------------
-        // RS X / Y are in rest = cancel the combo
- 
- 
-  if(cancel==1){            
-            if ( (abs(get_val (9)) <= 20 && abs(get_val (10)) <= 20) ) { 
-            i = -1;                        
-            combo_stop(execute_step);      
-            } 
-        }else if(cancel==2){
-            if ( (abs(get_val (11)) <= 20 && abs(get_val (12)) <= 20) ) { 
-            i = -1;                        
-            combo_stop(execute_step);      
-            } 
-        }                                            
- 
- 
-        // Make sure the user inputs does not interfere in the combo
-        set_val(BACK_PUNCH,   0);                      
-        set_val(BACK_KICK,    0);                      
-        set_val(FRONT_KICK,   0);                      
-        set_val(FRONT_PUNCH,  0);                      
-        set_val(R1,           0);                        
-        set_val(R2,           0);                        
-        set_val(THROW,        0);                        
-        set_val(L2,           0);                        
-        set_val(UP,           0);                        
-        set_val(DOWN,         0);                        
-        set_val(LEFT,         0);                        
-        set_val(RIGHT,        0);                        
-        set_val(MOVE_X,       0);                        
-        set_val(MOVE_Y,        0);                        
-    } else {    
- 
- 
- 
- 
-    // Combo Run  
-    //--------------------------------------
- 
-        // RS RIGHT                                   
-        if (get_val (9) >= 60) { 
-        cancel=1; 
-        i = get_combo_index(Combo_1); 
-        }                                                                   
-        // RS LEFT                                                            
-        if (get_val (9) <= -60) {  
-        cancel=1;    
-L2_PRESSoverheaD = 1 
-        i = get_combo_index(Combo_2); 
-        }                                                                    
-        // RS UP                                                          
-        if (get_val (10) <= -60) {
-        cancel=1;    
-        L2_PRESSoverheaD = 1
-        i = get_combo_index(Combo_3);
-        }                                                                      
-        // RS DOWN                                                            
-        if (get_val (10) >= 60) { 
-        cancel=1;    
-        i = get_combo_index(Combo_4); 
-        }  
-        // LS RIGHT                                                            
-        if (get_val (11)>= 60) { 
-        cancel=2;   
-L2_PRESSoverheaD = 1  
-        i = get_combo_index(Combo_5); 
-        } 
-        //LS LEFT
-        if (get_val (11)<= -60) { 
-        cancel=2;    
-        i = get_combo_index(Combo_6); 
-        }  
-        // LS UP                                                                        
-        if (get_val (12)<= -60) {  
-        cancel=2;   
-        i = get_combo_index(Combo_7); 
+                    combo_run(execute_step);
+                }
+            }
+            else {
+                //Determine combo on L1/L2 Press
+                if(L2_press) {
+                    L2_press = FALSE;
+                    if (L2_PRESSoverheaD == 1){
+                        i = get_combo_index(L2_PRESSoverhead);
+                        L2_PRESSoverheaD =0
+                    }
+                    else { i = get_combo_index(L2_PRESS); }
+                }
+                else if(L1_press) {
+                    L1_press = FALSE;
+                    i = get_combo_index(L1_PRESS);
+
+                }
+                else{ i = -1; }
+            }
         }
-        // LS DOWN                                                                                                         
-        if (get_val (12)  >= 60) { 
-        cancel=2;  
-        i = get_combo_index(Combo_8); 
-        }                                 
+
+        // CANCEL combos condition-----------------------------------------
+        // RS X / Y are in rest = cancel the combo
+
+
+        if(cancel==1){
+            if ( (abs(get_val (9)) <= 20 && abs(get_val (10)) <= 20) ) {
+                i = -1;
+                combo_stop(execute_step);
+            }
+        }else if(cancel==2){
+            if ( (abs(get_val (11)) <= 20 && abs(get_val (12)) <= 20) ) {
+                i = -1;
+                combo_stop(execute_step);
+            }
+        }
+
+
+        // Make sure the user inputs does not interfere in the combo
+        set_val(BACK_PUNCH,   0);
+        set_val(BACK_KICK,    0);
+        set_val(FRONT_KICK,   0);
+        set_val(FRONT_PUNCH,  0);
+        set_val(R1,           0);
+        set_val(R2,           0);
+        set_val(THROW,        0);
+        set_val(L2,           0);
+        set_val(UP,           0);
+        set_val(DOWN,         0);
+        set_val(LEFT,         0);
+        set_val(RIGHT,        0);
+        set_val(MOVE_X,       0);
+        set_val(MOVE_Y,        0);
+    } else {
+
+
+
+
+        // Combo Run
+        //--------------------------------------
+
+        // RS RIGHT
+        if (get_val (9) >= 60) {
+            cancel=1;
+            i = get_combo_index(Combo_1);
+        }
+        // RS LEFT
+        if (get_val (9) <= -60) {
+            cancel=1;
+            L2_PRESSoverheaD = 1
+                i = get_combo_index(Combo_2);
+        }
+        // RS UP
+        if (get_val (10) <= -60) {
+            cancel=1;
+            L2_PRESSoverheaD = 1
+                i = get_combo_index(Combo_3);
+        }
+        // RS DOWN
+        if (get_val (10) >= 60) {
+            cancel=1;
+            i = get_combo_index(Combo_4);
+        }
+        // LS RIGHT
+        if (get_val (11)>= 60) {
+            cancel=2;
+            L2_PRESSoverheaD = 1
+                i = get_combo_index(Combo_5);
+        }
+        //LS LEFT
+        if (get_val (11)<= -60) {
+            cancel=2;
+            i = get_combo_index(Combo_6);
+        }
+        // LS UP
+        if (get_val (12)<= -60) {
+            cancel=2;
+            i = get_combo_index(Combo_7);
+        }
+        // LS DOWN
+        if (get_val (12)  >= 60) {
+            cancel=2;
+            i = get_combo_index(Combo_8);
+        }
         // R3 Pressed
-        if (get_val (PS4_R3)) {       
-        cancel=3;                              
-        i = get_combo_index(Fatality1); 
+        if (get_val (PS4_R3)) {
+            cancel=3;
+            i = get_combo_index(Fatality1);
         }
         //  L3 Pressed
-        if (get_val (PS4_L3)) {          
-        cancel=3;                              
-        i = get_combo_index(Fatality2); 
+        if (get_val (PS4_L3)) {
+            cancel=3;
+            i = get_combo_index(Fatality2);
         }
-    // End Of Combo Run
-    //--------------------------------------
-    }                                            
-}                                                  
- 
-// This combo will run a step with wait            
-combo execute_step {                                
-    set_buttons_values();                          
-    wait(wait_time);                                
-    set_buttons_values();                          
-}                                                  
- 
-// This combo will run a step without wait        
-combo execute_step_no_wait {                      
-    set_buttons_values();                          
-}                                                  
- 
- 
- 
+        // End Of Combo Run
+        //--------------------------------------
+    }
+}
+
+// This combo will run a step with wait
+combo execute_step {
+    set_buttons_values();
+    wait(wait_time);
+    set_buttons_values();
+}
+
+// This combo will run a step without wait
+combo execute_step_no_wait {
+    set_buttons_values();
+}
+
+
+
 // Returns the starting index of a combo
- 
+
 function get_combo_index(combo_id) {
     L1_press=0;
-    L2_press=0;              
-    i = 0;                                        
-    while(TRUE) {//-----------------------        
-        v = dbyte(i);                              
-        if(v == combo_id) {                        
-            return(i + 1);                        
-        } else {//====================            
-            while(v != EOC && v != EOD) {//#      
-                i = i + 1;                        
-                v = dbyte(i);                      
-            }//#                                  
-            if(v == EOD) break;                    
-            else i = i + 1;                        
-        }//=============================          
-    }//-----------------------------------        
-    return(-1);                                    
-}                                                  
- 
+    L2_press=0;
+    i = 0;
+    while(TRUE) {//-----------------------
+        v = dbyte(i);
+        if(v == combo_id) {
+            return(i + 1);
+        } else {//====================
+            while(v != EOC && v != EOD) {//#
+                i = i + 1;
+                v = dbyte(i);
+            }//#
+            if(v == EOD) break;
+            else i = i + 1;
+        }//=============================
+    }//-----------------------------------
+    return(-1);
+}
+
 // Set the buttons, values and wait time of a step
-function get_step_values() {                      
-    b = dbyte(i); i = i + 1;  
- 
- 
-    //Determine L1/L2 Press            
+function get_step_values() {
+    b = dbyte(i); i = i + 1;
+
+
+    //Determine L1/L2 Press
     if(b > 5) {
-       if(L2_press) {      
-          return(FALSE); 
-       }else if(L1_press) {  
-          return(FALSE); 
- 
-       }else{
-          b = b -6;
- 
-          if(b<1 || b>5 ) return(FALSE);
-       }   
- 
+        if(L2_press) {
+            return(FALSE);
+        }else if(L1_press) {
+            return(FALSE);
+
+        }else{
+            b = b -6;
+
+            if(b<1 || b>5 ) return(FALSE);
+        }
+
     }
- 
- 
-    if(b >= 1) {                                    
+
+
+    if(b >= 1) {
         button_1 = convert_back_forward(dbyte(i)); i = i + 1;
-        value_1 = dbyte(i); i = i + 1;              
-    } else { button_1 = -1; value_1 = 0; }          
- 
-    if(b >= 2) {                                    
+        value_1 = dbyte(i); i = i + 1;
+    } else { button_1 = -1; value_1 = 0; }
+
+    if(b >= 2) {
         button_2 = convert_back_forward(dbyte(i)); i = i + 1;
-        value_2 = dbyte(i); i = i + 1;              
-    } else { button_2 = -1; value_2 = 0; }          
- 
-    if(b >= 3) {                                    
+        value_2 = dbyte(i); i = i + 1;
+    } else { button_2 = -1; value_2 = 0; }
+
+    if(b >= 3) {
         button_3 = convert_back_forward(dbyte(i)); i = i + 1;
-        value_3 = dbyte(i); i = i + 1;              
-    } else { button_3 = -1; value_3 = 0; }          
- 
-    if(b >= 4) {                                    
+        value_3 = dbyte(i); i = i + 1;
+    } else { button_3 = -1; value_3 = 0; }
+
+    if(b >= 4) {
         button_4 = convert_back_forward(dbyte(i)); i = i + 1;
-        value_4 = dbyte(i); i = i + 1;              
-    } else { button_4 = -1; value_4 = 0; }          
- 
-    if(b >= 5) {                                    
+        value_4 = dbyte(i); i = i + 1;
+    } else { button_4 = -1; value_4 = 0; }
+
+    if(b >= 5) {
         button_5 = convert_back_forward(dbyte(i)); i = i + 1;
-        value_5 = dbyte(i); i = i + 1;                
-    } else { button_5 = -1; value_5 = 0; }          
- 
-    wait_time = dbyte(i); i = i + 1;                
-    wait_time = (wait_time - 1) * 10;                
-    if(wait_time < 0) wait_time = 0;                
-    else if(wait_time > 2530) wait_time = 2530;      
- 
-    return(TRUE);                                    
-}                                                    
- 
+        value_5 = dbyte(i); i = i + 1;
+    } else { button_5 = -1; value_5 = 0; }
+
+    wait_time = dbyte(i); i = i + 1;
+    wait_time = (wait_time - 1) * 10;
+    if(wait_time < 0) wait_time = 0;
+    else if(wait_time > 2530) wait_time = 2530;
+
+    return(TRUE);
+}
+
 // If the step has FORWARD and BACK buttons, set the correct value.
-function convert_back_forward(button) {              
-    if(button == FORWARD) {                          
-        return(forward);                            
-    } else if(button == BACK) { 
- 
-        return(back);                                
-    }                                             
-    return(button);                                  
-}                                                    
- 
+function convert_back_forward(button) {
+    if(button == FORWARD) {
+        return(forward);
+    } else if(button == BACK) {
+
+        return(back);
+    }
+    return(button);
+}
+
 // Set the buttons and values, function used on the combos.
-function set_buttons_values() {                      
-    if(button_1 != -1) set_val(button_1, value_1);  
-    if(button_2 != -1) set_val(button_2, value_2);  
-    if(button_3 != -1) set_val(button_3, value_3);  
-    if(button_4 != -1) set_val(button_4, value_4);  
-    if(button_5 != -1) set_val(button_5, value_5);  
+function set_buttons_values() {
+    if(button_1 != -1) set_val(button_1, value_1);
+    if(button_2 != -1) set_val(button_2, value_2);
+    if(button_3 != -1) set_val(button_3, value_3);
+    if(button_4 != -1) set_val(button_4, value_4);
+    if(button_5 != -1) set_val(button_5, value_5);
 }
