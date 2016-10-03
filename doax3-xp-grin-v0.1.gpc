@@ -73,11 +73,11 @@ define Kasumi                        = 0;
 define Momiji                        = 2;
 define Hitomi                        = 4;
 define Helena                        = 6;
-define MarieRose                    = 8;
-define Honoka                        = 10;
-define NyoTengu                        = 12;
-define Kokoro                        = 14;
-define Ayane                        = 16;
+define MarieRose                     = 8;
+define Honoka                        = 14;
+define NyoTengu                      = 16;
+define Kokoro                        = 18;
+define Ayane                         = 20;
 
 
    /*------------------------*/
@@ -101,11 +101,12 @@ define Nb_Days                      = 10;
 // ----------------
 
 
-define S_Start_Input                = 1;
-define S_End_Input                  = 2;
-define S_EndWait                    = 3;
+define S_Play_Combo                 = 1;
 
 define S_Start_Intro                = 10;
+define S_Select_Char                = 11;
+define S_Start_Vacation             = 12;
+define S_End_Vacation               = 13;
 
 define S_Start_Day                  = 20;
 define S_End_Day                    = 21;
@@ -114,9 +115,6 @@ define S_Start_RockPlay             = 23;
 define S_Hotel                      = 24;
 define S_Mission                    = 25;
 define S_Go_Bed                     = 26;
-
-define S_Start_Vacation             = 50;
-define S_End_Vacation               = 51;
 
 define S_Start_Game                 = 80;
 define S_End_Game                   = 81;
@@ -161,8 +159,8 @@ define RED_BLINK                    = 3;
 // State variables
 // ---------------
 int State                            = S_IDLE;
+int Next_State                       = S_IDLE;
 int Play                             = FALSE;
-int StateInput;
 
 // Days and loop vacation
 //-----------------------
@@ -309,25 +307,11 @@ init {
 
     SwitchLED(BLUE);
     State = S_Start_Game;
+    Play  = TRUE;
 }
 
 main {
     set_val(TRACE_3,State);  // Look at the state definition to know where the automata is stuck
-
-    if (State == S_Play_Combo) { // combo playing
-        // Execute the combo step-by-step
-        if(!combo_running(cb_Send_Input)){
-            if (idx_step != EOC) {
-                combo_restart(cb_Send_Input);
-                idx_step = idx_step + 2;
-            }
-            else State = Next_State;
-        }
-        else if (cancel) {
-            combo_stop (cb_Send_Input);
-            State = S_IDLE;
-        }
-    }
 
     //Press Triangle to pause/play the script.
     if(event_press(PS4_TRIANGLE)) {   // <----- ICI ----
@@ -342,14 +326,10 @@ main {
 
     // Press Square to Stop the script
     if(event_press(PS4_SQUARE)) {
-        cancel  = TRUE;
+        State   = S_IDLE;
+        Play    = FALSE;
+        if (combo_running(cb_Send_Input)) combo_stop (cb_Send_Input);
         SwitchLED(BLUE);
-    }
-
-    if (State == S_Start_Intro) {
-        idx_step    = get_combo_index(cb_intro) + 1 ;
-        State       = S_Play_Combo;
-        Next_State  = S_Start_Day;
     }
 
     if (debug) {
@@ -358,28 +338,17 @@ main {
         //    combo_run(cb_wait);
     }
 
-    //Press Triangle to pause/play the script.
-    if(event_press(PS4_TRIANGLE)) {
-        //Play = !Play;
-        // LED
-        if (Play)     {
-            SwitchLED(GREEN);
-            if (State == S_Start_Game) State = S_Start_Intro;
-        }
-        else    SwitchLED(RED_BLINK);
-    }
-
     // Press Square to Stop the script
     if(event_press(PS4_SQUARE)) {
-        State=S_IDLE;
-        Play = FALSE;
+        State   = S_IDLE;
+        Play    = FALSE;
         SwitchLED(BLUE);
     }
 
     // If the script is stopped, pressing R2
     // will restart it at the beginning of the day
-    if ((State==S_IDLE) && event_press(PS4_R2)) {
-        State=S_Start_Day;
+    if ((State == S_IDLE) && event_press(PS4_R2)) {
+        State = S_Start_Day;
         SwitchLED(GREEN);
         //Play = TRUE;
     }
@@ -389,21 +358,19 @@ main {
 
 
     if (Play) {
-
-
-        if (State==S_Start_Intro)   combo_run(cb_Intro);
-
-        if (State==S_Start_Day)     combo_run(cb_Morning_Greeting);
-        if (State==S_Start_Stage)   combo_run (cb_Start_Stage);
-
-        if (State==S_Start_RockPlay && !combo_running(cb_Start_RockPlay)) {
+        if (State == S_Start_Intro)     run_State(cb_intro, S_Select_Char);
+        if (State == S_Select_Char)     run_State(cb_left_char + CharacterToPlay, S_Start_Vacation);
+        if (State == S_Start_Vacation)  run_State(cb_start_vacation, S_Start_Day);
+        if (State == S_Start_Day)       run_State(cb_greeting, S_Start_Stage);
+        if (State == S_Start_Stage)     run_State(cb_select_rock_stage, S_Start_RockPlay);
+        if (State == S_Start_RockPlay) {
             loop_event = loop_event - 1;
-            combo_restart (cb_Start_RockPlay);
+            if (!loop_event) {loop_event=Nb_Event; run_State(cb_abort_rock_play,S_Hotel);}
+            else                        run_State(cb_abort_rock_play,S_Start_RockPlay);
         }
-
-        if (State==S_Hotel)         combo_run (cb_Hotel);
-        if (State==S_Mission)       combo_run (cb_Mission);
-        if (State==S_Go_Bed)        combo_run (cb_Bed);
+        if (State == S_Hotel)           run_State(cb_hotel, S_Mission);
+        if (State == S_Mission)         run_State(cb_mission, S_Go_Bed);
+        if (State == S_Go_Bed)          run_State(cb_go_bed,S_End_Day);
 
         if (State==S_End_Day) {
             NumDay = NumDay + 1;
@@ -419,18 +386,24 @@ main {
 
         if (State==S_End_Vacation)  State = S_IDLE;
 
-        if((NextCmd!=255) && !combo_running(cb_Send_Input)
-                && StateInput==S_Start_Input){
-            VAR1 = VAR1 + 2;
-            combo_restart(cb_Send_Input);
+        if (State == S_Play_Combo) { // combo playing
+            // Execute the combo step-by-step
+            if(!combo_running(cb_Send_Input)){
+                if (idx_step != EOC) {
+                    combo_restart(cb_Send_Input);
+                    idx_step = idx_step + 2;
+                }
+                else State = Next_State;
+            }
         }
+
     }
 }
 
 /*-----------------------*/
 /*      Combos           */
 /*-----------------------*/
-
+/*
 combo cb_wait{
     wait(five_sec);
     State=S_Start_Day;
@@ -487,6 +460,7 @@ combo cb_Test{
     call(cb_Send_Input);
     State = S_IDLE;
 }
+*/
 
 combo cb_Send_Input{
     set_val(dbyte(VAR1),100);
@@ -546,3 +520,9 @@ function get_combo_index(combo_id) {
     return(-1);
 }
 
+function run_State(combo_to_run,next) {
+    idx_step    = get_combo_index(combo_to_run) + 1 ;
+    State       = S_Play_Combo;
+    Next_State  = next;
+
+}
