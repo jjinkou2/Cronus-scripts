@@ -1,4 +1,9 @@
-/*
+//Posted by jjinkou2, a member of the community in the CronusMAX Forums - http://cronusmax.com/forums
+
+//Posted : Thursday 29th of September, 2016 18:50 UTC
+
+
+ /*
   ____   ___    _    __  _______
  |  _ \ / _ \  / \   \ \/ /___ /
  | | | | | | |/ _ \   \  /  |_ \
@@ -14,9 +19,8 @@ ____________________________________________________________________________
 Licence : MIT
 Author  : jinkou
 
-Total byte size: 1079 bytes (26.34%)
-Total variables used: 13 of which 3 are dedicated to combos (11.61%)
-
+Total byte size: 2105 bytes (51.39%)
+Total variables used: 47 of which 30 are dedicated to combos (41.96%)
 
   /*-------------------------*/
  /*  How to start           */
@@ -53,7 +57,7 @@ Total variables used: 13 of which 3 are dedicated to combos (11.61%)
     - Re-Press Triangle to Pause / play the script anywhere
       (not fully tested).
 
-    - Press R1 to Stop the script.
+    - Press Square to Stop the script.
 
     - If the script is stopped, pressing R2
         will start it at the beginning of the day.
@@ -62,31 +66,31 @@ Total variables used: 13 of which 3 are dedicated to combos (11.61%)
 /*-------------------------------------------------------------------------*/
 
 
-  /*-----------------------*/
- /*      Characters       */
-/*-----------------------*/
+ /*-----------------------*/
+ /*      Characters           */
+/*------------------------*/
 define Kasumi                        = 0;
 define Momiji                        = 2;
 define Hitomi                        = 4;
 define Helena                        = 6;
 define MarieRose                     = 8;
-define Honoka                        = 12;
-define NyoTengu                      = 14;
-define Kokoro                        = 16;
-define Ayane                         = 18;
+define Honoka                        = 14;
+define NyoTengu                      = 16;
+define Kokoro                        = 18;
+define Ayane                         = 20;
 
 
    /*------------------------*/
-  /*      Configuration     */
- /*       (§CAR_Config)    */
-/*------------------------*/
+  /*      Configuration         */
+ /*       (§CAR_Config)        */
+/*-------------------------*/
 
 define CharacterToPlay                = Momiji;
 
 
   /*-----------------------*/
- /*      Definition       */
-/*-----------------------*/
+ /*      Definition        */
+/*------------------------*/
 
 
 define Nb_Event                     = 3; // Morning, Afternoon, Evening
@@ -132,7 +136,6 @@ define cb_abort_rock_play          = 30;
 define cb_hotel                    = 35;
 define cb_mission                  = 40;
 define cb_go_bed                   = 45;
-define cb_end_vacation             = 50;
 
 // End Flags. 254 and 255 should never be used in the
 // data segment for other purposes.
@@ -165,19 +168,21 @@ int NumDay = 1;
 int loop_event = Nb_Event;   // Morning , Afternoon, Evening
 
 
+int idx_step;      // to circulate thru the data structure
+
+
 // Debug
 //------
-int debug                            = FALSE;
+int debug                            = TRUE;
+int five_sec                         = 5000;
+
 
 // combo
 // -----
-
-int idx_step;      // to circulate thru the data structure
-int i,v;
-
+int idx_combo                       = -1;
 
   /*----------------------------*/
- /*      Data Structure        */
+ /*      Data Structure         */
 /*----------------------------*/
 
 // EOC represents the end of an event
@@ -188,7 +193,6 @@ int i,v;
 data(
     cb_intro,
         PS4_CIRCLE,      30,         //  Intro screen
-        PS4_CIRCLE,      100,        //
         PS4_OPTIONS,     10,         //  skip intro video
         PS4_OPTIONS,     80,         //
     EOC,
@@ -216,10 +220,11 @@ data(
 //      Start Vacation
     cb_start_vacation,
         PS4_OPTIONS,     10,         //  skip character intro
-        PS4_OPTIONS,     240,         //
+        PS4_OPTIONS,     80,         //
         PS4_LEFT,        10,         //  don't take a partner
-        PS4_CIRCLE,      240,         //
-        PS4_RIGHT,       10,         //  Go to Rock Stage
+        PS4_CIRCLE,      100,         //
+        PS4_LEFT,        10,         //  Go to Rock Stage
+        PS4_LEFT,        10,         //  to do => ajust nb of left
     EOC,
 //      ...
 
@@ -284,16 +289,8 @@ data(
 
 
 //       End Vacation
-    cb_end_vacation,
-        PS4_CIRCLE,      100,         //
-        PS4_OPTION,      100,         //
-        PS4_OPTION,      100,         //
-        PS4_CIRCLE,      50,         //
-        PS4_SQUARE,      20,         //  skip optionnal messages
-        PS4_SQUARE,      20,         //
-        PS4_SQUARE,      20,         //
-        PS4_CIRCLE,      150,         // return to title
-        PS4_CIRCLE,      150,         // return to title
+
+        PS4_LEFT,        5,          //
     EOC,
 
 // End of Data
@@ -302,12 +299,12 @@ data(
 
 
   /*----------------------------*/
- /*      Main and Init         */
+ /*      Main and Init          */
 /*----------------------------*/
 
 init {
 
-//    SwitchLED(BLUE);
+    SwitchLED(BLUE);
     State = S_Start_Game;
     Play  = TRUE;
 }
@@ -320,22 +317,22 @@ main {
         Play = !Play;
         // LED
         if (Play)     {
-//            SwitchLED(GREEN);
+            SwitchLED(GREEN);
             if (State == S_Start_Game) State = S_Start_Intro;
         }
-//        else    SwitchLED(RED_BLINK);
+        else    SwitchLED(RED_BLINK);
     }
 
-    // Press R1 to Stop the script
-    if(event_press(PS4_R1)) {
+    // Press Square to Stop the script
+    if(event_press(PS4_SQUARE)) {
         State   = S_IDLE;
         Play    = FALSE;
         if (combo_running(cb_Send_Input)) combo_stop (cb_Send_Input);
-//        SwitchLED(BLUE);
+        SwitchLED(BLUE);
     }
 
     if (debug) {
-//        SwitchLED(GREEN);
+        SwitchLED(GREEN);
         debug = FALSE;
         Play  = TRUE;
         State = S_Start_Intro;
@@ -348,31 +345,31 @@ main {
         if (event_press(PS4_R2)) {
             Play  = TRUE;
             State = S_Start_Day;
-//            SwitchLED(GREEN);
+            SwitchLED(GREEN);
         }
 
         // Press L2
         // for debug test . Use it if you want to test a specific combo
-        else if (event_press(PS4_L2)) DebugCombo (cb_end_vacation, 0);
+        else if (event_press(PS4_L2)) DebugCombo (cb_intro);
     }
 
    // Main Loop of the State automata
    // -------------------------------
     if (Play) {
-        if (State == S_Start_Intro)     run_State(cb_intro,0, S_Select_Char);
-        if (State == S_Select_Char)     run_State(cb_left_char, CharacterToPlay, S_Start_Vacation);
-        if (State == S_Start_Vacation)  run_State(cb_start_vacation,0, S_Start_Day);
-        if (State == S_Start_Day)       run_State(cb_greeting,0, S_Start_Stage);
-        if (State == S_Start_Stage)     run_State(cb_select_rock_stage, 0, S_Start_RockPlay);
+        if (State == S_Start_Intro)     run_State(cb_intro, S_Select_Char);
+        if (State == S_Select_Char)     run_State(cb_left_char + CharacterToPlay, S_Start_Vacation);
+        if (State == S_Start_Vacation)  run_State(cb_start_vacation, S_Start_Day);
+        if (State == S_Start_Day)       run_State(cb_greeting, S_Start_Stage);
+        if (State == S_Start_Stage)     run_State(cb_select_rock_stage, S_Start_RockPlay);
         if (State == S_Start_RockPlay)
         {
             loop_event = loop_event - 1;
-            if (!loop_event) {loop_event=Nb_Event; run_State(cb_abort_rock_play, 0, S_Hotel);}
-            else                        run_State(cb_abort_rock_play, 0, S_Start_RockPlay);
+            if (!loop_event) {loop_event=Nb_Event; run_State(cb_abort_rock_play,S_Hotel);}
+            else                        run_State(cb_abort_rock_play,S_Start_RockPlay);
         }
-        if (State == S_Hotel)           run_State(cb_hotel, 0, S_Mission);
-        if (State == S_Mission)         run_State(cb_mission, 0, S_Go_Bed);
-        if (State == S_Go_Bed)          run_State(cb_go_bed, 0, S_End_Day);
+        if (State == S_Hotel)           run_State(cb_hotel, S_Mission);
+        if (State == S_Mission)         run_State(cb_mission, S_Go_Bed);
+        if (State == S_Go_Bed)          run_State(cb_go_bed,S_End_Day);
 
         if (State==S_End_Day)
         {
@@ -393,24 +390,73 @@ main {
         { // combo playing
             // Execute the combo step-by-step
             if(!combo_running(cb_Send_Input)){
-			    set_val(TRACE_1,idx_step);
-
-				if (dbyte(idx_step) != EOC)
+                if (idx_step != EOC)
                 {
                     combo_restart(cb_Send_Input);
-
+                    idx_step = idx_step + 2;
                 }
                 else State = Next_State;
             }
         }
     } // end of State automata
-
 }
 
 /*-----------------------*/
 /*      Combos           */
 /*-----------------------*/
+/*
+   combo cb_wait{
+   wait(five_sec);
+   State=S_Start_Day;
+   }
 
+   combo cb_Intro{
+   VAR1  = idx_intro;
+   call(cb_Send_Input);
+   State = S_Start_Day;
+   }
+
+   combo cb_Morning_Greeting{
+   VAR1  = idx_greeting;
+   call(cb_Send_Input);
+   State = S_Start_Stage;
+   }
+
+   combo cb_Start_Stage{
+   VAR1 = idx_select_rock_stage;
+   call(cb_Send_Input);
+   State=S_Start_RockPlay;
+   }
+
+   combo cb_Start_RockPlay{
+   VAR1 = idx_abort_rock_play;
+   call(cb_Send_Input);
+   set_val(TRACE_2,loop_event);
+
+   if (!loop_event) {
+   State=S_Hotel;
+   loop_event=Nb_Event;
+   }
+   }
+
+   combo cb_Hotel{
+   VAR1 = idx_hotel;
+   call(cb_Send_Input);
+   State=S_Mission;
+   }
+
+   combo cb_Mission{
+   VAR1 = idx_mission;
+   call(cb_Send_Input);
+   State = S_Go_Bed;
+   }
+
+   combo cb_Bed{
+   VAR1 = idx_go_bed;
+   call(cb_Send_Input);
+   State = S_End_Day;
+   }
+   */
 
 combo cb_Send_Input{
     set_val(dbyte(idx_step),100);
@@ -418,15 +464,13 @@ combo cb_Send_Input{
 
     set_val(dbyte(idx_step),0);
     wait(dbyte(idx_step + 1) * 50);
-
-	idx_step = idx_step + 2;
 }
 
 
 /*-----------------------*/
 /*      Functions         */
 /*------------------------*/
-/*
+
 function SwitchLED(Color){
     // Find the correct color
     if (Color==GREEN) {
@@ -445,7 +489,7 @@ function SwitchLED(Color){
         set_led(LED_3, 0);
     }
 }
-*/
+
 // Returns the starting index of a combo
 
 function get_combo_index(combo_id) {
@@ -453,7 +497,7 @@ function get_combo_index(combo_id) {
     while(TRUE) {//-----------------------
         v = dbyte(i);
         if(v == combo_id) {
-			return(i + 1);
+            return(i + 1);
         } else {//====================
             while(v != EOC && v != EOD) {//#
                 i = i + 1;
@@ -466,14 +510,14 @@ function get_combo_index(combo_id) {
     return(-1);
 }
 
-function run_State(combo_to_run,offset,next) {
-    idx_step    = get_combo_index(combo_to_run) + offset;
-	State       = S_Play_Combo;
+function run_State(combo_to_run,next) {
+    idx_step    = get_combo_index(combo_to_run) + 1 ;
+    State       = S_Play_Combo;
     Next_State  = next;
 }
 
 
-function DebugCombo(combo_to_run,offset){
+function DebugCombo(combo_to_run){
     Play = TRUE;
-    run_State (combo_to_run,offset,S_IDLE);
+    run_State (combo_to_run,S_IDLE);
 }
