@@ -39,7 +39,7 @@ function SwitchLED(Colour)
     else if (Colour==RED_BLINK)
     {
         set_led(LED_1, 0);
-        set_led(LED_2, 2);
+        set_led(LED_2, 3);
         set_led(LED_3, 0);
     }
     return;
