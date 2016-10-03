@@ -170,7 +170,6 @@ int loop_event = Nb_Event;   // Morning , Afternoon, Evening
 
 int idx_step;      // to circulate thru the data structure
 
-int cancel = FALSE;
 
 // Debug
 //------
@@ -314,7 +313,7 @@ main {
     set_val(TRACE_3,State);  // Look at the state definition to know where the automata is stuck
 
     //Press Triangle to pause/play the script.
-    if(event_press(PS4_TRIANGLE)) {   // <----- ICI ----
+    if(event_press(PS4_TRIANGLE)) {
         Play = !Play;
         // LED
         if (Play)     {
@@ -334,36 +333,36 @@ main {
 
     if (debug) {
         SwitchLED(GREEN);
-        debug=FALSE;
-        //    combo_run(cb_wait);
+        debug = FALSE;
+        Play  = TRUE;
+        State = S_Start_Intro;
     }
 
-    // Press Square to Stop the script
-    if(event_press(PS4_SQUARE)) {
-        State   = S_IDLE;
-        Play    = FALSE;
-        SwitchLED(BLUE);
+    // If the script is stopped,
+    if (State == S_IDLE) {
+        // pressing R2
+        // will restart it at the beginning of the day
+        if (event_press(PS4_R2)) {
+            Play  = TRUE;
+            State = S_Start_Day;
+            SwitchLED(GREEN);
+        }
+
+        // Press L2
+        // for debug test . Use it if you want to test a specific combo
+        else if (event_press(PS4_L2)) DebugCombo (cb_intro);
     }
 
-    // If the script is stopped, pressing R2
-    // will restart it at the beginning of the day
-    if ((State == S_IDLE) && event_press(PS4_R2)) {
-        State = S_Start_Day;
-        SwitchLED(GREEN);
-        //Play = TRUE;
-    }
-
-    // for debug test . Use it if you want to test a specific state
-    if(event_press(PS4_L2)) DebugState(idx_greeting);
-
-
+   // Main Loop of the State automata
+   // -------------------------------
     if (Play) {
         if (State == S_Start_Intro)     run_State(cb_intro, S_Select_Char);
         if (State == S_Select_Char)     run_State(cb_left_char + CharacterToPlay, S_Start_Vacation);
         if (State == S_Start_Vacation)  run_State(cb_start_vacation, S_Start_Day);
         if (State == S_Start_Day)       run_State(cb_greeting, S_Start_Stage);
         if (State == S_Start_Stage)     run_State(cb_select_rock_stage, S_Start_RockPlay);
-        if (State == S_Start_RockPlay) {
+        if (State == S_Start_RockPlay)
+        {
             loop_event = loop_event - 1;
             if (!loop_event) {loop_event=Nb_Event; run_State(cb_abort_rock_play,S_Hotel);}
             else                        run_State(cb_abort_rock_play,S_Start_RockPlay);
@@ -372,7 +371,8 @@ main {
         if (State == S_Mission)         run_State(cb_mission, S_Go_Bed);
         if (State == S_Go_Bed)          run_State(cb_go_bed,S_End_Day);
 
-        if (State==S_End_Day) {
+        if (State==S_End_Day)
+        {
             NumDay = NumDay + 1;
             if (NumDay > Nb_Days) {
                 State   = S_End_Vacation;
@@ -386,89 +386,84 @@ main {
 
         if (State==S_End_Vacation)  State = S_IDLE;
 
-        if (State == S_Play_Combo) { // combo playing
+        if (State == S_Play_Combo)
+        { // combo playing
             // Execute the combo step-by-step
             if(!combo_running(cb_Send_Input)){
-                if (idx_step != EOC) {
+                if (idx_step != EOC)
+                {
                     combo_restart(cb_Send_Input);
                     idx_step = idx_step + 2;
                 }
                 else State = Next_State;
             }
         }
-
-    }
+    } // end of State automata
 }
 
 /*-----------------------*/
 /*      Combos           */
 /*-----------------------*/
 /*
-combo cb_wait{
-    wait(five_sec);
-    State=S_Start_Day;
-}
+   combo cb_wait{
+   wait(five_sec);
+   State=S_Start_Day;
+   }
 
-combo cb_Intro{
-    VAR1  = idx_intro;
-    call(cb_Send_Input);
-    State = S_Start_Day;
-}
+   combo cb_Intro{
+   VAR1  = idx_intro;
+   call(cb_Send_Input);
+   State = S_Start_Day;
+   }
 
-combo cb_Morning_Greeting{
-    VAR1  = idx_greeting;
-    call(cb_Send_Input);
-    State = S_Start_Stage;
-}
+   combo cb_Morning_Greeting{
+   VAR1  = idx_greeting;
+   call(cb_Send_Input);
+   State = S_Start_Stage;
+   }
 
-combo cb_Start_Stage{
-    VAR1 = idx_select_rock_stage;
-    call(cb_Send_Input);
-    State=S_Start_RockPlay;
-}
+   combo cb_Start_Stage{
+   VAR1 = idx_select_rock_stage;
+   call(cb_Send_Input);
+   State=S_Start_RockPlay;
+   }
 
-combo cb_Start_RockPlay{
-    VAR1 = idx_abort_rock_play;
-    call(cb_Send_Input);
-    set_val(TRACE_2,loop_event);
+   combo cb_Start_RockPlay{
+   VAR1 = idx_abort_rock_play;
+   call(cb_Send_Input);
+   set_val(TRACE_2,loop_event);
 
-    if (!loop_event) {
-        State=S_Hotel;
-        loop_event=Nb_Event;
-    }
-}
+   if (!loop_event) {
+   State=S_Hotel;
+   loop_event=Nb_Event;
+   }
+   }
 
-combo cb_Hotel{
-    VAR1 = idx_hotel;
-    call(cb_Send_Input);
-    State=S_Mission;
-}
+   combo cb_Hotel{
+   VAR1 = idx_hotel;
+   call(cb_Send_Input);
+   State=S_Mission;
+   }
 
-combo cb_Mission{
-    VAR1 = idx_mission;
-    call(cb_Send_Input);
-    State = S_Go_Bed;
-}
+   combo cb_Mission{
+   VAR1 = idx_mission;
+   call(cb_Send_Input);
+   State = S_Go_Bed;
+   }
 
-combo cb_Bed{
-    VAR1 = idx_go_bed;
-    call(cb_Send_Input);
-    State = S_End_Day;
-}
-
-combo cb_Test{
-    call(cb_Send_Input);
-    State = S_IDLE;
-}
-*/
+   combo cb_Bed{
+   VAR1 = idx_go_bed;
+   call(cb_Send_Input);
+   State = S_End_Day;
+   }
+   */
 
 combo cb_Send_Input{
-    set_val(dbyte(VAR1),100);
-
+    set_val(dbyte(idx_step),100);
     wait(100);
 
-    set_val(dbyte(VAR1),0);
-    wait(dbyte(VAR1 + 1) * 50);
+    set_val(dbyte(idx_step),0);
+    wait(dbyte(idx_step + 1) * 50);
 }
 
 
@@ -495,11 +490,6 @@ function SwitchLED(Color){
     }
 }
 
-function DebugState(idx_Data) {
-    VAR1 = idx_Data;
-    combo_run(cb_Test);
-}
-
 // Returns the starting index of a combo
 
 function get_combo_index(combo_id) {
@@ -524,5 +514,10 @@ function run_State(combo_to_run,next) {
     idx_step    = get_combo_index(combo_to_run) + 1 ;
     State       = S_Play_Combo;
     Next_State  = next;
+}
 
+
+function DebugCombo(combo_to_run){
+    Play = TRUE;
+    run_State (combo_to_run,S_IDLE);
 }
