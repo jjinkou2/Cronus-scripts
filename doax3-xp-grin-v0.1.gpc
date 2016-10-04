@@ -391,18 +391,7 @@ main {
         //if (State == S_Mission)         run_State(cb_mission, 0, S_Go_Bed);
         if (State == S_Go_Bed)          run_State(cb_go_bed, 0, S_End_Day);
 
-        if (State==S_End_Day)
-        {
-            NumDay = NumDay + 1;
-            if (NumDay > Nb_Days) {
-                State   = S_End_Vacation;
-                NumDay  = 1;
-            }
-            else {
-                set_val(TRACE_4,NumDay);
-                State   = S_Start_Day;
-            }
-        }
+        if (State==S_End_Day)           State = EndDay();
 
         if (State==S_End_Vacation)
         {
@@ -418,14 +407,11 @@ main {
 			    set_val(TRACE_1,idx_step);
 
 				if (dbyte(idx_step) != EOC)  combo_restart(cb_Send_Input);
-                ClearNotif();
+                else State = Next_State;
             }
         }
 
-		if (State == S_Clear_Notif) {
-			
-		}
-    } // end of State automata
+	 } // end of State automata
 
 }
 
@@ -504,6 +490,17 @@ function run_State(combo_to_run, offset, next) {
 	return;
 }
 
+function EndDay() {
+    NumDay = NumDay + 1;
+    if (NumDay > Nb_Days) {
+         NumDay  = 1;
+         return (S_End_Vacation);
+    }
+    else {
+         set_val(TRACE_4,NumDay);
+         return (S_Start_Day);
+    }
+}
 
 function DebugCombo(combo_to_run,offset){
     Play = TRUE;
