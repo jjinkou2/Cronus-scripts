@@ -91,6 +91,7 @@ define Nb_Vacations				   = 3  		// number of loop
 
 define Nb_Events                    = 3; // Morning, Afternoon, Evening
 define Nb_Days                      = 14;
+define Nb_Notifs	                = 20; // repeat 20xsquare to clear notif
 
 
 // State Definition
@@ -111,6 +112,7 @@ define S_Start_RockPlay             = 23;
 define S_Hotel                      = 24;
 define S_Mission                    = 25;
 define S_Go_Bed                     = 26;
+define S_Clear_Event				= 27;
 
 define S_Start_Game                 = 80;
 define S_End_Game                   = 81;
@@ -161,10 +163,10 @@ int Play                             = FALSE;
 
 // Days and loop vacation
 //-----------------------
-int NumDay = 1;
-int loop_event = Nb_Events;   // Morning , Afternoon, Evening
-int loop_vacation = 1;
-
+int NumDay							= 1;
+int loop_event						= Nb_Events; // Morning , Afternoon, Evening
+int loop_vacation					= 1;
+int loop_notif						= 1;
 
 // Debug
 //------
@@ -377,11 +379,16 @@ main {
         if (State == S_Start_RockPlay)
         {
             loop_event = loop_event - 1;
-            if (!loop_event) {loop_event=Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
-            else                        run_State(cb_abort_rock_play, 0, S_Start_RockPlay);
+            if (loop_event != 0)        run_State(cb_abort_rock_play, 0, S_Start_RockPlay);
+			else {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Clear_Event);}
         }
-        if (State == S_Hotel)           run_State(cb_hotel, 0, S_Mission);
-        if (State == S_Mission)         run_State(cb_mission, 0, S_Go_Bed);
+		if (State == S_Clear_Event) {
+			if (loop_notif < Nb_Notifs)  combo_restart (cb_Clear_Notif);	
+			else { loop_notif = 1; State = S_Hotel; }
+		}
+        //if (State == S_Hotel)           run_State(cb_hotel, 0, S_Mission);
+        if (State == S_Hotel)           run_State(cb_hotel, 0, S_Go_Bed);
+        //if (State == S_Mission)         run_State(cb_mission, 0, S_Go_Bed);
         if (State == S_Go_Bed)          run_State(cb_go_bed, 0, S_End_Day);
 
         if (State==S_End_Day)
@@ -400,9 +407,8 @@ main {
         if (State==S_End_Vacation)
         {
         	loop_vacation = loop_vacation + 1;
-        	if (loop_vacation < Nb_Vacations) 	run_State(cb_end_vacation, 0, S_End_Vacation);
+        	if (loop_vacation < Nb_Vacations) 	run_State(cb_end_vacation, 0, S_Start_Vacation);
         	else  { loop_vacation = 1 ;			run_State(cb_end_vacation, 0, S_IDLE);}
-        	
         }
 
         if (State == S_Play_Combo)
@@ -411,14 +417,14 @@ main {
             if(!combo_running(cb_Send_Input)){
 			    set_val(TRACE_1,idx_step);
 
-				if (dbyte(idx_step) != EOC)
-                {
-                    combo_restart(cb_Send_Input);
-
-                }
-                else State = Next_State;
+				if (dbyte(idx_step) != EOC)  combo_restart(cb_Send_Input);
+                ClearNotif();
             }
         }
+
+		if (State == S_Clear_Notif) {
+			
+		}
     } // end of State automata
 
 }
@@ -438,6 +444,13 @@ combo cb_Send_Input{
 	idx_step = idx_step + 2;
 }
 
+combo cb_Clear_Notif{
+	set_val(PS4_SQUARE,100);
+	wait(80);
+	wait(100);
+
+	loop_notif = loop_notif + 1;
+}
 
 /*-----------------------*/
 /*      Functions         */
@@ -483,15 +496,17 @@ function get_combo_index(combo_id) {
     return(-1);
 }
 
-function run_State(combo_to_run,offset,next) {
+function run_State(combo_to_run, offset, next) {
     set_val(TRACE_3,State);  // Look at the state definition to know where the automata is stuck
     idx_step    = get_combo_index(combo_to_run) + offset;
 	State       = S_Play_Combo;
     Next_State  = next;
+	return;
 }
 
 
 function DebugCombo(combo_to_run,offset){
     Play = TRUE;
     run_State (combo_to_run,offset,S_IDLE);
+	return;
 }
