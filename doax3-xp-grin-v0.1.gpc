@@ -37,13 +37,13 @@ Total variables used: 13 of which 3 are dedicated to combos (11.61%)
        If the script broke, manually move the game to the beginning of the next day
        and press R2 to restart it.
 
-       Note: You may have to resynchronise the day number by pressing several PS4_UP
-       (look at TRACE_4 which display the day)
+       Note: You may have to resynchronise the day number by pressing several L1
+       (look at TRACE_4 which displays the day number)
 
     Color Led:
     ----------
         - BLUE              : Script is Stopped
-        - RED               : Script is on Pause
+        - RED               : Script is Paused
         - GREEN             : Script is Playing
 
     Troubleshooting:
@@ -53,7 +53,7 @@ Total variables used: 13 of which 3 are dedicated to combos (11.61%)
 
     - TRACE_4 displays the day number. If the script is stuck or if something
       goes wrong, stop the script, manually move the game to the next day
-      then adjust the day number inside TRACE_4 by pressing UP.
+      then adjust the day number inside TRACE_4 by pressing L1.
 
     - If you want to test a specific set of Data, use the function DebugCombo
       and press L2.
@@ -113,7 +113,8 @@ define S_Hotel                      = 24;
 define S_Mission                    = 25;
 define S_Go_Bed                     = 26;
 
-define S_Clear_Event				= 27;
+define S_Clear_Event                = 27;
+define S_Clear_Vacation             = 28;
 
 define S_Start_Game                 = 80;
 define S_End_Game                   = 81;
@@ -355,7 +356,7 @@ main {
         // for debug test . Use it if you want to test a specific combo
         if (event_press(PS4_L2)) DebugCombo (cb_end_vacation, 0);
 
-        if(event_press(PS4_UP)) {
+        if(event_press(PS4_L1)) {
             NumDay = NumDay + 1; // adjust the numDay if script is stopped
             set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
         }
@@ -478,9 +479,8 @@ function get_combo_index(combo_id) {
             else i = i + 1;
         }//=============================
     }//=============================
+    return(-1);
 }//-----------------------------------
-return(-1);
-}
 
 function StartGame(){
     loop_event = Nb_Events - 1;  // only Afternoon & evening
@@ -490,12 +490,12 @@ function StartGame(){
 function EndDay() {
     NumDay = NumDay + 1;
     if (NumDay > Nb_Days) {
-         NumDay  = 1;
-         return (S_End_Vacation);
+        NumDay  = 1;
+        return (S_End_Vacation);
     }
     else {
-         set_val(TRACE_4,NumDay);
-         return (S_Start_Day);
+        set_val(TRACE_4,NumDay);
+        return (S_Start_Day);
     }
 }
 
