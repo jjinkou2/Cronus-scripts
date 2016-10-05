@@ -226,7 +226,7 @@ data(
     cb_start_vacation,
         PS4_OPTIONS,     20,         //  skip character intro
         PS4_OPTIONS,     240,         //
-        PS4_LEFT,        10,         //  don't take a partner
+        PS4_LEFT,        5,         //  don't take a partner
         PS4_CIRCLE,      240,         //
         PS4_RIGHT,       5,         //  Go to Rock Stage
 	EOC,
@@ -247,28 +247,26 @@ data(
         PS4_DOWN,        10,         //
         PS4_CIRCLE,      80,         //  Select Rock Game
 
-        PS4_OPTIONS,     10,         //  Abort Mission
+        PS4_OPTIONS,     5,         //  Abort Mission
         PS4_UP,          5,          //
-        PS4_CIRCLE,      10,         //
+        PS4_CIRCLE,      5,         //
         PS4_LEFT,        5,          //
         PS4_CIRCLE,      80,         //  Mission Aborted
     EOC,
 
     cb_hotel,
         PS4_CIRCLE,      60,         // End Of Day
-        PS4_CIRCLE,      100,        //
         PS4_CIRCLE,      100,        // End Of Dialogue
         PS4_CIRCLE,      100,        // Start of Zack Gift
-        PS4_CIRCLE,      50 ,        //
         PS4_SQUARE,      70,         // Open girl's
         PS4_LEFT,        5,         //
         PS4_LEFT,        5,         //
         PS4_LEFT,        5,         //
         PS4_CIRCLE,      10,         // select gift
-        PS4_LEFT,        10,         //
-        PS4_CIRCLE,      10,         //
-        PS4_LEFT,        10,         //
-        PS4_CIRCLE,      10,         // throw away gift
+        PS4_LEFT,        5,         //
+        PS4_CIRCLE,      5,         //
+        PS4_LEFT,        5,         //
+        PS4_CIRCLE,      5,         // throw away gift
         PS4_CROSS,       50,        // exit girl's closet
     EOC,
 
@@ -284,10 +282,10 @@ data(
     EOC,
 
     cb_go_bed,
-        PS4_DOWN,        10,         // Start go to bed
-        PS4_DOWN,        10,         //
+        PS4_DOWN,        5,         // Start go to bed
+        PS4_DOWN,        5,         //
         PS4_CIRCLE,      150,         //
-        PS4_CIRCLE,      100,        // go to new morning
+        PS4_CIRCLE,      120,        // go to new morning
     EOC,
 
 
@@ -323,6 +321,7 @@ init {
 
 main {
 
+    set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
     //Press Triangle to pause/play the script.
     if(event_press(PS4_TRIANGLE)) {
         Play = !Play;
@@ -343,10 +342,10 @@ main {
 
     // If the script is stopped,
     if (State == S_IDLE) {
-        // pressing R2
+	    set_val(TRACE_3,State);  // Look at the state definition to know where the automata is stuck
+	    // pressing R2
         // will restart it at the beginning of the day
         if (event_press(PS4_R2)) {
-            NumDay = NumDay + 1; // adjust the numDay
             Play  = TRUE;
             State = S_Start_Day;
             SwitchLED(GREEN);
@@ -355,11 +354,9 @@ main {
         // Press L2
         // for debug test . Use it if you want to test a specific combo
         if (event_press(PS4_L2)) DebugCombo (cb_end_vacation, 0);
-
-        if(event_press(PS4_L1)) {
-            NumDay = NumDay + 1; // adjust the numDay if script is stopped
-            set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
-        }
+        if (event_press(PS4_R3))  {Play  = TRUE;State = S_Clear_Event;}
+        if (event_press(PS4_L1)) NumDay = NumDay + 1; // adjust the numDay if script is stopped
+        
     }
 
     if (debug) {
@@ -372,6 +369,7 @@ main {
    // Main Loop of the State automata
    // -------------------------------
     if (Play) {
+
         if (State == S_Start_Game)      State = StartGame();
         if (State == S_Start_Intro)     run_State(cb_intro,0, S_Select_Char);
         if (State == S_Select_Char)     run_State(cb_left_char, CharacterToPlay, S_Start_Vacation);
@@ -434,9 +432,8 @@ combo cb_Send_Input{
 combo cb_Clear_Notif{
     set_val(PressButton,100);
     wait(80);
+    set_val(PressButton,0);
     wait(100);
-
-    loop_notif = loop_notif + 1;
 }
 
 /*-----------------------*/
@@ -510,9 +507,19 @@ function run_State(combo_to_run,offset,next) {
 
 function ClearNotif_ThenGoto(button, next) {
     PressButton = button;
-    if (loop_notif < Nb_Notifs && !combo_running(cb_Clear_Notif))
-        combo_restart (cb_Clear_Notif);
-    else { loop_notif = 1; State = next; }
+    if (loop_notif < Nb_Notifs) {
+    	if (!combo_running(cb_Clear_Notif))
+    	{
+        	loop_notif = loop_notif + 1;
+       		combo_restart (cb_Clear_Notif);
+    	}
+    }
+    else 
+    {
+    	set_val(TRACE_5,loop_notif);  // Look at the state definition to know where the automata is stuck
+    	loop_notif = 1; 
+    	State = next; 
+    }
     return;
 }
 
