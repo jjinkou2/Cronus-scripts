@@ -23,7 +23,7 @@ Total byte size: 1925 bytes (47.00%)
 /*--------------------------/----------------------------------------------
 
     1) Before starting the script, just change the character/swimsuit/Ticket
-       in the config paragraph below (§CAR_Config)
+       in the config paragraph below (§Config)
 
     2) Important : Make sure the inventory of your selected character is empty.
 
@@ -58,6 +58,8 @@ Total byte size: 1925 bytes (47.00%)
     - If you want to test a specific set of Data, use the function DebugCombo
       and press L2.
 
+    - Press R3 to test a whole State
+
 /*-------------------------------------------------------------------------*/
 
 
@@ -74,23 +76,23 @@ define NyoTengu                    = 14;
 define Kokoro                      = 16;
 define Ayane                       = 18;
 
-  /*-----------------------*/
- /*      Item to collect   */
-/*-----------------------*/
+  /*-------------------------*/
+ /*      Items to collect   */
+/*-------------------------*/
 define Swimsuit                    = 0;
 define Ticket                      = 1;
 
 
-   /*-------------------------------------*/
-  /*  Configuration      (§CAR_Config)    */
-/*--------------------------------------*/
+  /*-------------------------------------*/
+ /*  Configuration      (§Config)       */
+/*-------------------------------------*/
 
-define CharacterToPlay             = Hitomi; // select a character to grin XP
-define Nb_Vacations                = 3;      // number of Vacation to loop
-define Item_To_Buy				   = Ticket; // select between Ticket or Swimsuit to buy every 2 / 3 holidays
-define Index_Swimsuit	  	       = 3;		 // if swimsuit is selected buy this swimsuit index
-define Index_Ticket 			   = 1;		// if Ticket is selected , select from 1 to 4 (dangerous, ...)
- 
+define CharacterToPlay             = Hitomi;// select a character to grin XP
+define Nb_Vacations                = 3;     // number of Vacation to loop
+define Item_To_Buy                 = Ticket;// select between Ticket or Swimsuit to buy every 2 / 3 holidays
+define Index_Swimsuit              = 3;     // if swimsuit is selected buy this swimsuit index
+define Index_Ticket                = 1;     // if Ticket is selected , select from 1 to 4 (dangerous, ...)
+
   /*-----------------------*/
  /*      Definition       */
 /*-----------------------*/
@@ -119,13 +121,13 @@ define S_Start_RockPlay             = 23;
 define S_Hotel                      = 24;
 define S_Throw_Gift                 = 25;
 define S_Go_Bed                     = 26;
-define S_Owner_Shop					= 27;
-define S_Select_Swimsuit			= 28;
-define S_Buy_Swimsuit	 			= 29;
+define S_Owner_Shop                 = 27;
+define S_Select_Swimsuit            = 28;
+define S_Buy_Swimsuit               = 29;
 
-define S_Select_Ticket 	 			= 30;
-define S_Select_Ticket_Tab 			= 31;
-define S_Buy_Ticket 	 			= 32;
+define S_Select_Ticket              = 30;
+define S_Select_Ticket_Tab          = 31;
+define S_Buy_Ticket                 = 32;
 
 define S_Clear_Event                = 50;
 define S_Clear_Vacation             = 51;
@@ -147,10 +149,9 @@ define cb_select_rock_stage        = 25;
 define cb_abort_rock_play          = 30;
 define cb_hotel                    = 35;
 define cb_throw_gift               = 40;
-define cb_owner_shop			   = 42;
-define cb_buy_swimsuit			   = 44;
+define cb_owner_shop               = 42;
+define cb_buy_swimsuit             = 44;
 define cb_select_ticket_tab        = 45;
-define cb_buy_ticket			   = 46;
 define cb_go_bed                   = 47;
 define cb_end_vacation             = 50;
 define cb_return_title             = 55;
@@ -178,9 +179,9 @@ define RED_BLINK                    = 3;
 
 // State variables
 // ---------------
-int State                            = S_IDLE;
-int Next_State                       = S_IDLE;
-int Play                             = FALSE;
+int State                           = S_IDLE;
+int Next_State                      = S_IDLE;
+int Play                            = FALSE;
 
 // Days and loop vacation
 //-----------------------
@@ -188,11 +189,11 @@ int NumDay                          = 1;
 int loop_event                      = Nb_Events; // Morning , Afternoon, Evening
 int loop_vacation                   = 1;
 int loop_notif                      = 1;
-int loop_button						= 1;
+int loop_button                     = 1;
 
 // Debug
 //------
-int debug                            = FALSE;
+int debug                           = FALSE;
 
 // combo
 // -----
@@ -217,7 +218,7 @@ data(
         PS4_CIRCLE,      80,         //  Travel to zack island
         PS4_CIRCLE,      100,        //
         PS4_OPTIONS,     10,         //  skip intro video
-        PS4_OPTIONS,     100,         //
+        PS4_OPTIONS,     100,        //
     EOC,
 
 //      ...
@@ -247,7 +248,7 @@ data(
         PS4_LEFT,        5,         //  don't take a partner
         PS4_CIRCLE,      240,         //
         PS4_RIGHT,       5,         //  Go to Rock Stage
-	EOC,
+    EOC,
 
 //       One Day event
     cb_greeting,
@@ -287,53 +288,38 @@ data(
         PS4_LEFT,        5,         //
         PS4_CIRCLE,      5,         //
         PS4_LEFT,        5,         //
-        PS4_CIRCLE,      5,         // throw away gift
+        PS4_CIRCLE,      5,         // throw gift away
         PS4_CROSS,       50,        // exit girl's closet
     EOC,
 
-	// Buy swimsuit / Ticket
-	cb_owner_shop,					
+    // Buy swimsuit / Ticket
+    cb_owner_shop,
         PS4_CIRCLE,      60,         // End Of Day
         PS4_CIRCLE,      100,        // End Of Dialogue
         PS4_CIRCLE,      100,        // spam circle for notif
         PS4_TRIANGLE,    70,         // Enter Owner shop    
-	EOC,
-	cb_buy_swimsuit,					
-        PS4_CIRCLE,    	 10,         // buy
-        PS4_CIRCLE,    	 10,         // 
-		PS4_CIRCLE,    	 10,         // Paper select silver
-        PS4_CIRCLE,		 10,			// yes / no ?
-        PS4_SQUARE,		 10,		// easy clear notif
-        PS4_SQUARE,		 10,		// not enough ? or ok        
-        PS4_CROSS,		 10,			// cancel
-        PS4_CROSS,		 15,		// exit 
-        PS4_CROSS,		 50,		// exit 
-        PS4_TOUCH,		 50,		// exit Owner mode   
-	EOC,
+    EOC,
+    cb_buy_swimsuit,
+        PS4_CIRCLE,      10,         // buy
+        PS4_CIRCLE,      10,         //
+        PS4_CIRCLE,      10,         // Paper select silver
+        PS4_CIRCLE,      10,            // yes / no ?
+        PS4_SQUARE,      10,        // easy clear notif
+        PS4_SQUARE,      10,        // not enough ? or ok
+        PS4_CROSS,       10,            // cancel
+        PS4_CROSS,       15,        // exit 
+        PS4_CROSS,       50,        // exit 
+        PS4_TOUCH,       50,        // exit Owner mode
+    EOC,
 
-	cb_select_ticket_tab,
-		PS4_RIGHT,		 10,
-		PS4_RIGHT,		 10,
-		PS4_UP,			 10,
-		PS4_UP,			 10,
-	EOC,
-	
-	cb_buy_ticket,					
-        PS4_CIRCLE,    	 10,         // buy
-        PS4_CIRCLE,    	 10,         // 
-		PS4_CIRCLE,    	 10,         // Paper select silver
-        PS4_CIRCLE,		 10,			// yes / no ?
-        PS4_SQUARE,		 10,		// easy clear notif
-        PS4_SQUARE,		 10,		// not enough ? or ok        
-        PS4_CROSS,		 10,			// cancel
-        PS4_CROSS,		 15,		// exit 
-        PS4_CROSS,		 50,		// exit 
-        PS4_TOUCH,		 50,		// exit Owner mode   
-	EOC,
+    cb_select_ticket_tab,
+        PS4_RIGHT,       10,
+        PS4_RIGHT,       10,
+        PS4_UP,          10,
+        PS4_UP,          10,
+    EOC,
 
-
-
-	// Bed Time
+    // Bed Time
     cb_go_bed,
         PS4_DOWN,        5,         // Start go to bed
         PS4_DOWN,        5,         //
@@ -395,8 +381,8 @@ main {
 
     // If the script is stopped,
     if (State == S_IDLE) {
-	    set_val(TRACE_3,State);  // Look at the state definition to know where the automata is stuck
-	    // pressing R2
+        set_val(TRACE_3,State);  // Look at the state definition to know where the automata is stuck
+        // pressing R2
         // will restart it at the beginning of the day
         if (event_press(PS4_R2)) {
             Play  = TRUE;
@@ -409,10 +395,10 @@ main {
         if (event_press(PS4_L2)) DebugCombo (cb_end_vacation, 0); // test a combe 
         if (event_press(PS4_R3))  {Play  = TRUE;State = S_Select_Ticket_Tab;} // test a whole state
         if (event_press(PS4_L1)) {
-        	if (NumDay>14) NumDay=1;
-        	else NumDay = NumDay + 1; // adjust the numDay if script is stopped
+            if (NumDay>14) NumDay = 1;
+            else NumDay = NumDay + 1; // adjust the numDay if script is stopped
         }
-        
+
     }
 
     if (debug) {
@@ -422,8 +408,8 @@ main {
         State = S_Start_Intro;
     }
 
-   // Main Loop of the State automata
-   // -------------------------------
+    // Main Loop of the State automata
+    // -------------------------------
     if (Play) {
 
         if (State == S_Start_Game)      State = StartGame();
@@ -440,23 +426,23 @@ main {
             else {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Clear_Event);}
         }
         if (State == S_Clear_Event)     Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, S_Hotel);
-        if (State == S_Hotel) {           
-        	if (NumDay == 1) 			State = S_Owner_Shop;
-        	else 						run_State(cb_hotel, 0, S_Throw_Gift);
+        if (State == S_Hotel) {
+            if (NumDay == 1)            State = S_Owner_Shop;
+            else                        run_State(cb_hotel, 0, S_Throw_Gift);
         }
-        
+
         if (State == S_Owner_Shop)      {
-        	if (Item_To_Buy == Swimsuit) run_State(cb_owner_shop, 0, S_Select_Swimsuit);
-        	else if (Item_To_Buy == Ticket)run_State(cb_owner_shop, 0, S_Select_Ticket_Tab);
+            if (Item_To_Buy == Swimsuit) run_State(cb_owner_shop, 0, S_Select_Swimsuit);
+            else if (Item_To_Buy == Ticket)run_State(cb_owner_shop, 0, S_Select_Ticket_Tab);
         }
-        
-        if (State == S_Select_Swimsuit)	Repeat_ThenGoto(PS4_UP, Index_Swimsuit, S_Buy_Swimsuit);
+
+        if (State == S_Select_Swimsuit) Repeat_ThenGoto(PS4_UP, Index_Swimsuit, S_Buy_Swimsuit);
         if (State == S_Buy_Swimsuit)    run_State(cb_buy_swimsuit, 0, S_Throw_Gift);
-        
+
         if (State == S_Select_Ticket_Tab)   run_State(cb_select_ticket_tab, 0, S_Select_Ticket);
-        if (State == S_Select_Ticket)	Repeat_ThenGoto(PS4_DOWN, Index_Ticket, S_Buy_Ticket);
+        if (State == S_Select_Ticket)   Repeat_ThenGoto(PS4_DOWN, Index_Ticket, S_Buy_Ticket);
         if (State == S_Buy_Ticket)      run_State(cb_buy_swimsuit, 0, S_Throw_Gift);
-                
+
         if (State == S_Throw_Gift)      run_State(cb_throw_gift, 0, S_Go_Bed);
         if (State == S_Go_Bed)          run_State(cb_go_bed, 0, S_End_Day);
 
@@ -584,40 +570,40 @@ function run_State(combo_to_run,offset,next) {
 function Repeat_ThenGoto(button, times, next) {
     PressButton = button;
     if (loop_button < times) {
-    	if (!combo_running(cb_Clear_Notif))
-    	{
-        	loop_button = loop_button + 1;
-       		combo_restart (cb_Clear_Notif);
-    	}
+        if (!combo_running(cb_Clear_Notif))
+        {
+            loop_button = loop_button + 1;
+            combo_restart (cb_Clear_Notif);
+        }
     }
     else 
     {
-    	set_val(TRACE_5,loop_button);  // Look at the state definition to know where the automata is stuck
-    	loop_button = 1; 
-    	State = next; 
+        set_val(TRACE_5,loop_button);  // Look at the state definition to know where the automata is stuck
+        loop_button = 1; 
+        State = next; 
     }
     return;
 }
 
 /*
-function ClearNotif_ThenGoto(button, next) {
-    PressButton = button;
-    if (loop_notif < Nb_Notifs) {
-    	if (!combo_running(cb_Clear_Notif))
-    	{
-        	loop_notif = loop_notif + 1;
-       		combo_restart (cb_Clear_Notif);
-    	}
-    }
-    else 
-    {
-    	set_val(TRACE_5,loop_notif);  // Look at the state definition to know where the automata is stuck
-    	loop_notif = 1; 
-    	State = next; 
-    }
-    return;
-}
-*/
+   function ClearNotif_ThenGoto(button, next) {
+   PressButton = button;
+   if (loop_notif < Nb_Notifs) {
+   if (!combo_running(cb_Clear_Notif))
+   {
+   loop_notif = loop_notif + 1;
+   combo_restart (cb_Clear_Notif);
+   }
+   }
+   else 
+   {
+   set_val(TRACE_5,loop_notif);  // Look at the state definition to know where the automata is stuck
+   loop_notif = 1; 
+   State = next; 
+   }
+   return;
+   }
+ */
 
 function DebugCombo(combo_to_run,offset){
     Play = TRUE;
