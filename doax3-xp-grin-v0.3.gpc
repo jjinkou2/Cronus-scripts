@@ -79,27 +79,49 @@ define Ayane                       = 18;
   /*-------------------------*/
  /*      Items to collect   */
 /*-------------------------*/
-define Swimsuit                    = 0;
-define Ticket                      = 1;
+define Swimsuit                   = 0;
+define Ticket                     = 1;
+define All						  = 255; 
 
 
   /*-------------------------------------*/
  /*  Configuration      (§Config)       */
 /*-------------------------------------*/
 
-define CharacterToPlay             = Hitomi;// select a character to grin XP
-define Nb_Vacations                = 5;     // number of Vacation to loop
-define Item_To_Buy                 = Ticket;// select between [Ticket or Swimsuit] to buy every 2 / 3 holidays
+// number of Vacation to loop
+define Nb_Vacations                = 5;     
 
-// if you selected Swimsuit then modify the 3 swimsuits below. You can put different values
-int Index_Swimsuit;                     // dont' touch this one
-int Swimsuit_1rst                  = 3; // select the index of the first swimsuit to buy
-int Swimsuit_2nd                   = 3; // for the 2nd (here it will be the same)
-int Swimsuit_3rd                   = 5; // Change it to the same value above if you farm only one
+// Select a Character to Farm, 
+// Possible Values [Hitomi, Helena, ..., All]
+// if you put All_Characters, it will farm a new character each vacation. 
+define CharacterToPlay             = Hitomi; 
 
-// if Ticket is selected , select from 1 to 4 (dangerous, ...)
-define  All_Tickets                = TRUE; // TRUE = buy all tickets,
-int     Index_Ticket               = 1;   //  False => select which one to buy (1,2,3,4)
+// Select between [Ticket or Swimsuit] to buy every 2 / 3 holidays
+define Item_To_Buy                 = Ticket;
+
+
+// if you selected Swimsuit then modify the Swimsuit_X below.
+// You can put different values to specify which one you want
+//
+// If Nb_Swimsuits = All, Swimsuit_X are not used 
+
+define Nb_Swimsuits				   = 3; // Change the number of swimsuits to farm
+
+int Index_Swimsuit;                     // dont' touch this one.
+int Swimsuit_1                     = 2; // select the index of the first swimsuit to buy
+int Swimsuit_2                     = 2; // for the 2nd (here it will be the same)
+int Swimsuit_3                     = 5; // Change it to the same value above if you farm only one
+
+// uncomment below or add  as much Swimsuit_x as you like 
+// but don't forget to change the Nb_Swimsuits above 
+//int Swimsuit_4                    = 8; 
+
+
+
+// if Ticket is selected , select one from theses values (1,2,3,4,All)
+define Ticket_Numero               = All;   //  select which one to buy 
+
+
 
   /*-----------------------*/
  /*      Definition       */
@@ -191,6 +213,13 @@ int State                           = S_IDLE;
 int Next_State                      = S_IDLE;
 int Play                            = FALSE;
 
+// 
+// Items Swimsuit and characters
+//------------------------------
+int next_swimsuit					= 1;
+int Selected_Ticket					= Ticket_Numero;
+int Selected_Char					= 0;
+
 // Days and loop vacation
 //-----------------------
 int NumDay                          = 1;
@@ -209,7 +238,7 @@ int debug                           = FALSE;
 int idx_step;      // to circulate thru the data structure
 int i,v;
 int PressButton;
-int State_itemToBuy[2];// Will give the State according to itemlist (see Init)
+int State_itemToBuy[2]; // Will give the State according to itemlist (see Init)
 
 //-----------------------------------------------------
 
@@ -367,11 +396,12 @@ data(
 
 init {
     SwitchLED(BLUE);
-    State = S_IDLE;
-    Play  = FALSE;
+    State						= S_IDLE;
+    Play						= FALSE;
     State_itemToBuy[Swimsuit]   = S_Select_Swimsuit;
     State_itemToBuy[Ticket]     = S_Select_Ticket_Tab;
 
+	if (Ticket_Numero == All_Tickets)	Selected_Ticket = 0;
 }
 
 main {
@@ -430,7 +460,7 @@ main {
 
         if (State == S_Start_Game)      State = StartGame();
         if (State == S_Start_Intro)     run_State(cb_intro,0, S_Select_Char);
-        if (State == S_Select_Char)     run_State(cb_left_char, CharacterToPlay, S_Start_Vacation);
+        if (State == S_Select_Char)     run_State(cb_left_char, Selected_Char, S_Start_Vacation);
         if (State == S_Start_Vacation)  run_State(cb_start_vacation,0, S_Start_RockPlay);
         if (State == S_Start_Day)       run_State(cb_greeting,0, S_Start_Stage);
         if (State == S_Start_Stage)     run_State(cb_select_rock_stage, 0, S_Start_RockPlay);
@@ -450,16 +480,15 @@ main {
 
         if (State == S_Owner_Shop)      run_State(cb_owner_shop, 0, State_itemToBuy[Item_To_Buy]);
 
-        if (State == S_Select_Swimsuit) Repeat_ThenGoto(PS4_UP, Index_Swimsuit[loop_vacation % 3], S_Buy_Swimsuit);
+        if (State == S_Select_Swimsuit) select_Swimsuit_ThenGoto(S_Buy_Swimsuit);
         if (State == S_Buy_Swimsuit)    run_State(cb_buy_swimsuit, 0, S_Throw_Gift);
 
         if (State == S_Select_Ticket_Tab)   run_State(cb_select_ticket_tab, 0, S_Select_Ticket);
-        if (State == S_Select_Ticket)   Repeat_ThenGoto(PS4_DOWN, Index_Ticket, S_Buy_Ticket);
-        if (State == S_Buy_Ticket)      run_State(cb_buy_swimsuit, 0, S_Throw_Gift);
+        if (State == S_Select_Ticket)	Repeat_ThenGoto(PS4_DOWN, Selected_Ticket, S_Buy_Ticket);
+		if (State == S_Buy_Ticket)      run_State(cb_buy_swimsuit, 0, S_Throw_Gift);
 
         if (State == S_Throw_Gift)      run_State(cb_throw_gift, 0, S_Go_Bed);
         if (State == S_Go_Bed)          run_State(cb_go_bed, 0, S_End_Day);
-
 
         if (State == S_End_Day)         State = EndDay();
 
@@ -555,7 +584,15 @@ function get_combo_index(combo_id) {
 
 function StartGame(){
     loop_event = Nb_Events - 1;  // only Afternoon & evening
-    if (All_Tickets) Index_Ticket = ((Index_Ticket + 1) % 4);
+
+	if (CharacterToPlay == All) { 
+		if (Selected_Char < 8)		 Selected_Char = Selected_Char + 2; 
+		if (Selected_Char == 8)		 Selected_Char = Selected_Char + 4;
+		else if (Selected_Char > 8)  Selected_Char = ((Selected_Char + 2) % 20) ;
+	}
+	else Selected_Char = CharacterToPlay;
+
+    if (Ticket_Numero == All)	Selected_Ticket = (Selected_Ticket  % 4) + 1;
     return (S_Start_Intro);
 }
 
@@ -581,27 +618,35 @@ function run_State(combo_to_run,offset,next) {
 }
 
 
+function select_Swimsuit_ThenGoto (next){
+	if (Nb_Swimsuits != All_Swimsuits)
+		Repeat_ThenGoto(PS4_UP, Index_Swimsuit[loop_vacation % Nb_Swimsuits], next);
+	else { 
+		Repeat_ThenGoto(PS4_UP, , next);
+		next_swimsuit = next_swimsuit + 1;
+	}
+}
 
 function Repeat_ThenGoto(button, times, next) {
-    PressButton = button;
-    if (loop_button < times) {
-        if (!combo_running(cb_Clear_Notif))
-        {
-            loop_button = loop_button + 1;
-            combo_restart (cb_Clear_Notif);
-        }
-    }
-    else
-    {
-        set_val(TRACE_5,loop_button);  // Look at the state definition to know where the automata is stuck
-        loop_button = 1;
-        State = next;
-    }
-    return;
+	PressButton = button;
+	if (loop_button < times) {
+		if (!combo_running(cb_Clear_Notif))
+		{
+			loop_button = loop_button + 1;
+			combo_restart (cb_Clear_Notif);
+		}
+	}
+	else
+	{
+		set_val(TRACE_5,loop_button);  // Look at the state definition to know where the automata is stuck
+		loop_button = 1;
+		State = next;
+	}
+	return;
 }
 
 function DebugCombo(combo_to_run,offset){
-    Play = TRUE;
-    run_State (combo_to_run,offset,S_IDLE);
-    return;
+	Play = TRUE;
+	run_State (combo_to_run,offset,S_IDLE);
+	return;
 }
