@@ -14,7 +14,7 @@ ____________________________________________________________________________
 Licence : MIT
 Author  : jinkou
 
-Total byte size: 2077 bytes (50.71%)
+Total byte size: 2091 bytes (51.05%)
 
 
   /*-------------------------*/
@@ -75,7 +75,8 @@ Total byte size: 2077 bytes (50.71%)
  /*      backlog          */
 /*------------------------/-------------------------------------------------
 
-v0.3.1  Correct the pause state to restart where we were before the pause
+v0.3.1  fine tuning time inside menu, 5xFaster
+		Correct the pause state to restart where we were before the pause
         Add trace_1 to trace the step (see §quickstart Troubleshooting)
         other bug fixes.
 v0.3    You can buy swimsuits/ticket
@@ -115,7 +116,7 @@ define Nb_Vacations                = 5;
 
 // Select a Character to Farm,
 // Possible Values [Hitomi, Helena, ..., All]
-// if you put All_Characters, it will farm a new character each vacation.
+// if you put All, it will farm a new character each vacation.
 define CharacterToPlay             = Kasumi;
 
 // Select between [Ticket or Swimsuit] to buy every 2 / 3 holidays
@@ -130,9 +131,9 @@ define Item_To_Buy                 = Swimsuit;
 define Nb_Swimsuits                = 3; // Change the number of swimsuits to farm
 
 int Index_Swimsuit;                     // dont' touch this one.
-int Swimsuit_1                     = 2; // select the index of the first swimsuit to buy
-int Swimsuit_2                     = 3; // for the 2nd (here it will be the same)
-int Swimsuit_3                     = 5; // Change it to the same value above if you farm only one
+int Swimsuit_1                     = 6; // select the index of the first swimsuit to buy
+int Swimsuit_2                     = 12; // for the 2nd (here it will be the same)
+int Swimsuit_3                     = 19; // Change it to the same value above if you farm only one
 
 // uncomment below or add  as much Swimsuit_x as you like
 // but don't forget to change the Nb_Swimsuits above
@@ -232,7 +233,7 @@ define RED_BLINK                    = 3;
 // State variables
 // ---------------
 int State                           = S_IDLE;
-int Next_State                      = S_IDLE;
+int Next_State                      = S_Start_Game;
 int Play                            = FALSE;
 
 //
@@ -275,7 +276,7 @@ int State_itemToBuy[2]; // Will give the State according to itemlist (see Init)
 //      Introduction
 data(
     cb_intro,
-        PS4_CIRCLE,      20,         //  Travel to zack island
+        PS4_CIRCLE,      50,         //  Travel to zack island
         PS4_CIRCLE,      100,        //
         PS4_OPTIONS,     10,         //  skip intro video
         PS4_OPTIONS,     100,        //
@@ -316,20 +317,20 @@ data(
     EOC,
 
     cb_select_rock_stage,
-        PS4_LEFT,        10,         //  Go to Rock Stage
-        PS4_LEFT,        10,         //
-        PS4_LEFT,        10,         //
+        PS4_LEFT,        1,         //  Go to Rock Stage
+        PS4_LEFT,        1,         //
+        PS4_LEFT,        1,         //
     EOC,
 
     cb_abort_rock_play,
         PS4_CIRCLE,      15,         //  Select Rock Stage
-        PS4_DOWN,        10,         //
+        PS4_DOWN,        1,         //
         PS4_CIRCLE,      80,         //  Select Rock Game
 
-        PS4_OPTIONS,     5,         //  Abort Mission
-        PS4_UP,          5,         //
-        PS4_CIRCLE,      5,         //
-        PS4_LEFT,        5,         //
+        PS4_OPTIONS,     1,         //  Abort Mission
+        PS4_UP,          1,         //
+        PS4_CIRCLE,      1,         //
+        PS4_LEFT,        1,         //
         PS4_CIRCLE,      80,        //  Mission Aborted
         PS4_SQUARE,      10,        // clear optional notification
         PS4_SQUARE,      10,        // it will eventually enter inventory
@@ -346,12 +347,12 @@ data(
     cb_throw_gift,
         PS4_SQUARE,      70,         // Open girl's closet
         PS4_LEFT,        5,         //
-        PS4_LEFT,        5,         //
-        PS4_LEFT,        5,         //
+        PS4_LEFT,        2,         //
+        PS4_LEFT,        2,         //
         PS4_CIRCLE,      10,         // select gift
-        PS4_LEFT,        5,         //
+        PS4_LEFT,        2,         //
         PS4_CIRCLE,      5,         //
-        PS4_LEFT,        5,         //
+        PS4_LEFT,        2,         //
         PS4_CIRCLE,      5,         // throw gift away
         PS4_CROSS,       50,        // exit girl's closet
     EOC,
@@ -385,10 +386,10 @@ data(
 
     // Bed Time
     cb_go_bed,
-        PS4_DOWN,        5,         // Start go to bed
-        PS4_DOWN,        5,         //
+        PS4_DOWN,        1,         // Start go to bed
+        PS4_DOWN,        1,         //
         PS4_CIRCLE,      100,         //
-        PS4_CIRCLE,      120,        // go to new morning
+        PS4_CIRCLE,      180,        // go to new morning
     EOC,
 
 
@@ -418,14 +419,12 @@ data(
 
 init {
     SwitchLED(BLUE);
-    State                       = S_IDLE;
-    Next_State                  = S_Start_Game;
-    Play                        = FALSE;
     State_itemToBuy[Swimsuit]   = S_Select_Swimsuit;
     State_itemToBuy[Ticket]     = S_Select_Ticket_Tab;
 
     if (Ticket_Numero   == All) Selected_Ticket = 0;
     if (CharacterToPlay == All) Selected_Char   = 0;
+    set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
 }
 
 main {
@@ -433,7 +432,6 @@ main {
     // Set script commands
    //---------------------
 
-    set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
 
     //Press Triangle to pause/play the script.
     if(event_press(PS4_TRIANGLE)) {
@@ -450,8 +448,9 @@ main {
 
     // Press R1 to Stop the script
     if(event_press(PS4_R1)) {
-        State   = S_IDLE;
-        Play    = FALSE;
+        State   	= S_IDLE;
+        Next_State 	= S_Start_Game;  // restart game
+        Play    	= FALSE;
         if (combo_running(cb_Send_Input)) combo_stop (cb_Send_Input);
         SwitchLED(BLUE);
     }
@@ -472,11 +471,13 @@ main {
         if (event_press(PS4_L2)) DebugCombo (cb_end_vacation, 0); // test a combe
 
         // R3 to test a whole State
-        if (event_press(PS4_R3))  {Play  = TRUE;State = S_End_Day;} // test a whole state
+        if (event_press(PS4_R3))  {Play  = TRUE;State = S_Start_RockPlay;} // test a whole state
 
         // L1 to adjust the numday (look at TRACE_4)
-        if (event_press(PS4_L1))  NumDay = NumDay  % 15 + 1 ;// adjust the numDay if script is stopped
-
+        if (event_press(PS4_L1))  {
+			NumDay = NumDay  % 15 + 1 ;// adjust the numDay if script is stopped
+			set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
+		}
     }
 
     if (debug) {
@@ -633,6 +634,7 @@ function StartGame(){
 
 function EndDay() {
     NumDay = NumDay + 1;
+    set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
     if (NumDay > Nb_Days) {
         NumDay  = 1;
         return (S_End_Vacation);
