@@ -8,7 +8,7 @@
   / ___|_ __(_)_ __   \ \/ /  _ \
  | |  _| '__| | '_ \   \  /| |_) |
  | |_| | |  | | | | |  /  \|  __/
-  \____|_|  |_|_| |_| /_/\_\_|                                        V0.3.1
+  \____|_|  |_|_| |_| /_/\_\_|                                        V0.3.2
 ____________________________________________________________________________
 
 Licence : MIT
@@ -75,6 +75,9 @@ Total byte size: 2091 bytes (51.05%)
  /*      backlog          */
 /*------------------------/-------------------------------------------------
 
+v0.3.2  fine tuning time inside intro menu and character selection, 5xFaster
+		bug fix for right side characters (from Honoka to Ayane)
+		time added at the begining of the day (to avoid pool)
 v0.3.1  fine tuning time inside menu, 5xFaster
 		Correct the pause state to restart where we were before the pause
         Add trace_1 to trace the step (see §quickstart Troubleshooting)
@@ -94,10 +97,10 @@ define Momiji                      = 2;
 define Hitomi                      = 4;
 define Helena                      = 6;
 define MarieRose                   = 8;
-define Honoka                      = 12;
-define NyoTengu                    = 14;
-define Kokoro                      = 16;
-define Ayane                       = 18;
+define Ayane                       = 12;
+define Kokoro                      = 14;
+define NyoTengu     	           = 16;
+define Honoka                      = 18;
 
   /*-------------------------*/
  /*      Items to collect   */
@@ -117,7 +120,7 @@ define Nb_Vacations                = 5;
 // Select a Character to Farm,
 // Possible Values [Hitomi, Helena, ..., All]
 // if you put All, it will farm a new character each vacation.
-define CharacterToPlay             = Kasumi;
+define CharacterToPlay             = Ayane;
 
 // Select between [Ticket or Swimsuit] to buy every 2 / 3 holidays
 define Item_To_Buy                 = Swimsuit;
@@ -250,6 +253,7 @@ int loop_event                      = Nb_Events; // Morning , Afternoon, Evening
 int loop_vacation                   = 1;
 int loop_notif                      = 1;
 int loop_button                     = 1;
+int wait_time;							 		// time used between repeating button
 
 // Debug
 //------
@@ -286,19 +290,19 @@ data(
 //      Select Character
 //            Left Side of Marie Rose
     cb_left_char,
-        PS4_LEFT,        5,         //  Kasumi
-        PS4_LEFT,        5,         //  Momiji
-        PS4_LEFT,        5,         //  Hitomi
-        PS4_LEFT,        5,         //  Helena
+        PS4_LEFT,        1,         //  Kasumi
+        PS4_LEFT,        1,         //  Momiji
+        PS4_LEFT,        1,         //  Hitomi
+        PS4_LEFT,        1,         //  Helena
         PS4_CIRCLE,      150,       //  Confirm choice
     EOC,
 
 //            Right Side of Marie Rose
     cb_right_char,
-        PS4_RIGHT,       5,         //  Honoka
-        PS4_RIGHT,       5,         //  NyoTengu
-        PS4_RIGHT,       5,         //  Kokoro
-        PS4_RIGHT,       5,         //  Ayane
+        PS4_RIGHT,       1,         //  Ayane
+        PS4_RIGHT,       1,         //  Kokoro
+        PS4_RIGHT,       1,         //  NyoTengu
+        PS4_RIGHT,       1,         //  Honoka
         PS4_CIRCLE,      150,       //  Confirm choice
     EOC,
 
@@ -389,13 +393,13 @@ data(
         PS4_DOWN,        1,         // Start go to bed
         PS4_DOWN,        1,         //
         PS4_CIRCLE,      100,         //
-        PS4_CIRCLE,      180,        // go to new morning
+        PS4_CIRCLE,      200,        // go to new morning
     EOC,
 
 
 //       End Vacation
     cb_end_vacation,
-        PS4_CIRCLE,      100,         //
+        PS4_CIRCLE,      50,         //
         PS4_OPTIONS,     50,         //
         PS4_OPTIONS,     100,         //
         PS4_CIRCLE,      50,         //
@@ -521,7 +525,7 @@ main {
         if (State == S_Buy_Swimsuit)    run_State(cb_buy_swimsuit, 0, S_Throw_Gift);
 
         if (State == S_Select_Ticket_Tab)   run_State(cb_select_ticket_tab, 0, S_Select_Ticket);
-        if (State == S_Select_Ticket)   Repeat_ThenGoto(PS4_DOWN, Selected_Ticket, S_Buy_Ticket);
+        if (State == S_Select_Ticket)   Repeat_ThenGoto(PS4_DOWN, Selected_Ticket, 4, S_Buy_Ticket);
         if (State == S_Buy_Ticket)      run_State(cb_buy_swimsuit, 0, S_Throw_Gift);
 
         if (State == S_Throw_Gift)      run_State(cb_throw_gift, 0, S_Go_Bed);
@@ -537,7 +541,7 @@ main {
             else  { loop_vacation = 1 ;         run_State(cb_end_vacation, 0, S_IDLE);}
         }
 
-        if (State == S_Clear_Vacation)  Repeat_ThenGoto(PS4_CIRCLE,Nb_Notifs, S_Return_Title);
+        if (State == S_Clear_Vacation)  Repeat_ThenGoto(PS4_CIRCLE,Nb_Notifs, 4, S_Return_Title);
         if (State == S_Return_Title)    run_State(cb_return_title, 0, S_Start_Game);
 
         // State called by each states with the function runState
@@ -569,10 +573,10 @@ combo cb_Send_Input{
     idx_step = idx_step + 2;
 }
 
-combo cb_Clear_Notif{
+combo cb_Repeat_Button{
     set_val(PressButton,100);
     wait(80);
-    wait(200);
+    wait(wait_time);
     loop_button = loop_button + 1;
 }
 
@@ -654,23 +658,24 @@ function run_State(combo_to_run,offset,next) {
 }
 
 function select_Swimsuit_ThenGoto (next){
-    if (Nb_Swimsuits != All)
+	if (Nb_Swimsuits != All)
     {
         set_val(TRACE_2,Index_Swimsuit[loop_vacation % Nb_Swimsuits + 1]);
-        Repeat_ThenGoto(PS4_UP, Index_Swimsuit[loop_vacation % Nb_Swimsuits + 1], next);
+        Repeat_ThenGoto(PS4_UP, Index_Swimsuit[loop_vacation % Nb_Swimsuits + 1], 1, next);
     }
     else {
-        Repeat_ThenGoto(PS4_UP, next_swimsuit, next);
+        Repeat_ThenGoto(PS4_UP, next_swimsuit, 1, next);
         next_swimsuit = next_swimsuit + 1;
     }
     return;
 }
 
-function Repeat_ThenGoto(button, times, next) {
+function Repeat_ThenGoto(button, times, speed, next) {
     PressButton = button;
+    wait_time 	= speed * 50; // x * 50 ms of waiting
 
     if (loop_button <= times )
-     if (!combo_running(cb_Clear_Notif)) combo_restart (cb_Clear_Notif);
+     if (!combo_running(cb_Repeat_Button)) combo_restart (cb_Repeat_Button);
 
     else
     {
