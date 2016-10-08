@@ -366,7 +366,7 @@ data(
         PS4_LEFT,        1,         //
         PS4_CIRCLE,      80,        //  Mission Aborted
         PS4_SQUARE,      10,        // clear optional notification
-        PS4_SQUARE,      10,        // it will eventually enter inventory
+        PS4_SQUARE,      30,        // it will eventually enter inventory
         PS4_SQUARE,      30,        //
         PS4_CROSS,       80,        // exit inventory
     EOC,
