@@ -75,6 +75,10 @@ Total byte size: 2146 bytes (52.39%)
   /*-----------------------*/
  /*      backlog          */
 /*------------------------/-------------------------------------------------
+v0.4.2  Bug fix: End of the vacation loop will be in LED Blue now. (was staying
+				 green)
+		Time ajustment at beginning, and at clearing notifications. script 
+		should be more stable. 
 
 v0.4.1  You can choose a different wrapping paper for each vacations. So you 
         can farm a single swimsuit for all girls. 
@@ -369,9 +373,9 @@ data(
         PS4_CIRCLE,      1,         //
         PS4_LEFT,        1,         //
         PS4_CIRCLE,      90,        //  Mission Aborted
-        PS4_SQUARE,      30,        // clear optional notification
-        PS4_SQUARE,      30,        // it will eventually enter inventory
-        PS4_CROSS,       80,        // exit inventory
+        PS4_SQUARE,      100,        // clear optional notification
+        PS4_SQUARE,      80,        // it will eventually enter inventory
+        PS4_CROSS,       100,        // exit inventory
     EOC,
 
     cb_hotel,
@@ -434,13 +438,12 @@ data(
 //       End Vacation
     cb_end_vacation,
         PS4_CIRCLE,      50,         //
-        PS4_OPTIONS,     50,         //
+        PS4_OPTIONS,     20,         //
         PS4_OPTIONS,     100,         //
         PS4_CIRCLE,      50,         //
     EOC,
 
     cb_return_title,
-        PS4_CIRCLE,      150,         // return to title
         PS4_CIRCLE,      150,         // return to title
     EOC,
 
@@ -576,12 +579,21 @@ main {
         {
             loop_vacation = loop_vacation + 1;
             if (loop_vacation < Nb_Vacations)   run_State(cb_end_vacation, 0, S_Clear_Vacation);
-            else  { loop_vacation = 1 ;         run_State(cb_end_vacation, 0, S_IDLE);}
+            else  { loop_vacation = 1 ;         run_State(cb_end_vacation, 0, S_End_Game);}
         }
 
         if (State == S_Clear_Vacation)  Repeat_ThenGoto(PS4_CIRCLE,Nb_Notifs, 4, S_Return_Title);
         if (State == S_Return_Title)    run_State(cb_return_title, 0, S_Start_Game);
-
+		
+		// End of vacation loop
+		if (State == S_End_Game) {
+			Play = FALSE;
+			State = S_IDLE;
+			SwitchLED(BLUE);
+		}
+		
+		
+		//-----------------------------------------------------------------------------------
         // State called by each states with the function runState
         if (State == S_Play_Combo)
         { // combo playing
