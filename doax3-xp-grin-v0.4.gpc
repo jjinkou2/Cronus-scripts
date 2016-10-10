@@ -1,4 +1,3 @@
-//Script was modified by * Script Manipulator * ver.12.1 /on date: time:
 /*
   ____   ___    _    __  _______
  |  _ \ / _ \  / \   \ \/ /___ /
@@ -9,13 +8,13 @@
   / ___|_ __(_)_ __   \ \/ /  _ \
  | |  _| '__| | '_ \   \  /| |_) |
  | |_| | |  | | | | |  /  \|  __/
-  \____|_|  |_|_| |_| /_/\_\_|                                        V0.4
+  \____|_|  |_|_| |_| /_/\_\_|                                        V0.4.1
 ____________________________________________________________________________
 
 Licence : MIT
 Author  : jinkou
 
-Total byte size: 2128 bytes (51.95%)
+Total byte size: 2146 bytes (52.39%)
 
 
 
@@ -77,15 +76,18 @@ Total byte size: 2128 bytes (51.95%)
  /*      backlog          */
 /*------------------------/-------------------------------------------------
 
+v0.4.1  You can choose a different wrapping paper for each vacations. So you 
+        can farm a single swimsuit for all girls. 
+
 v0.4    New Feature:
-			Paper Wrapping: you can select paper wrapping color. see §config
-		Fixes:
-		fine tuning time inside intro menu and character selection, 5xFaster
-		bug fix for right side characters (from Honoka to Ayane)
-		time added at the begining of the day (to avoid pool)
-		
+            Paper Wrapping: you can select paper wrapping color. see §config
+        Fixes:
+        fine tuning time inside intro menu and character selection, 5xFaster
+        bug fix for right side characters (from Honoka to Ayane)
+        time added at the begining of the day (to avoid pool)
+
 v0.3.1  fine tuning time inside menu, 5xFaster
-		Correct the pause state to restart where we were before the pause
+        Correct the pause state to restart where we were before the pause
         Add trace_1 to trace the step (see §quickstart Troubleshooting)
         other bug fixes.
 v0.3    You can buy swimsuits/ticket
@@ -105,7 +107,7 @@ define Helena                      = 6;
 define MarieRose                   = 8;
 define Ayane                       = 12;
 define Kokoro                      = 14;
-define NyoTengu     	           = 16;
+define NyoTengu                    = 16;
 define Honoka                      = 18;
 
 // Paper wrapping 
@@ -116,7 +118,7 @@ define paper_MarieRose             = 3;
 define paper_Ayane                 = 4;
 define paper_NyoTengu              = 5;
 define paper_Kokoro                = 6;
-define paper_Hitomi 			   = 7;
+define paper_Hitomi                = 7;
 define paper_Momiji                = 8;
 define paper_Helena                = 9;
 define paper_Premium               = 10;
@@ -134,7 +136,7 @@ define All                        = 255;
 /*-------------------------------------/-----------------------------*/
 
 // number of Vacation to loop
-define Nb_Vacations               = 5;
+define Nb_Vacations               = 9;
 
 
 // Select a Character to Farm,
@@ -143,9 +145,11 @@ define Nb_Vacations               = 5;
 define CharacterToPlay            = Ayane;
 
 // Select a Wrapping paper,
-// Possible Values [paper_Silver, paper_Hitomi, ..., paper_Premium]
-// may not work because of premium paper. paper_Silver is bug safe. 
-define WrappingPaper              = paper_Helena;
+// Possible Values [paper_Silver, paper_Hitomi, ..., paper_Premium, All]
+// If All is selected it will change paper each vacations
+// if you want  to farm a swimsuit/ticket for all girls, select 
+// All for WrappingPaper and select only one Swimsuit below
+define WrappingPaper              = All;
 
 
 // Select between [Ticket or Swimsuit] to buy every 2 / 3 holidays
@@ -214,8 +218,8 @@ define S_Paper                      = 30;
 define S_Select_Ticket              = 31;
 define S_Ticket_Tab                 = 32;
 define S_Buy_Ticket                 = 33;
-define S_Select_Paper				= 34;
-define S_Wrap						= 35;
+define S_Select_Paper               = 34;
+define S_Wrap                       = 35;
 
 define S_Clear_Event                = 50;
 define S_Clear_Vacation             = 51;
@@ -239,7 +243,7 @@ define cb_hotel                    = 35;
 define cb_throw_gift               = 40;
 define cb_owner_shop               = 42;
 define cb_buy_swimsuit             = 44;
-define cb_paper					   = 45;
+define cb_paper                    = 45;
 define cb_select_ticket_tab        = 46;
 define cb_go_bed                   = 47;
 define cb_end_vacation             = 50;
@@ -286,7 +290,7 @@ int loop_event                      = Nb_Events; // Morning , Afternoon, Evening
 int loop_vacation                   = 1;
 int loop_notif                      = 1;
 int loop_button                     = 1;
-int wait_time;							 		// time used between repeating button
+int wait_time;                                  // time used between repeating button
 
 // combo
 // -----
@@ -364,10 +368,9 @@ data(
         PS4_UP,          1,         //
         PS4_CIRCLE,      1,         //
         PS4_LEFT,        1,         //
-        PS4_CIRCLE,      80,        //  Mission Aborted
-        PS4_SQUARE,      10,        // clear optional notification
+        PS4_CIRCLE,      90,        //  Mission Aborted
+        PS4_SQUARE,      30,        // clear optional notification
         PS4_SQUARE,      30,        // it will eventually enter inventory
-        PS4_SQUARE,      30,        //
         PS4_CROSS,       80,        // exit inventory
     EOC,
 
@@ -483,9 +486,9 @@ main {
 
     // Press R1 to Stop the script
     if(event_press(PS4_R1)) {
-        State   	= S_IDLE;
-        Next_State 	= S_Start_Game;  // restart game
-        Play    	= FALSE;
+        State       = S_IDLE;
+        Next_State  = S_Start_Game;  // restart game
+        Play        = FALSE;
         if (combo_running(cb_Send_Input)) combo_stop (cb_Send_Input);
         SwitchLED(BLUE);
     }
@@ -506,13 +509,17 @@ main {
         if (event_press(PS4_L2)) DebugCombo (cb_end_vacation, 0); // test a combe
 
         // R3 to test a whole State
-        if (event_press(PS4_R3))  {Play  = TRUE;State = S_Select_Swimsuit;} // test a whole state
+        if (event_press(PS4_R3))  {Play  = TRUE;State = S_Start_RockPlay;} // test a whole state
 
         // L1 to adjust the numday (look at TRACE_4)
         if (event_press(PS4_L1))  {
-			NumDay = NumDay  % 15 + 1 ;// adjust the numDay if script is stopped
-			set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
-		}
+            NumDay = NumDay  % 15 + 1 ;// adjust the numDay if script is stopped
+            set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
+        }
+    /*  if (event_press(PS4_UP))  {
+            loop_vacation = loop_vacation  % Nb_Vacations + 1 ;
+            set_val(TRACE_2,loop_vacation);  
+        }*/
     }
 
     // Main Loop of the State automata
@@ -547,8 +554,12 @@ main {
 
         if (State == S_Select_Swimsuit) select_Swimsuit_ThenGoto(S_Buy_Swimsuit);
         if (State == S_Buy_Swimsuit)    run_State(cb_buy_swimsuit, 0, S_Select_Paper);
-		if (State == S_Select_Paper) 	Repeat_ThenGoto(PS4_RIGHT, WrappingPaper, 2, S_Wrap);
-        if (State == S_Wrap) 		    run_State(cb_paper, 0, S_Throw_Gift);
+        if (State == S_Select_Paper)    {
+            if (WrappingPaper == All)   
+                 Repeat_ThenGoto(PS4_RIGHT, loop_vacation % 10, 2, S_Wrap);
+            else Repeat_ThenGoto(PS4_RIGHT, WrappingPaper, 2, S_Wrap);
+        }
+        if (State == S_Wrap)            run_State(cb_paper, 0, S_Throw_Gift);
 
 
         if (State == S_Ticket_Tab)      run_State(cb_select_ticket_tab, 0, S_Select_Ticket);
@@ -685,11 +696,8 @@ function run_State(combo_to_run,offset,next) {
 }
 
 function select_Swimsuit_ThenGoto (next){
-	if (Nb_Swimsuits != All)
-    {
-        set_val(TRACE_2,Index_Swimsuit[loop_vacation % Nb_Swimsuits + 1]);
-        Repeat_ThenGoto(PS4_UP, Index_Swimsuit[loop_vacation % Nb_Swimsuits + 1], 2, next);
-    }
+    if (Nb_Swimsuits != All)
+        Repeat_ThenGoto(PS4_UP, Index_Swimsuit[(loop_vacation - 1) % Nb_Swimsuits + 1], 2, next);
     else {
         Repeat_ThenGoto(PS4_UP, next_swimsuit, 2, next);
         next_swimsuit = next_swimsuit + 1;
@@ -699,7 +707,7 @@ function select_Swimsuit_ThenGoto (next){
 
 function Repeat_ThenGoto(button, times, speed, next) {
     PressButton = button;
-    wait_time 	= speed * 50; // x * 50 ms of waiting
+    wait_time   = speed * 50; // x * 50 ms of waiting
 
     if (loop_button <= times )
      if (!combo_running(cb_Repeat_Button)) combo_restart (cb_Repeat_Button);
