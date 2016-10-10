@@ -165,7 +165,7 @@ define Nb_Swimsuits                = 3; // Change the number of swimsuits to far
 
 int Index_Swimsuit;                     // dont' touch this one.
 int Swimsuit_1                     = 6; // select the index of the first swimsuit to buy
-int Swimsuit_2                     = 18; // for the 2nd (here it will be the same)
+int Swimsuit_2                     = 18; // for the 2nd 
 int Swimsuit_3                     = 19; // Change it to the same value above if you farm only one
 
 // uncomment below or add  as much Swimsuit_x as you like
