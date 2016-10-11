@@ -311,6 +311,7 @@ int State_itemToBuy[2]; // Will give the State according to itemlist (see Init)
 /*--------------------------------------*/
 
 // EOC represents the end of an event
+// 255, or 254 a value reserved, don't use them
 
 //  Idx, Button,       Wait(x50ms),     Event
 //---------------------------------------------------------------
@@ -346,7 +347,8 @@ data(
 //      Start Vacation
     cb_start_vacation,
         PS4_OPTIONS,     20,         //  skip character intro
-        PS4_OPTIONS,     255,         //
+        PS4_OPTIONS,     240,         //  skip character intro
+        PS4_OPTIONS,     50,         //  wait longer
         PS4_LEFT,        5,         //  don't take a partner
         PS4_CIRCLE,      240,         //
         PS4_RIGHT,       5,         //  Go to Rock Stage
@@ -702,8 +704,7 @@ function EndDay() {
 function run_State(combo_to_run,offset,next) {
     set_val(TRACE_3,State);  // Look at the state definition to know where the automata is stuck
     idx_step    = get_combo_index(combo_to_run) + offset;
-        set_val(TRACE_6,idx_step);  // Look at the state definition to know where the automata is stuck
-    State       = S_IDLE;
+    State       = S_Play_Combo;
     Next_State  = next;
     return;
 }
