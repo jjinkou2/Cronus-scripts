@@ -146,7 +146,7 @@ define Nb_Vacations               = 9;
 // Select a Character to Farm,
 // Possible Values [Hitomi, Helena, ..., All]
 // if you put All, it will farm a new character each vacation.
-define CharacterToPlay            = Ayane;
+define CharacterToPlay            = Honoka;
 
 // Select a Wrapping paper,
 // Possible Values [paper_Silver, paper_Hitomi, ..., paper_Premium, All]
@@ -169,8 +169,8 @@ define Nb_Swimsuits                = 3; // Change the number of swimsuits to far
 
 int Index_Swimsuit;                     // dont' touch this one.
 int Swimsuit_1                     = 6; // select the index of the first swimsuit to buy
-int Swimsuit_2                     = 18; // for the 2nd 
-int Swimsuit_3                     = 19; // Change it to the same value above if you farm only one
+int Swimsuit_2                     = 7; // for the 2nd 
+int Swimsuit_3                     = 38; // Change it to the same value above if you farm only one
 
 // uncomment below or add  as much Swimsuit_x as you like
 // but don't forget to change the Nb_Swimsuits above
@@ -346,7 +346,7 @@ data(
 //      Start Vacation
     cb_start_vacation,
         PS4_OPTIONS,     20,         //  skip character intro
-        PS4_OPTIONS,     240,         //
+        PS4_OPTIONS,     255,         //
         PS4_LEFT,        5,         //  don't take a partner
         PS4_CIRCLE,      240,         //
         PS4_RIGHT,       5,         //  Go to Rock Stage
@@ -702,7 +702,8 @@ function EndDay() {
 function run_State(combo_to_run,offset,next) {
     set_val(TRACE_3,State);  // Look at the state definition to know where the automata is stuck
     idx_step    = get_combo_index(combo_to_run) + offset;
-    State       = S_Play_Combo;
+        set_val(TRACE_6,idx_step);  // Look at the state definition to know where the automata is stuck
+    State       = S_IDLE;
     Next_State  = next;
     return;
 }
