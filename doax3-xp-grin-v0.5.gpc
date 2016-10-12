@@ -164,7 +164,7 @@ define CharacterToPlay            = All;
 
 int Items;                              // dont' touch this one.
 
-int Tab1 = 0, FromRow1 = IllusionA, ToRow1 = IllusionA, Paper1 = paper_Helena; // only one for Helena
+int Tab1 = 0, FromRow1 = IllusionA, ToRow1 = IllusionA, Paper1 = paper_Kasumi; // only one for Helena
 //int Tab2 = 0, FromRow2 = SandwichA, ToRow2 = EelE,      Paper2 = paper_Kokoro; // a range of swimsuits
 //int Tab3 = 2, FromRow3 = Dangerous, ToRow3 = Secret,    Paper3 = paper_Honoka; // a range of tickets
 //int Tab4 = 1, FromRow4 = 7,         ToRow4 = 18,        Paper4 = All;  // anything at tab 2 from 7 to 18 to all
@@ -561,7 +561,11 @@ main {
         // Shopping Items at X vacations
         if (State == S_Owner_Shop)      run_State(cb_owner_shop, 0, S_Select_Tab);
 
-        if (State == S_Select_Tab) 		Repeat_ThenGoto(PS4_RIGHT, Item_Tab, 2, S_Select_Item);
+        if (State == S_Select_Tab) 		
+        {
+                set_val(TRACE_6,Item_Tab);  // Look at the loop
+        Repeat_ThenGoto(PS4_RIGHT, Item_Tab, 2, S_Select_Item);
+        }
         if (State == S_Select_Item)     select_Item_ThenGoto(S_Select_Paper);
         if (State == S_Select_Paper)    Repeat_ThenGoto(PS4_RIGHT, ItemPaper, 2, S_Wrap);
         if (State == S_Wrap)            run_State(cb_paper, 0, S_Exit_Shop);
@@ -740,12 +744,12 @@ function next_Item(){
 function Repeat_ThenGoto(button, times, speed, next) {
     PressButton = button;
     wait_time   = speed * 50; // x * 50 ms of waiting
-
+        set_val(TRACE_5,times);  // Look at the loop
     if (abs(loop_button) < times ) {
         if (!combo_running(cb_Repeat_Button)) combo_restart (cb_Repeat_Button);
 	}
     else {
-        set_val(TRACE_5,loop_button);  // Look at the loop
+
         loop_button = 0;
         State = next;
     }
