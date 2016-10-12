@@ -129,14 +129,14 @@ define paper_Helena                = 9;
 define paper_Premium               = 10;
 
   /*-------------------------*/
- /*      Items to collect   */
+ /*      List of Items      */
 /*-------------------------*/
 define IllusionA                  =  0;
 define IllusionB                  =  1;
 define PeaceH                     =  6;
 define Caviar                     = 12;
 define PeanutF                    = 15;
-define EELE                       = 18;
+define EelE                       = 18;
 define DecupleI                   = 21;
 define SandwichA                  = 30;
 
@@ -164,12 +164,12 @@ define CharacterToPlay            = All;
 
 int Items;                              // dont' touch this one.
 
-int Tab_1 = 0, FromRow_1 = IllusionA, ToRow_1 = IllusionA,      Paper_1 = paper_Helena; // only one for Helena
-int Tab_2 = 0, FromRow_2 = SandwichA, ToRow_2 = EELE,           Paper_2 = paper_Kokoro; // a range of swimsuits
-int Tab_3 = 2, FromRow_3 = Dangerous, ToRow_3 = Secret,         Paper_3 = paper_Honoka; // a range of tickets
-int Tab_4 = 1, FromRow_4 = 7,         ToRow_4 = 18,             Paper_4 = All;  // anything at tab 2 from 7 to 18 to all
+int Tab1 = 0, FromRow1 = IllusionA, ToRow1 = IllusionA, Paper1 = paper_Helena; // only one for Helena
+int Tab2 = 0, FromRow2 = SandwichA, ToRow2 = EelE,      Paper2 = paper_Kokoro; // a range of swimsuits
+int Tab3 = 2, FromRow3 = Dangerous, ToRow3 = Secret,    Paper3 = paper_Honoka; // a range of tickets
+int Tab4 = 1, FromRow4 = 7,         ToRow4 = 18,        Paper4 = All;  // anything at tab 2 from 7 to 18 to all
                                                                                 // for instance godfather...
-int Tab_5 = 2, FromRow_5 = 7,         ToRow_5 = 18,             Paper_5 = paper_Hitomi; //other items like pose tickets
+int Tab5 = 2, FromRow5 = -3,        ToRow5 = 3,        Paper_5 = paper_Hitomi; //other items like pose tickets
 
 int EndofItems                      = 255; 
 
@@ -706,7 +706,7 @@ function run_State(combo_to_run,offset,next) {
 function select_Item_ThenGoto (next){
     if   (ItemFromRow <= ItemToRow) PressButton = PS4_UP;
     else                            PressButton = PS4_DOWN;
-    Repeat_ThenGoto(PressButton, ItemFromRow, 2, next);
+    Repeat_ThenGoto(PressButton, abs(ItemFromRow), 2, next);
     return;
 }
 
