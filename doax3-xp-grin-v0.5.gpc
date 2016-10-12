@@ -206,9 +206,8 @@ define S_Throw_Gift                 = 25;
 define S_Go_Bed                     = 26;
 define S_Owner_Shop                 = 27;
 define S_Select_Item                = 28;
-define S_Buy_Item                   = 29;
 
-define S_Select_Tab_Item            = 30;
+define S_Select_Tab            		= 30;
 define S_Select_Paper               = 34;
 define S_Wrap                       = 35;
 define S_Exit_Shop                  = 36;
@@ -517,7 +516,7 @@ main {
         if (event_press(PS4_L2)) DebugCombo (cb_end_vacation, 0); // test a combe
 
         // R3 to test a whole State
-        if (event_press(PS4_R3))  {Play  = TRUE;State = S_Start_RockPlay;} // test a whole state
+        if (event_press(PS4_R3))  {Play  = TRUE;State = S_Select_Tab;} // test a whole state
 
         // L1 to adjust the numday (look at TRACE_4)
         if (event_press(PS4_L1))  {
@@ -560,10 +559,9 @@ main {
         }
 
         // Shopping Items at X vacations
-        if (State == S_Owner_Shop)      run_State(cb_owner_shop, 0, S_Buy_Item);
+        if (State == S_Owner_Shop)      run_State(cb_owner_shop, 0, S_Select_Tab);
 
-        if (State == S_Buy_Item)        State = S_Select_Tab_Item;
-        if (State == S_Select_Tab_Item) Repeat_ThenGoto(PS4_RIGHT, Item_Tab, 2, S_Select_Item);
+        if (State == S_Select_Tab) 		Repeat_ThenGoto(PS4_RIGHT, Item_Tab, 2, S_Select_Item);
         if (State == S_Select_Item)     select_Item_ThenGoto(S_Select_Paper);
         if (State == S_Select_Paper)    Repeat_ThenGoto(PS4_RIGHT, ItemPaper, 2, S_Wrap);
         if (State == S_Wrap)            run_State(cb_paper, 0, S_Exit_Shop);
@@ -743,15 +741,14 @@ function Repeat_ThenGoto(button, times, speed, next) {
     PressButton = button;
     wait_time   = speed * 50; // x * 50 ms of waiting
 
-    if (abs(loop_button) <= times )
+    if (abs(loop_button) < times ) {
         if (!combo_running(cb_Repeat_Button)) combo_restart (cb_Repeat_Button);
-
-        else
-        {
-            set_val(TRACE_5,loop_button);  // Look at the loop
-            loop_button = 0;
-            State = next;
-        }
+	}
+    else {
+        set_val(TRACE_5,loop_button);  // Look at the loop
+        loop_button = 0;
+        State = next;
+    }
     return;
 }
 
