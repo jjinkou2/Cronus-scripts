@@ -165,11 +165,11 @@ define CharacterToPlay            = All;
 int Items;                              // dont' touch this one.
 
 int Tab1 = 0, FromRow1 = IllusionA, ToRow1 = IllusionA, Paper1 = paper_Helena; // only one for Helena
-int Tab2 = 0, FromRow2 = SandwichA, ToRow2 = EelE,      Paper2 = paper_Kokoro; // a range of swimsuits
-int Tab3 = 2, FromRow3 = Dangerous, ToRow3 = Secret,    Paper3 = paper_Honoka; // a range of tickets
-int Tab4 = 1, FromRow4 = 7,         ToRow4 = 18,        Paper4 = All;  // anything at tab 2 from 7 to 18 to all
+//int Tab2 = 0, FromRow2 = SandwichA, ToRow2 = EelE,      Paper2 = paper_Kokoro; // a range of swimsuits
+//int Tab3 = 2, FromRow3 = Dangerous, ToRow3 = Secret,    Paper3 = paper_Honoka; // a range of tickets
+//int Tab4 = 1, FromRow4 = 7,         ToRow4 = 18,        Paper4 = All;  // anything at tab 2 from 7 to 18 to all
                                                                                 // for instance godfather...
-int Tab5 = 2, FromRow5 = -3,        ToRow5 = 3,        Paper_5 = paper_Hitomi; //other items like pose tickets
+//int Tab5 = 2, FromRow5 = -3,        ToRow5 = 3,        Paper_5 = paper_Hitomi; //other items like pose tickets
 
 int EndofItems                      = 255; 
 
