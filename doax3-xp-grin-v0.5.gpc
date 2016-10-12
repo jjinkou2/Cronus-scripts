@@ -9,7 +9,7 @@
   / ___|_ __(_)_ __   \ \/ /  _ \
  | |  _| '__| | '_ \   \  /| |_) |
  | |_| | |  | | | | |  /  \|  __/
-  \____|_|  |_|_| |_| /_/\_\_|                                        V0.4.2
+  \____|_|  |_|_| |_| /_/\_\_|                                        V0.5
 ____________________________________________________________________________
 
 Licence : MIT
@@ -131,8 +131,20 @@ define paper_Premium               = 10;
   /*-------------------------*/
  /*      Items to collect   */
 /*-------------------------*/
-define Swimsuit                   = 0;
-define Ticket                     = 1;
+define IllusionA                  =  0;
+define IllusionB                  =  1;
+define PeaceH                     =  6;
+define Caviar                     = 12;
+define PeanutF                    = 15;
+define EELE                       = 18;
+define DecupleI                   = 21;
+define SandwichA                  = 30;
+
+define Dangerous                  =  0;
+define Tempting                   =  1;
+define Forbidden                  = -1;
+define Secret                     = -2;
+
 define All                        = 255;
 
 
@@ -142,49 +154,26 @@ define All                        = 255;
 
 // number of Vacation to loop
 define Nb_Vacations               = 9;
-
+define Buy_At_X                   = 3; // will try to buy at every X vacations
 
 // Select a Character to Farm,
 // Possible Values [Hitomi, Helena, ..., All]
 // if you put All, it will farm a new character each vacation.
 define CharacterToPlay            = All;
 
-// Select a Wrapping paper,
-// Possible Values [paper_Silver, paper_Hitomi, ..., paper_Premium, All]
-// If All is selected it will change paper each vacations
-// if you want  to farm a swimsuit/ticket for all girls, select 
-// All for WrappingPaper and select only one Swimsuit below
-define WrappingPaper              = All;
 
+int Items;                              // dont' touch this one.
 
-// Select between [Ticket or Swimsuit] to buy every 2 / 3 holidays
-define Item_To_Buy                = Swimsuit;
+int Tab_1 = 0, FromRow_1 = IllusionA, ToRow_1 = IllusionA,      Paper_1 = paper_Helena; // only one for Helena
+int Tab_2 = 0, FromRow_2 = SandwichA, ToRow_2 = EELE,           Paper_2 = paper_Kokoro; // a range of swimsuits
+int Tab_3 = 2, FromRow_3 = Dangerous, ToRow_3 = Secret,         Paper_3 = paper_Honoka; // a range of tickets
+int Tab_4 = 1, FromRow_4 = 7,         ToRow_4 = 18,             Paper_4 = All;  // anything at tab 2 from 7 to 18 to all
+                                                                                // for instance godfather...
+int Tab_5 = 2, FromRow_5 = 7,         ToRow_5 = 18,             Paper_5 = paper_Hitomi; //other items like pose tickets
 
-
-// if you selected Swimsuit then modify the Swimsuit_X below.
-// You can put different values to specify which one you want
-//
-// If Nb_Swimsuits = All, Swimsuit_X are not used
-
-define Nb_Swimsuits                = 3; // Change the number of swimsuits to farm
-
-int Index_Swimsuit;                     // dont' touch this one.
-int Swimsuit_1                     = 6; // select the index of the first swimsuit to buy
-int Swimsuit_2                     = 7; // for the 2nd 
-int Swimsuit_3                     = 38; // Change it to the same value above if you farm only one
-
-// uncomment below or add  as much Swimsuit_x as you like
-// but don't forget to change the Nb_Swimsuits above
-//int Swimsuit_4                    = 8;
-
-
-
-// if Ticket is selected , select one from theses values (1,2,3,4,All)
-define Ticket_Numero               = All;   //  select which one to buy
+int EndofItems                      = 255; 
 
 /*-------------  End of configuration ---------------------------------------------*/
-
-
 
 
   /*-----------------------*/
@@ -216,15 +205,13 @@ define S_Hotel                      = 24;
 define S_Throw_Gift                 = 25;
 define S_Go_Bed                     = 26;
 define S_Owner_Shop                 = 27;
-define S_Select_Swimsuit            = 28;
-define S_Buy_Swimsuit               = 29;
+define S_Select_Item                = 28;
+define S_Buy_Item                   = 29;
 
-define S_Paper                      = 30;
-define S_Select_Ticket              = 31;
-define S_Ticket_Tab                 = 32;
-define S_Buy_Ticket                 = 33;
+define S_Select_Tab_Item            = 30;
 define S_Select_Paper               = 34;
 define S_Wrap                       = 35;
+define S_Exit_Shop                  = 36;
 
 define S_Clear_Event                = 50;
 define S_Clear_Vacation             = 51;
@@ -284,9 +271,14 @@ int Play                            = FALSE;
 //
 // Items Swimsuit and characters
 //------------------------------
-int next_swimsuit                   = 1;
-int Selected_Ticket                 = Ticket_Numero;
 int Selected_Char                   = CharacterToPlay;
+
+int index_item                      = 1;
+int Item_Tab;
+int ItemFromRow;
+int ItemToRow;
+int ItemPaper;
+int stepRow;
 
 // Days and loop vacation
 //-----------------------
@@ -294,7 +286,7 @@ int NumDay                          = 1;
 int loop_event                      = Nb_Events; // Morning , Afternoon, Evening
 int loop_vacation                   = 1;
 int loop_notif                      = 1;
-int loop_button                     = 1;
+int loop_button                     = 0;
 int wait_time;                                  // time used between repeating button
 
 // combo
@@ -386,7 +378,7 @@ data(
         PS4_SQUARE,      50,        // End Of Dialogue
         PS4_SQUARE,      50,        // Start of Zack Gift
         PS4_SQUARE,      100,        // clear optional notification
-        PS4_SQUARE,      80,        // it will eventually enter inventory
+        PS4_SQUARE,      80,        // it will enter inventory
         PS4_CROSS,       100,        // exit inventory
     EOC,
 
@@ -469,12 +461,16 @@ data(
 
 init {
     SwitchLED(BLUE);
-    State_itemToBuy[Swimsuit]   = S_Select_Swimsuit;
-    State_itemToBuy[Ticket]     = S_Ticket_Tab;
 
-    if (Ticket_Numero   == All) Selected_Ticket = 0;
-    if (CharacterToPlay == All) Selected_Char   = 0;
+    if (CharacterToPlay == All) Selected_Char = 0;
     set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
+
+    Item_Tab                        = Items[1];
+    ItemFromRow                     = Items[2];
+    ItemToRow                       = Items[3];
+    if  (Items[4]== All)  ItemPaper = 1;
+    else                  ItemPaper = Items[4];
+
 }
 
 main {
@@ -558,26 +554,22 @@ main {
 
         // At the Hotel
         if (State == S_Hotel) {
-            if (NumDay == 1)            State = S_Owner_Shop;
+            if ((NumDay == 1) && !(loop_vacation % Buy_At_X))
+                                        State = S_Owner_Shop;
             else                        run_State(cb_hotel, 0, S_Throw_Gift);
         }
 
-        if (State == S_Owner_Shop)      run_State(cb_owner_shop, 0, State_itemToBuy[Item_To_Buy]);
+        // Shopping Items at X vacations
+        if (State == S_Owner_Shop)      run_State(cb_owner_shop, 0, S_Buy_Item);
 
-        if (State == S_Select_Swimsuit) select_Swimsuit_ThenGoto(S_Buy_Swimsuit);
-        if (State == S_Buy_Swimsuit)    run_State(cb_buy_swimsuit, 0, S_Select_Paper);
-        if (State == S_Select_Paper)    {
-            if (WrappingPaper == All)   
-                 Repeat_ThenGoto(PS4_RIGHT, loop_vacation % 10, 2, S_Wrap);
-            else Repeat_ThenGoto(PS4_RIGHT, WrappingPaper, 2, S_Wrap);
-        }
-        if (State == S_Wrap)            run_State(cb_paper, 0, S_Throw_Gift);
+        if (State == S_Buy_Item)        State = S_Select_Tab_Item;
+        if (State == S_Select_Tab_Item) Repeat_ThenGoto(PS4_RIGHT, Item_Tab, 2, S_Select_Item);
+        if (State == S_Select_Item)     select_Item_ThenGoto(S_Select_Paper);
+        if (State == S_Select_Paper)    Repeat_ThenGoto(PS4_RIGHT, ItemPaper, 2, S_Wrap);
+        if (State == S_Wrap)            run_State(cb_paper, 0, S_Exit_Shop);
+        if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Throw_Gift);
 
-
-        if (State == S_Ticket_Tab)      run_State(cb_select_ticket_tab, 0, S_Select_Ticket);
-        if (State == S_Select_Ticket)   Repeat_ThenGoto(PS4_DOWN, Selected_Ticket, 4, S_Buy_Ticket);
-        if (State == S_Buy_Ticket)      run_State(cb_buy_swimsuit, 0, S_Throw_Gift);
-
+        // End of hotel
         if (State == S_Throw_Gift)      run_State(cb_throw_gift, 0, S_Go_Bed);
         if (State == S_Go_Bed)          run_State(cb_go_bed, 0, S_End_Day);
 
@@ -593,28 +585,26 @@ main {
 
         if (State == S_Clear_Vacation)  Repeat_ThenGoto(PS4_CIRCLE,Nb_Notifs, 4, S_Return_Title);
         if (State == S_Return_Title)    run_State(cb_return_title, 0, S_Start_Game);
-		
-		// End of vacation loop
-		if (State == S_End_Game) {
-			Play = FALSE;
-			State = S_IDLE;
-			SwitchLED(BLUE);
-		}
-		
-		
-		//-----------------------------------------------------------------------------------
+
+        // End of vacation loop
+        if (State == S_End_Game) {
+            Play = FALSE;
+            State = S_IDLE;
+            SwitchLED(BLUE);
+        }
+
+
+        //-----------------------------------------------------------------------------------
         // State called by each states with the function runState
         if (State == S_Play_Combo)
         { // combo playing
             // Execute the combo step-by-step
             if(!combo_running(cb_Send_Input)){
                 set_val(TRACE_1,idx_step);
-
                 if (dbyte(idx_step) != EOC)  combo_restart(cb_Send_Input);
                 else State = Next_State;
             }
         }
-
     } // end of State automata
 }
 
@@ -689,9 +679,6 @@ function StartGame(){
         if (Selected_Char == MarieRose) Selected_Char = Selected_Char + 4;
         else                            Selected_Char = (Selected_Char + 2) % 20;
     }
-
-    if (Ticket_Numero == All) Selected_Ticket = Selected_Ticket % 4 + 1;
-
     return (S_Start_Intro);
 }
 
@@ -716,29 +703,55 @@ function run_State(combo_to_run,offset,next) {
     return;
 }
 
-function select_Swimsuit_ThenGoto (next){
-    if (Nb_Swimsuits != All)
-        Repeat_ThenGoto(PS4_UP, Index_Swimsuit[(loop_vacation - 1) % Nb_Swimsuits + 1], 2, next);
+function select_Item_ThenGoto (next){
+    if   (ItemFromRow <= ItemToRow) PressButton = PS4_UP;
+    else                            PressButton = PS4_DOWN;
+    Repeat_ThenGoto(PressButton, ItemFromRow, 2, next);
+    return;
+}
+
+function exit_Shop_ThenGoto(next){
+    if (Items[index_item + 3] == All) {
+        if (ItemPaper%10) next_Item();
+        else  ItemPaper   = ItemPaper % 10 + 1;
+    }
+    else next_Item();
+    State = next;
+    return;
+}
+
+function next_Item(){
+    if (abs(ItemFromRow - ItemToRow) != 0)  {
+        if (ItemFromRow <= ItemToRow) stepRow = 1;
+        else                          stepRow = -1;
+        ItemFromRow = ItemFromRow + stepRow;
+    }
     else {
-        Repeat_ThenGoto(PS4_UP, next_swimsuit, 2, next);
-        next_swimsuit = next_swimsuit + 1;
+        index_item  = index_item + 4;
+        if (Items[index_item] == EndofItems)   index_item = 1;
+
+        Item_Tab    = Items[index_item];
+        ItemFromRow = Items[index_item + 1];
+        ItemToRow   = Items[index_item + 2];
+        ItemPaper   = Items[index_item + 3];
     }
     return;
 }
+
 
 function Repeat_ThenGoto(button, times, speed, next) {
     PressButton = button;
     wait_time   = speed * 50; // x * 50 ms of waiting
 
-    if (loop_button <= times )
-     if (!combo_running(cb_Repeat_Button)) combo_restart (cb_Repeat_Button);
+    if (abs(loop_button) <= times )
+        if (!combo_running(cb_Repeat_Button)) combo_restart (cb_Repeat_Button);
 
-    else
-    {
-        set_val(TRACE_5,loop_button);  // Look at the loop
-        loop_button = 1;
-        State = next;
-    }
+        else
+        {
+            set_val(TRACE_5,loop_button);  // Look at the loop
+            loop_button = 0;
+            State = next;
+        }
     return;
 }
 
