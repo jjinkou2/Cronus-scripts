@@ -8,7 +8,7 @@ doax3 grin XP is a script that help you level up your XP for the game Dead or al
 
 The whole script  stays in only ONE slot and takes half of memory.
 
-------
+------------------------
 Ok lets see how it 's done: 
 
 The cronus max is a microcontroller, that translates into power but fewer memory than PC or smartphone. It has also 
@@ -18,11 +18,14 @@ than a burden. This device will oblige you to think out of the box.
 So instead of whinning on memory lack, just leverage on its assets : power and script features
 To reach to goal of less memory, this scripts uses 3 points: 
 
-- The 1rst one is the most important : DATASET, use and abuse it. that's how you keep microcontroller not a jabba hutt memory eater.
+- The 1rst one is the most important : DATASET, use and abuse it. that's how you keep microcontroller not a jabba the hut memory eater.
 - 2nd: "main is a loop". I repeat "MAIN IS A LOOP"! i'll come back on this point. 
 - 3rd: State automata machine is the key to this peculiar language. 
 
-Ok lets go back to the 1rst point. DATASET. It's a bunch of bytes not organised. So it's up to you to 
+1. DATASET
+---------
+
+Ok lets go back to the 1rst point. Dataset is a bunch of unorganised bytes. So it's up to you to 
 organise it. Forget your python list / ruby object /C structures. You 'll have to structure it yourself. 
 For this algorithm i just needed:
   - a entry point (cb_intro),
@@ -48,17 +51,44 @@ to read the combo till EOC.
 this dataset efficiently replaces the repetitive and memory greeding: 
 	combo_run(PS4_XX,100);wait...
 
-2/ Main Loop
+2. Main Loop
+-------------
+
 lets move on the 2nd point: MAIN IS A LOOP. You don't need While/ForLoop. That's pretty challenging
 at first: how can i loop / branch to somewhere in my code ? I don't know you, but for me that's
 really interessing when you have to give away your habits and explore new paths. 
 Ok if main is a loop, so there's a way to loop my combo/function/code in some sort of way. 
 Have you read the manual ? no ?so i'll let you re-read the chapter Combo. yes it is clearly written how too loop. 
  
-so instead of repeating : call (rapid_square) x 10, just use the power of the microcontroller that 
-loop every 10ms the main. 
+ok you are lazy : here's the code you can find in the combo section 
+[combo section]http://cronusmax.com/manual/combo_section.htm
 
-3/ State machine
+'''C++
+int run_combo = 0;
+ 
+main {
+ 
+    if(event_press(19)) {       //If A / Cross is pressed...
+        run_combo = 5;          //Variable 'run_combo' equals 5
+    }
+ 
+    if(run_combo && !combo_running(mycombo)) {  //If 'run_combo' has a value and mycombo is not running...
+        run_combo = run_combo - 1;              //'run_combo' equals 'run_combo' minus 1
+        combo_restart(mycombo);                 //restart mycombo
+    }
+ 
+}
+ 
+combo mycombo {
+    set_val(3, 100);    //set RB / R1 to 100
+    wait(200);          //wait 200 milliseconds
+    wait(200);          //wait 200 milliseconds
+}
+'''
+
+3. State machine
+-----------------
+
 Now the Last point : State automata machine. Franckly, without state automata, Cronus scripts look like 
 a raging bull. Now with this tool, i take it by the horns. Look at the code after the if (play). 
 with State programming, you develop small modules that you will plug each one. 
@@ -79,6 +109,6 @@ with State programming, you develop small modules that you will plug each one.
      +------------------+              +------------------+
 
 
-
+# Happy coding ! 
 
 
