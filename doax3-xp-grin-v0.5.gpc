@@ -75,6 +75,16 @@ Total byte size: 2294 bytes (56.01%)
   /*-----------------------*/
  /*      backlog          */
 /*------------------------/-------------------------------------------------
+v 0.5   New Feature: Buy any item in the owner shop.
+
+        Just add a new line in the config like this one 
+        int Tab1 = 0, FromRow1 = IllusionA, ToRow1 = IllusionA, Paper1 = paper_Helena;
+       
+        It should select tab 0 (new swimsuit)
+        If you want a range of swimsuit just modify FromRow1 and ToRow1.
+        Then select the wrapping paper color.
+        Voilà : You should have a new item every 3 vacations. 
+
 v0.4.2  Bug fix: End of the vacation loop will be in LED Blue now. (was staying
                  green)
         Time ajustment at beginning, and at clearing notifications. script 
