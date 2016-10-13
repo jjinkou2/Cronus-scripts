@@ -245,7 +245,6 @@ define cb_throw_gift               = 40;
 define cb_owner_shop               = 42;
 define cb_buy_item             = 44;
 define cb_paper                    = 45;
-define cb_select_ticket_tab        = 46;
 define cb_go_bed                   = 47;
 define cb_end_vacation             = 50;
 define cb_return_title             = 55;
@@ -377,18 +376,28 @@ data(
         PS4_UP,          1,         //
         PS4_CIRCLE,      1,         //
         PS4_LEFT,        1,         //
+/*  time ajustment by zaykho
         PS4_CIRCLE,      90,        //  Mission Aborted
         PS4_SQUARE,      100,        // clear optional notification
         PS4_SQUARE,      80,        // it will eventually enter inventory
+*/
+        PS4_CIRCLE,      150,        //  Mission Aborted
+        PS4_SQUARE,      150,        // clear optional notification
+        PS4_SQUARE,      120,        // it will eventually enter inventory
         PS4_CROSS,       100,        // exit inventory
     EOC,
 
     cb_hotel,
         PS4_CIRCLE,      60,         // End Of Day
         PS4_SQUARE,      50,        // End Of Dialogue
+/* time ajustment from zaykho 
         PS4_SQUARE,      50,        // Start of Zack Gift
         PS4_SQUARE,      100,        // clear optional notification
         PS4_SQUARE,      80,        // it will enter inventory
+*/
+        PS4_SQUARE,      150,        // Start of Zack Gift
+        PS4_SQUARE,      150,        // clear optional notification
+        PS4_SQUARE,      120,        // it will eventually enter inventory
         PS4_CROSS,       100,        // exit inventory
     EOC,
 
@@ -409,9 +418,15 @@ data(
     cb_owner_shop,
         PS4_CIRCLE,      60,         // End Of Day
         PS4_SQUARE,      50,        // End Of Dialogue
+
+/* time ajustment from zaykho 
         PS4_SQUARE,      50,        // Start of Zack Gift
         PS4_SQUARE,      100,        // clear optional notification
         PS4_SQUARE,      80,        // it will eventually enter inventory
+*/
+        PS4_SQUARE,      150,        // Start of Zack Gift
+        PS4_SQUARE,      150,        // clear optional notification
+        PS4_SQUARE,      120,        // it will eventually enter inventory
         PS4_CROSS,       100,        // exit inventory
         PS4_TRIANGLE,    70,         // Enter Owner shop
     EOC,
@@ -419,7 +434,7 @@ data(
         PS4_CIRCLE,      10,         // buy
     EOC,
     cb_paper,
-        PS4_CIRCLE,      10,         // Paper select silver
+        PS4_CIRCLE,      10,         // Paper select 
         PS4_CIRCLE,      10,         // 
         PS4_CIRCLE,      10,            // yes / no ?
         PS4_SQUARE,      10,        // easy clear notif
@@ -428,13 +443,6 @@ data(
         PS4_CROSS,       15,        // exit
         PS4_CROSS,       50,        // exit
         PS4_TOUCH,       50,        // exit Owner mode
-    EOC,
-
-    cb_select_ticket_tab,
-        PS4_RIGHT,       10,
-        PS4_RIGHT,       10,
-        PS4_UP,          10,
-        PS4_UP,          10,
     EOC,
 
     // Bed Time
@@ -472,7 +480,7 @@ data(
 init {
     SwitchLED(BLUE);
 
-    if (CharacterToPlay == All) Selected_Char = 0;
+    if (CharacterToPlay == All) Selected_Char = -2;
     set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
 
     Item_Tab                        = Items[1];
@@ -690,7 +698,7 @@ function StartGame(){
     loop_event = Nb_Events - 1;  // only Afternoon & evening
 
     if (CharacterToPlay == All) {
-        if (Selected_Char == MarieRose) Selected_Char = Selected_Char + 4;
+        if (Selected_Char == MarieRose) Selected_Char = Ayane;
         else                            Selected_Char = (Selected_Char + 2) % 20;
     }
     return (S_Start_Intro);
