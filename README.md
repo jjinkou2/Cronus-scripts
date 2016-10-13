@@ -1,6 +1,5 @@
 # Cronus-scripts
 
-files for the cronus max device. 
 hi, 
 
 i would like to share algorithms to people who would like to program more efficiently this tiny beast cronus max. 
