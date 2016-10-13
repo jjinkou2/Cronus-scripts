@@ -29,7 +29,7 @@ For this algorithm i just needed:
   - a entry point (cb_intro),
   - a set of combo
   - and a Id for the end of combo (EOC).
-
+```
      //  Idx, Button,       Wait(x50ms),     Event
      //---------------------------------------------------------------
      //      Introduction
@@ -41,7 +41,7 @@ For this algorithm i just needed:
             PS4_OPTIONS,     100,         //
         EOC,
      ...
-
+```
 then it needs a function that read that kind of structure : "function get_combo_index(combo_id)" 
 I copied it from a Mortal Kombat script found at cronus forum. I then wrote the State "Play_combo"
 to read the combo till EOC. 
