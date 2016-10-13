@@ -25,22 +25,22 @@ To reach to goal of less memory, this scripts uses 3 points:
 
 Ok lets go back to the 1rst point. DATASET. It's a bunch of bytes not organised. So it's up to you to 
 organise it. Forget your python list / ruby object /C structures. You 'll have to structure it yourself. 
-For this algorithm i just needed 
-  - a entry point (cb_intro), 
-  - a set of combo 
+For this algorithm i just needed:
+  - a entry point (cb_intro),
+  - a set of combo
   - and a Id for the end of combo (EOC).
 
-    //  Idx, Button,       Wait(x50ms),     Event
-    //---------------------------------------------------------------
-    //      Introduction
-    data(
+     //  Idx, Button,       Wait(x50ms),     Event
+     //---------------------------------------------------------------
+     //      Introduction
+     data(
         cb_intro,
             PS4_CIRCLE,      80,         //  Travel to zack island
             PS4_CIRCLE,      100,        //
             PS4_OPTIONS,     10,         //  skip intro video
             PS4_OPTIONS,     100,         //
         EOC,
-    ...
+     ...
 
 then it needs a function that read that kind of structure : "function get_combo_index(combo_id)" 
 I copied it from a Mortal Kombat script found at cronus forum. I then wrote the State "Play_combo"
