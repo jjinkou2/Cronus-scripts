@@ -22,7 +22,7 @@ To reach to goal of less memory, this scripts uses 3 points:
 - 2nd: "main is a loop". I repeat "MAIN IS A LOOP"! i'll come back on this point. 
 - 3rd: State automata machine is the key to this peculiar language. 
 
-1. DATASET
+1. Dataset
 ---------
 
 Ok lets go back to the 1rst point. Dataset is a bunch of unorganised bytes. So it's up to you to 
@@ -63,28 +63,28 @@ Have you read the manual ? no ?so i'll let you re-read the chapter Combo. yes it
 ok you are lazy : here's the code you can find in the combo section 
 [combo section]http://cronusmax.com/manual/combo_section.htm
 
-'''C++
-int run_combo = 0;
+```C++
+	int run_combo = 0;
  
-main {
+	main {
  
-    if(event_press(19)) {       //If A / Cross is pressed...
-        run_combo = 5;          //Variable 'run_combo' equals 5
-    }
+	    if(event_press(19)) {       //If A / Cross is pressed...
+		run_combo = 5;          //Variable 'run_combo' equals 5
+	    }
+
+	    if(run_combo && !combo_running(mycombo)) {  //If 'run_combo' has a value and mycombo is not running...
+		run_combo = run_combo - 1;              //'run_combo' equals 'run_combo' minus 1
+		combo_restart(mycombo);                 //restart mycombo
+	    }
  
-    if(run_combo && !combo_running(mycombo)) {  //If 'run_combo' has a value and mycombo is not running...
-        run_combo = run_combo - 1;              //'run_combo' equals 'run_combo' minus 1
-        combo_restart(mycombo);                 //restart mycombo
-    }
+	}
  
-}
- 
-combo mycombo {
-    set_val(3, 100);    //set RB / R1 to 100
-    wait(200);          //wait 200 milliseconds
-    wait(200);          //wait 200 milliseconds
-}
-'''
+	combo mycombo {
+	    set_val(3, 100);    //set RB / R1 to 100
+	    wait(200);          //wait 200 milliseconds
+	    wait(200);          //wait 200 milliseconds
+	}
+```
 
 3. State machine
 -----------------
