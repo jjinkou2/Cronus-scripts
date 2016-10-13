@@ -61,7 +61,8 @@ Ok if main is a loop, so there's a way to loop my combo/function/code in some so
 Have you read the manual ? no ?so i'll let you re-read the chapter Combo. yes it is clearly written how too loop. 
  
 ok you are lazy : here's the code you can find in the combo section 
-[combo section](http://cronusmax.com/manual/combo_section.htm)
+
+[Cronus Manual](http://cronusmax.com/manual/combo_section.htm)
 
 ```C++
 	int run_combo = 0;
