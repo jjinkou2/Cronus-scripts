@@ -77,9 +77,9 @@ Total byte size: 2146 bytes (52.39%)
  /*      backlog          */
 /*------------------------/-------------------------------------------------
 v0.4.2  Bug fix: End of the vacation loop will be in LED Blue now. (was staying
-				 green)
-		Time ajustment at beginning, and at clearing notifications. script 
-		should be more stable. 
+                 green)
+        Time ajustment at beginning, and at clearing notifications. script 
+        should be more stable. 
 
 v0.4.1  You can choose a different wrapping paper for each vacations. So you 
         can farm a single swimsuit for all girls. 
@@ -164,7 +164,7 @@ define CharacterToPlay            = All;
 
 int Items;                              // dont' touch this one.
 
-int Tab1 = 0, FromRow1 = IllusionA, ToRow1 = IllusionA, Paper1 = paper_Kasumi; // only one for Helena
+int Tab1 = 0, FromRow1 = IllusionA, ToRow1 = IllusionA, Paper1 = paper_Helena; // only one for Helena
 //int Tab2 = 0, FromRow2 = SandwichA, ToRow2 = EelE,      Paper2 = paper_Kokoro; // a range of swimsuits
 //int Tab3 = 2, FromRow3 = Dangerous, ToRow3 = Secret,    Paper3 = paper_Honoka; // a range of tickets
 //int Tab4 = 1, FromRow4 = 7,         ToRow4 = 18,        Paper4 = All;  // anything at tab 2 from 7 to 18 to all
@@ -206,8 +206,9 @@ define S_Throw_Gift                 = 25;
 define S_Go_Bed                     = 26;
 define S_Owner_Shop                 = 27;
 define S_Select_Item                = 28;
+define S_Buy_Item                   = 29;
 
-define S_Select_Tab            		= 30;
+define S_Select_Tab                 = 30;
 define S_Select_Paper               = 34;
 define S_Wrap                       = 35;
 define S_Exit_Shop                  = 36;
@@ -233,7 +234,7 @@ define cb_abort_rock_play          = 30;
 define cb_hotel                    = 35;
 define cb_throw_gift               = 40;
 define cb_owner_shop               = 42;
-define cb_buy_swimsuit             = 44;
+define cb_buy_item             = 44;
 define cb_paper                    = 45;
 define cb_select_ticket_tab        = 46;
 define cb_go_bed                   = 47;
@@ -348,7 +349,8 @@ data(
 
 //       One Day event
     cb_greeting,
-        PS4_CIRCLE,      30,         //  greetings
+        //PS4_CIRCLE,      30,         //  greetings
+        PS4_CIRCLE,      10,         //  greetings- test a smaller value
     EOC,
 
     cb_select_rock_stage,
@@ -404,7 +406,7 @@ data(
         PS4_CROSS,       100,        // exit inventory
         PS4_TRIANGLE,    70,         // Enter Owner shop
     EOC,
-    cb_buy_swimsuit,
+    cb_buy_item,
         PS4_CIRCLE,      10,         // buy
     EOC,
     cb_paper,
@@ -561,12 +563,13 @@ main {
         // Shopping Items at X vacations
         if (State == S_Owner_Shop)      run_State(cb_owner_shop, 0, S_Select_Tab);
 
-        if (State == S_Select_Tab) 		
+        if (State == S_Select_Tab)      
         {
                 set_val(TRACE_6,Item_Tab);  // Look at the loop
         Repeat_ThenGoto(PS4_RIGHT, Item_Tab, 2, S_Select_Item);
         }
-        if (State == S_Select_Item)     select_Item_ThenGoto(S_Select_Paper);
+        if (State == S_Select_Item)     select_Item_ThenGoto(S_Buy_Item);
+        if (State == S_Buy_Item)    run_State(cb_buy_item, 0, S_Select_Paper);
         if (State == S_Select_Paper)    Repeat_ThenGoto(PS4_RIGHT, ItemPaper, 2, S_Wrap);
         if (State == S_Wrap)            run_State(cb_paper, 0, S_Exit_Shop);
         if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Throw_Gift);
@@ -747,7 +750,7 @@ function Repeat_ThenGoto(button, times, speed, next) {
         set_val(TRACE_5,times);  // Look at the loop
     if (abs(loop_button) < times ) {
         if (!combo_running(cb_Repeat_Button)) combo_restart (cb_Repeat_Button);
-	}
+    }
     else {
 
         loop_button = 0;
