@@ -30,17 +30,17 @@ For this algorithm i just needed
   - a set of combo 
   - and a Id for the end of combo (EOC).
 
-//  Idx, Button,       Wait(x50ms),     Event
-//---------------------------------------------------------------
-//      Introduction
-data(
-    cb_intro,
-        PS4_CIRCLE,      80,         //  Travel to zack island
-        PS4_CIRCLE,      100,        //
-        PS4_OPTIONS,     10,         //  skip intro video
-        PS4_OPTIONS,     100,         //
-    EOC,
-...
+    //  Idx, Button,       Wait(x50ms),     Event
+    //---------------------------------------------------------------
+    //      Introduction
+    data(
+        cb_intro,
+            PS4_CIRCLE,      80,         //  Travel to zack island
+            PS4_CIRCLE,      100,        //
+            PS4_OPTIONS,     10,         //  skip intro video
+            PS4_OPTIONS,     100,         //
+        EOC,
+    ...
 
 then it needs a function that read that kind of structure : "function get_combo_index(combo_id)" 
 I copied it from a Mortal Kombat script found at cronus forum. I then wrote the State "Play_combo"
