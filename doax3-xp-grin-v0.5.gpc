@@ -178,15 +178,16 @@ int Items;// dont' touch this one.
 // comment/uncomment / modify / add what you want
 
 // take all Asari in silver
-int Tab0 = 0, FromRow0 = AsariA,    ToRow0 = AsariI,   Paper0 = paper_Silver;  
+int Tab0 = 0, FromRow0 = AsariA,    ToRow0 = AsariA,   Paper0 = paper_Silver;  
  // only one for Helena
-//int Tab1 = 0, FromRow1 = MummyC,    ToRow1 = MummyC,   Paper1 = paper_Helena;
+int Tab1 = 0, FromRow1 = MummyA,    ToRow1 = MummyI,   Paper1 = paper_Helena;
 // a range of tickets
 //int Tab3 = 2, FromRow3 = Dangerous, ToRow3 = Tempting, Paper3 = paper_Honoka;
  // anything at tab 1 from 7 to 18 to all,for instance godfather...
 //int Tab4 = 1, FromRow4 = 7,         ToRow4 = 18,       Paper4 = All;
 //other items like pose tickets
 //int Tab5 = 2, FromRow5 = -3,        ToRow5 = 3,        Paper_5 = paper_Hitomi; 
+//int Tab5 = 2, FromRow5 = -3,        ToRow5 = 3,        Paper_5 = All;
 
 int EndofItems = 255;// dont' touch this one. 
 
@@ -213,6 +214,7 @@ define S_Select_Char                = 11;
 define S_Start_Vacation             = 12;
 define S_End_Vacation               = 13;
 define S_Return_Title               = 14;
+define S_Exit_Mission               = 15;
 
 define S_Start_Day                  = 20;
 define S_End_Day                    = 21;
@@ -248,13 +250,13 @@ define cb_intro                    = 1;
 define cb_left_char                = 5;
 define cb_right_char               = 10;
 define cb_start_vacation           = 15;
-define cb_greeting                 = 20;
+define cb_quit_mission             = 21;
 define cb_select_rock_stage        = 25;
 define cb_abort_rock_play          = 30;
 define cb_hotel                    = 35;
 define cb_throw_gift               = 40;
 define cb_owner_shop               = 42;
-define cb_buy_item             = 44;
+define cb_buy_item				   = 44;
 define cb_paper                    = 45;
 define cb_go_bed                   = 47;
 define cb_end_vacation             = 50;
@@ -363,16 +365,30 @@ data(
         PS4_OPTIONS,     50,         //  wait longer
         // PS4_LEFT,        5,         //  don't take a partner // TODO : Will try with a partner
         PS4_CIRCLE,      240,         //
-        PS4_RIGHT,       5,         //  Go to Rock Stage
+//        PS4_RIGHT,       5,         //  Go to Rock Stage
     EOC,
+
+    cb_quit_mission,
+        PS4_LEFT,       1,         //  from Rock stage
+        PS4_LEFT,       1,         //  offset from day 1 
+        PS4_LEFT,       1,         //  
+        PS4_CIRCLE,     50,        //  Select Pool
+        PS4_TOUCH,      10,        //  Owner mode
+		PS4_UP,			2,		   //  Select mission
+		PS4_UP,			2,
+		PS4_CIRCLE,		50,			// Kill ?
+		PS4_RIGHT,		10,			// Yes
+		PS4_CIRCLE,		50,
+		PS4_TOUCH,		2,			// exit Owner mode
+		PS4_CROSS,		50,			// exit menu
+		PS4_LEFT,        1,         //  Go to Rock Stage
+        PS4_LEFT,        1,         //
+        PS4_LEFT,        1,         //
+		EOC,
 
 //       One Day event
-    cb_greeting,
-        //PS4_CIRCLE,      30,         //  greetings
-        PS4_CIRCLE,      10,         //  greetings- test a smaller value
-    EOC,
-
     cb_select_rock_stage,
+        PS4_CIRCLE,      30,         //  greetings
         PS4_LEFT,        1,         //  Go to Rock Stage
         PS4_LEFT,        1,         //
         PS4_LEFT,        1,         //
@@ -393,9 +409,9 @@ data(
         PS4_SQUARE,      80,        // it will eventually enter inventory
 */
         PS4_CIRCLE,      150,        //  Mission Aborted
-        PS4_SQUARE,      150,        // clear optional notification
-        PS4_SQUARE,      120,        // it will eventually enter inventory
-        PS4_CROSS,       100,        // exit inventory
+//        PS4_SQUARE,      150,        // clear optional notification
+//        PS4_SQUARE,      120,        // it will eventually enter inventory
+//        PS4_CROSS,       100,        // exit inventory
     EOC,
 
     cb_hotel,
@@ -494,7 +510,8 @@ init {
     if (CharacterToPlay == All) Selected_Char = -2; // start with Kasumi
     set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
 
-    if (get_pvar(SPVAR_1,0,1,0)==1){ // if data were stored before
+// FIXME: Find a better solution for PVAR
+/*    if (get_pvar(SPVAR_1,0,1,0)==1){ // if data were stored before
         set_val(TRACE_6,50);  // Trace_6 available for debug
         index_item  = get_pvar(SPVAR_2,0,20,0); 
         Item_Tab    = Items[index_item];
@@ -503,14 +520,15 @@ init {
         ItemPaper   = get_pvar(SPVAR_4,0,10,Items[index_item + 3]);
         //if  (ItemPaper == All)  ItemPaper = 1;
     }
-    else  { // first load of the script
-        set_val(TRACE_6,10);  // Trace_6 available for debug
+    else  { // first load of the script*/
+    
+
         Item_Tab    = Items[1];
         CurrentItem = Items[2];
         ItemToRow   = Items[3];
         if  (Items[4]== All)  ItemPaper = 1;
         else                  ItemPaper = Items[4];
-    }
+ //   }
 }
 
 main {
@@ -567,8 +585,8 @@ main {
         /*    if (event_press(PS4_UP))  {
               loop_vacation = loop_vacation  % Nb_Vacations + 1 ;
               set_val(TRACE_2,loop_vacation);  
-
-              }*/
+              }
+         */
     }
 
     // Main Loop of the State automata
@@ -578,21 +596,33 @@ main {
         // intro States
 
         if (State == S_Start_Game)      State = StartGame();
-        if (State == S_Start_Intro)     run_State(cb_intro,0, S_Select_Char);
+        if (State == S_Start_Intro)     run_State(cb_intro, 0, S_Select_Char);
         if (State == S_Select_Char)     run_State(cb_left_char, Selected_Char, S_Start_Vacation);
-        if (State == S_Start_Vacation)  run_State(cb_start_vacation,0, S_Start_RockPlay);
+        if (State == S_Start_Vacation)  run_State(cb_start_vacation, 0, S_Exit_Mission);
 
         // Day States
-        if (State == S_Start_Day)       run_State(cb_greeting,0, S_Start_Stage);
-        if (State == S_Start_Stage)     run_State(cb_select_rock_stage, 0, S_Start_RockPlay);
+		if (State == S_Exit_Mission) {
+			if (NumDay == 1)			run_State(cb_quit_mission,2,S_Start_RockPlay);
+			else						run_State(cb_quit_mission,0,S_Start_RockPlay);
+		}
+
+        if (State == S_Start_Day)       run_State(cb_select_rock_stage, 0, S_Start_RockPlay);
 
         if (State == S_Start_RockPlay)
         {
             loop_event = loop_event - 1;
-            if (loop_event != 0)          run_State(cb_abort_rock_play, 0, S_Start_RockPlay);
-            else {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
-        }
+			if (NumDay==1){ 
+				if (loop_event != 0)        run_State(cb_abort_rock_play, 0, S_Start_RockPlay);
+	            if (loop_event == 0) {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
+			} 
+			else {
+				if (loop_event == 1)	run_State(cb_abort_rock_play, 0, S_Exit_Mission);
+				if (loop_event == 2)        run_State(cb_abort_rock_play, 0, S_Start_RockPlay);
+	            if (loop_event == 0) {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
+			}
+		}
         //if (State == S_Clear_Event)     Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, S_Hotel);
+		
 
         // At the Hotel
         if (State == S_Hotel) {
@@ -608,7 +638,10 @@ main {
         if (State == S_Select_Tab)      Repeat_ThenGoto(PS4_RIGHT, Item_Tab, 2, S_Select_Item);
         if (State == S_Select_Item)     select_Item_ThenGoto(S_Buy_Item);
         if (State == S_Buy_Item)        run_State(cb_buy_item, 0, S_Select_Paper);
-        if (State == S_Select_Paper)    Repeat_ThenGoto(PS4_RIGHT, ItemPaper, 2, S_Wrap);
+        if (State == S_Select_Paper)    {
+
+        Repeat_ThenGoto(PS4_RIGHT, ItemPaper, 2, S_Wrap);
+        }
         if (State == S_Wrap)            run_State(cb_paper, 0, S_Exit_Shop);
         //if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Throw_Gift); //comment this to test items to buy
         if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Debug);  // uncomment this to test items to buy
@@ -783,14 +816,18 @@ function exit_Shop_ThenGoto(next){
     else next_Item();
     State = next;
     // save values for next cronus init
-    if (TRUE) { // TODO: concat all SPVAR with set_bit
+    // TODO : review this code 
+ /*   
+ if (TRUE) { // TODO: concat all SPVAR with set_bit
         set_pvar(SPVAR_1,1); // to tell init that EEPROM has data
         set_pvar(SPVAR_2,index_item);
         set_pvar(SPVAR_3,CurrentItem);
         set_pvar(SPVAR_4,ItemPaper);
         set_val(TRACE_6,100);  // Trace_6 available for debug
+        
     }
-
+*/
+        set_val (TRACE_5,ItemPaper);
     return;
 }
 
@@ -808,9 +845,11 @@ function next_Item(){
         CurrentItem = Items[index_item + 1];
         ItemToRow   = Items[index_item + 2];
         ItemPaper   = Items[index_item + 3];
+
         if  (ItemPaper == All)  ItemPaper = 1;
-        else                    ItemPaper = Items[4];
+        else                    ItemPaper = Items[index_item + 3];
     }
+
     return;
 }
 
