@@ -8,15 +8,15 @@
   / ___|_ __(_)_ __   \ \/ /  _ \
  | |  _| '__| | '_ \   \  /| |_) |
  | |_| | |  | | | | |  /  \|  __/
-  \____|_|  |_|_| |_| /_/\_\_|                                        V0.5.1
-____________________________________________________________________________
+  \____|_|  |_|_| |_| /_/\_\_|                                        V0.6
+___________________________________________________________________________
 
 Licence : MIT
 Author  : jinkou
 Credits : Huge thanks to contributors: Zaykho; Morganite
 
-Total byte size: 2534 bytes (61.87%)
-Total variables used: 34 of which 6 are dedicated to combos (30.36%)
+Total byte size: 2528 bytes (61.72%)
+
 
 
   /*-------------------------*/
@@ -84,6 +84,10 @@ Total variables used: 34 of which 6 are dedicated to combos (30.36%)
   /*-----------------------*/
  /*      backlog          */
 /*------------------------/-------------------------------------------------
+V0.6	New Feature: Select one or several characters you want to level up.
+		Now you can tell which characters to level up and the script will 
+		loop from every characters at each vacation. 
+
 v 0.5.1   Huge boost in time thanks to Zaykho: Script now turns in 27min (was 
 		  around 47min before). 
 		  And it's safest so far, currently 8 hours running. 
@@ -167,10 +171,21 @@ define Nb_Vacations               = 25;
 // will try to buy at every X vacations
 define Buy_At_X                   = 3;
 
-// Select a Character to Farm,
-// Possible Values [Hitomi, Helena, ..., All]
-// if you put All, it will farm a new character each vacation.
-define CharacterToPlay            = All;
+// Select one or several Characters to Farm,
+// comment / uncomment the characters you want 
+int CharacterToPlay  // Don't touch this one
+
+int Character0 					= Kasumi;
+//int Character1 					= Momiji;
+//int Character2 					= Hitomi;
+int Character3 					= Helena;
+//int Character4 					= MarieRose;
+//int Character5 					= Honoka;
+//int Character6 					= NyoTengu;
+int Character7 					= Kokoro;
+int Character8 					= Ayane;
+
+int EndOfChars = 255  // Don't touch this one
 
 // Items you want to farm
 // It's a range like
@@ -298,7 +313,8 @@ int Play                            = FALSE;
 //
 // Items Swimsuit and characters
 //------------------------------
-int Selected_Char                   = CharacterToPlay;
+int index_char;
+int Selected_Char;
 
 int index_item                      = 1;
 int Item_Tab;
@@ -493,7 +509,7 @@ data(
 init {
     SwitchLED(BLUE);
 
-    if (CharacterToPlay == All) Selected_Char = -2; // start with Kasumi
+    //if (CharacterToPlay == All) Selected_Char = -2; // start with Kasumi
     set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
 
 // FIXME: Find a better solution for PVAR
@@ -584,6 +600,7 @@ main {
         if (State == S_Start_Game)      State = StartGame();
         if (State == S_Start_Intro)     run_State(cb_intro, 0, S_Select_Char);
         if (State == S_Select_Char)     run_State(cb_left_char, Selected_Char, S_Start_Vacation);
+
         if (State == S_Start_Vacation)  run_State(cb_start_vacation, 0, S_Exit_Mission);
 
         // Day States
@@ -742,11 +759,9 @@ function get_combo_index(combo_id) {
 
 function StartGame(){
     loop_event = Nb_Events - 1;  // only Afternoon & evening
-
-    if (CharacterToPlay == All) {
-        if (Selected_Char == MarieRose) Selected_Char = Ayane;
-        else                            Selected_Char = (Selected_Char + 2) % 20;
-    }
+	index_char = index_char + 1;
+	if (CharacterToPlay[index_char] == EndOfChars) index_char = 1;
+	Selected_Char = CharacterToPlay[index_char];
     return (S_Start_Intro);
 }
 
