@@ -26,7 +26,7 @@ Total byte size: 2528 bytes (61.72%)
     1) Before starting the script, just change the character/swimsuit/Ticket
        in the config paragraph below (§Config)
 
-    2) Important : Make sure the inventory gifts of your selected character is empty.
+    2) Important : Make sure the gifts inventories of your selected characters are empty.
        ----------
 
     3) Start the script :
@@ -88,9 +88,12 @@ V0.6	New Feature: Select one or several characters you want to level up.
 		Now you can tell which characters to level up and the script will 
 		loop from every characters at each vacation. 
 
+        Important : Make sure the gifts inventories of your selected characters 
+		are empty.
+
 v 0.5.1   Huge boost in time thanks to Zaykho: Script now turns in 27min (was 
 		  around 47min before). 
-		  And it's safest so far, currently 8 hours running. 
+		  And so far it's safer, currently 8 hours running. 
 
 v 0.5     New Feature: Buy any item in the owner shop.
 
@@ -166,13 +169,19 @@ define All                        = 255;
 /*-------------------------------------/-----------------------------*/
 
 // number of Vacation to loop
+// --------------------------
 define Nb_Vacations               = 25;
 
 // will try to buy at every X vacations
-define Buy_At_X                   = 3;
+define Buy_At_X                   = 2;
 
-// Select one or several Characters to Farm,
+
+// Characters to Level up
+// ----------------------
+// Select one or several Characters to level up,
 // comment / uncomment the characters you want 
+// Important : Make sure the gifts inventories of your 
+// ----------  selected characters are empty.
 int CharacterToPlay  // Don't touch this one
 
 int Character0 					= Kasumi;
@@ -187,7 +196,10 @@ int Character8 					= Ayane;
 
 int EndOfChars = 255  // Don't touch this one
 
-// Items you want to farm
+
+
+// Items you want to collect
+// -------------------------
 // It's a range like
 //  [MummyA, ...., MummyH] for Helena
 //  [Ticket1 ...Ticket3] for All
