@@ -8,14 +8,16 @@
   / ___|_ __(_)_ __   \ \/ /  _ \
  | |  _| '__| | '_ \   \  /| |_) |
  | |_| | |  | | | | |  /  \|  __/
-  \____|_|  |_|_| |_| /_/\_\_|                                        V0.5
+  \____|_|  |_|_| |_| /_/\_\_|                                        V0.5.1
 ____________________________________________________________________________
 
 Licence : MIT
 Author  : jinkou
 Credits : Huge thanks to contributors: Zaykho; Morganite
 
-Total byte size: 2593 bytes (63.31%)
+Total byte size: 2534 bytes (61.87%)
+Total variables used: 34 of which 6 are dedicated to combos (30.36%)
+
 
   /*-------------------------*/
  /*  Quick start            */
@@ -82,7 +84,11 @@ Total byte size: 2593 bytes (63.31%)
   /*-----------------------*/
  /*      backlog          */
 /*------------------------/-------------------------------------------------
-v 0.5   New Feature: Buy any item in the owner shop.
+v 0.5.1   Huge boost in time thanks to Zaykho: Script now turns in 27min (was 
+		  around 47min before). 
+		  And it's safest so far, currently 8 hours running. 
+
+v 0.5     New Feature: Buy any item in the owner shop.
 
 v0.4.2  Time adjustment at beginning, and at clearing notifications. 
 v0.4.1  You can choose a different wrapping paper for each vacations.
@@ -156,7 +162,7 @@ define All                        = 255;
 /*-------------------------------------/-----------------------------*/
 
 // number of Vacation to loop
-define Nb_Vacations               = 9;
+define Nb_Vacations               = 25;
 
 // will try to buy at every X vacations
 define Buy_At_X                   = 3;
@@ -363,7 +369,7 @@ data(
         PS4_OPTIONS,     20,         //  skip character intro
         PS4_OPTIONS,     240,         //  skip character intro
         PS4_OPTIONS,     50,         //  wait longer
-        // PS4_LEFT,        5,         //  don't take a partner // TODO : Will try with a partner
+        PS4_LEFT,        5,         //  don't take a partner // TODO : Will try with a partner
         PS4_CIRCLE,      240,         //
 
     EOC,
@@ -409,10 +415,9 @@ data(
     cb_hotel,
         PS4_CIRCLE,      60,         // End Of Day
         PS4_SQUARE,      50,        // End Of Dialogue
-        PS4_SQUARE,      150,        // Start of Zack Gift
+        PS4_SQUARE,      50,        // Start of Zack Gift
         PS4_SQUARE,      150,        // clear optional notification
-        PS4_SQUARE,      120,        // it will eventually enter inventory
-        PS4_CROSS,       100,        // exit inventory
+		PS4_SQUARE,      100,      // it will eventually enter inventory
     EOC,
 
     cb_throw_gift,
@@ -432,9 +437,7 @@ data(
     cb_owner_shop,
         PS4_CIRCLE,      60,         // End Of Day
         PS4_SQUARE,      50,        // End Of Dialogue
-
-//time ajustment from zaykho 
-        PS4_SQUARE,      150,        // Start of Zack Gift
+        PS4_SQUARE,      100,        // Start of Zack Gift
         PS4_SQUARE,      150,        // clear optional notification
         PS4_SQUARE,      120,        // it will eventually enter inventory
         PS4_CROSS,       100,        // exit inventory
@@ -473,7 +476,7 @@ data(
     EOC,
 
     cb_return_title,
-        PS4_CIRCLE,      200,         // return to title
+        PS4_CIRCLE,      150,         // return to title
     EOC,
 
 // End of Data
@@ -490,8 +493,7 @@ data(
 init {
     SwitchLED(BLUE);
 
-//    if (CharacterToPlay == All) Selected_Char = -2; // start with Kasumi
-    if (CharacterToPlay == All) Selected_Char = MarieRose; // start with Kasumi
+    if (CharacterToPlay == All) Selected_Char = -2; // start with Kasumi
     set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
 
 // FIXME: Find a better solution for PVAR
@@ -586,7 +588,7 @@ main {
 
         // Day States
 		if (State == S_Exit_Mission) {
-			if (NumDay == 1)			run_State(cb_quit_mission,2,S_Start_RockPlay);
+			if (NumDay == 1 && loop_event == 2)	run_State(cb_quit_mission,2,S_Start_RockPlay);
 			else						run_State(cb_quit_mission,0,S_Start_RockPlay);
 		}
 
@@ -596,12 +598,12 @@ main {
         {
             loop_event = loop_event - 1;
 			if (NumDay==1){ 
-				if (loop_event)        run_State(cb_abort_rock_play, 0, S_Exit_Mission);
-	            else  {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
+				if (loop_event != 0)        run_State(cb_abort_rock_play, 0, S_Exit_Mission);
+	            if (loop_event == 0) {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
 			} 
 			else {
-				if (loop_event == 1)	run_State(cb_abort_rock_play, 0, S_Exit_Mission);
 				if (loop_event == 2)   run_State(cb_abort_rock_play, 0, S_Start_RockPlay);
+				if (loop_event == 1)	run_State(cb_abort_rock_play, 0, S_Exit_Mission);
 	            if (loop_event == 0) {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
 			}
 		}
@@ -856,4 +858,3 @@ function DebugCombo(combo_to_run,offset){
     run_State (combo_to_run,offset,S_IDLE);
     return;
 }
-
