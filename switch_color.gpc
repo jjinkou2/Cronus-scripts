@@ -1,0 +1,46 @@
+//Posted : Monday 3rd of October, 2016 13:20 UTC  
+define GREEN                        = 1;
+define BLUE                         = 2;
+define RED_BLINK                    = 3;
+ 
+ 
+init 
+{ 
+    SwitchLED(BLUE);
+}
+ 
+ 
+main 
+{ 
+     if(event_press(PS4_TRIANGLE)) SwitchLED(GREEN);
+          if(event_press(PS4_SQUARE)) SwitchLED(RED_BLINK);
+               if(event_press(PS4_CIRCLE)) SwitchLED(BLUE);
+}
+ 
+/*-----------------------*/
+/*      Functions         */
+/*------------------------*/
+ 
+function SwitchLED(Colour)
+{
+    // Find the correct color
+    if (Colour==GREEN) 
+    {
+        set_led(LED_1, 0);
+        set_led(LED_2, 0);
+        set_led(LED_3, 1);
+    }
+    else if (Colour==BLUE)
+    {
+        set_led(LED_1, 1);
+        set_led(LED_2, 0);
+        set_led(LED_3, 0);
+    }
+    else if (Colour==RED_BLINK)
+    {
+        set_led(LED_1, 0);
+        set_led(LED_2, 3);
+        set_led(LED_3, 0);
+    }
+    return;
+}
