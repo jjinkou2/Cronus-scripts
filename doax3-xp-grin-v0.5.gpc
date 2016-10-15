@@ -164,7 +164,7 @@ define Buy_At_X                   = 3;
 // Select a Character to Farm,
 // Possible Values [Hitomi, Helena, ..., All]
 // if you put All, it will farm a new character each vacation.
-define CharacterToPlay            = Kokoro;
+define CharacterToPlay            = All;
 
 // Items you want to farm
 // It's a range like
@@ -178,9 +178,9 @@ int Items;// dont' touch this one.
 // comment/uncomment / modify / add what you want
 
 // take all Asari in silver
-int Tab0 = 0, FromRow0 = AsariA,    ToRow0 = AsariA,   Paper0 = paper_Silver;  
+int Tab0 = 0, FromRow0 = -9,    ToRow0 = AsariI,   Paper0 = paper_Silver;  
  // only one for Helena
-int Tab1 = 0, FromRow1 = MummyA,    ToRow1 = MummyI,   Paper1 = paper_Helena;
+//int Tab1 = 0, FromRow1 = MummyA,    ToRow1 = MummyI,   Paper1 = paper_Helena;
 // a range of tickets
 //int Tab3 = 2, FromRow3 = Dangerous, ToRow3 = Tempting, Paper3 = paper_Honoka;
  // anything at tab 1 from 7 to 18 to all,for instance godfather...
@@ -365,7 +365,7 @@ data(
         PS4_OPTIONS,     50,         //  wait longer
         // PS4_LEFT,        5,         //  don't take a partner // TODO : Will try with a partner
         PS4_CIRCLE,      240,         //
-//        PS4_RIGHT,       5,         //  Go to Rock Stage
+
     EOC,
 
     cb_quit_mission,
@@ -395,33 +395,20 @@ data(
     EOC,
 
     cb_abort_rock_play,
-        PS4_CIRCLE,      15,         //  Select Rock Stage
+        PS4_CIRCLE,      15,        //  Select Rock Stage
         PS4_DOWN,        1,         //
-        PS4_CIRCLE,      80,         //  Select Rock Game
+        PS4_CIRCLE,      80,        //  Select Rock Game
 
         PS4_OPTIONS,     1,         //  Abort Mission
         PS4_UP,          1,         //
         PS4_CIRCLE,      1,         //
         PS4_LEFT,        1,         //
-/*  time ajustment by zaykho
-        PS4_CIRCLE,      90,        //  Mission Aborted
-        PS4_SQUARE,      100,        // clear optional notification
-        PS4_SQUARE,      80,        // it will eventually enter inventory
-*/
-        PS4_CIRCLE,      150,        //  Mission Aborted
-//        PS4_SQUARE,      150,        // clear optional notification
-//        PS4_SQUARE,      120,        // it will eventually enter inventory
-//        PS4_CROSS,       100,        // exit inventory
+        PS4_CIRCLE,      150,       //  Mission Aborted
     EOC,
 
     cb_hotel,
         PS4_CIRCLE,      60,         // End Of Day
         PS4_SQUARE,      50,        // End Of Dialogue
-/* time ajustment from zaykho 
-        PS4_SQUARE,      50,        // Start of Zack Gift
-        PS4_SQUARE,      100,        // clear optional notification
-        PS4_SQUARE,      80,        // it will enter inventory
-*/
         PS4_SQUARE,      150,        // Start of Zack Gift
         PS4_SQUARE,      150,        // clear optional notification
         PS4_SQUARE,      120,        // it will eventually enter inventory
@@ -446,11 +433,7 @@ data(
         PS4_CIRCLE,      60,         // End Of Day
         PS4_SQUARE,      50,        // End Of Dialogue
 
-/* time ajustment from zaykho 
-        PS4_SQUARE,      50,        // Start of Zack Gift
-        PS4_SQUARE,      100,        // clear optional notification
-        PS4_SQUARE,      80,        // it will eventually enter inventory
-*/
+//time ajustment from zaykho 
         PS4_SQUARE,      150,        // Start of Zack Gift
         PS4_SQUARE,      150,        // clear optional notification
         PS4_SQUARE,      120,        // it will eventually enter inventory
@@ -490,7 +473,7 @@ data(
     EOC,
 
     cb_return_title,
-        PS4_CIRCLE,      150,         // return to title
+        PS4_CIRCLE,      200,         // return to title
     EOC,
 
 // End of Data
@@ -507,7 +490,8 @@ data(
 init {
     SwitchLED(BLUE);
 
-    if (CharacterToPlay == All) Selected_Char = -2; // start with Kasumi
+//    if (CharacterToPlay == All) Selected_Char = -2; // start with Kasumi
+    if (CharacterToPlay == All) Selected_Char = MarieRose; // start with Kasumi
     set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
 
 // FIXME: Find a better solution for PVAR
@@ -612,12 +596,12 @@ main {
         {
             loop_event = loop_event - 1;
 			if (NumDay==1){ 
-				if (loop_event != 0)        run_State(cb_abort_rock_play, 0, S_Start_RockPlay);
-	            if (loop_event == 0) {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
+				if (loop_event)        run_State(cb_abort_rock_play, 0, S_Exit_Mission);
+	            else  {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
 			} 
 			else {
 				if (loop_event == 1)	run_State(cb_abort_rock_play, 0, S_Exit_Mission);
-				if (loop_event == 2)        run_State(cb_abort_rock_play, 0, S_Start_RockPlay);
+				if (loop_event == 2)   run_State(cb_abort_rock_play, 0, S_Start_RockPlay);
 	            if (loop_event == 0) {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
 			}
 		}
@@ -633,7 +617,7 @@ main {
         // Shopping Items at X vacations
         if (State == S_Owner_Shop)      run_State(cb_owner_shop, 0, S_Select_Tab);
 
-        if (State == S_Debug)           run_State(cb_owner_shop, 12, S_Select_Tab); //uncomment this to test items to buy
+        //if (State == S_Debug)           run_State(cb_owner_shop, 12, S_Select_Tab); //uncomment this to test items to buy
 
         if (State == S_Select_Tab)      Repeat_ThenGoto(PS4_RIGHT, Item_Tab, 2, S_Select_Item);
         if (State == S_Select_Item)     select_Item_ThenGoto(S_Buy_Item);
@@ -643,8 +627,8 @@ main {
         Repeat_ThenGoto(PS4_RIGHT, ItemPaper, 2, S_Wrap);
         }
         if (State == S_Wrap)            run_State(cb_paper, 0, S_Exit_Shop);
-        //if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Throw_Gift); //comment this to test items to buy
-        if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Debug);  // uncomment this to test items to buy
+        if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Throw_Gift); //comment this to test items to buy
+        //if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Debug);  // uncomment this to test items to buy
 
         // End of hotel
         if (State == S_Throw_Gift)      run_State(cb_throw_gift, 0, S_Go_Bed);
