@@ -594,7 +594,6 @@ init {
 	// load NumDay / event from EEPROM
     index_char		= get_pvar(SPVAR_5,1,9,1);
 	NumDay			= get_pvar(SPVAR_6,1,14,1);
-	loop_vacation	= get_pvar(SPVAR_7,1,255,1);
     set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
     set_val(TRACE_2,loop_vacation);  // Trace 4 will display the # day
 }
@@ -729,14 +728,12 @@ main {
             else                                run_State(cb_end_vacation, 0, S_End_Game);
         }
 
-        if (State == S_Clear_Vacation){ Repeat_ThenGoto(PS4_CIRCLE,Nb_Notifs, 4, S_Return_Title);
-										set_pvar(SPVAR_7,loop_vacation); }
+        if (State == S_Clear_Vacation)  Repeat_ThenGoto(PS4_CIRCLE,Nb_Notifs, 4, S_Return_Title);
         if (State == S_Return_Title)    run_State(cb_return_title, 0, S_Start_Game);
 
         // End of vacation loop
         if (State == S_End_Game) {
 										loop_vacation = 1;
-										set_pvar(SPVAR_7,loop_vacation);
 										NumDay        = 1;
 										set_pvar(SPVAR_6,NumDay);
 										Play          = FALSE;
