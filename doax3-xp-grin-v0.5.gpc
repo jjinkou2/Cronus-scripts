@@ -170,7 +170,7 @@ define Buy_At_X                   = 3;
 // Select a Character to Farm,
 // Possible Values [Hitomi, Helena, ..., All]
 // if you put All, it will farm a new character each vacation.
-define CharacterToPlay            = All;
+define CharacterToPlay            = Kokoro;
 
 // Items you want to farm
 // It's a range like
