@@ -15,7 +15,7 @@ Licence : MIT
 Author  : jinkou
 Credits : Huge thanks to contributors: Zaykho; Morganite
 
-Total byte size: 2528 bytes (61.72%)
+Total byte size: 2938 bytes (71.73%)
 
 
 
@@ -62,30 +62,30 @@ Total byte size: 2528 bytes (61.72%)
 
     Troubleshooting:
     ----------------
-	    Script doing wrong things: 
-	    --------------------------
-	    - If you find the script sitting in the closet, it's because you didn't
-	      clear the gift inventory before you started.
-	      
-	    - If you find your girl at the pool doing relax movie, it's because you 
-	      didn't synchronise the day number. you are at day 1 in the script. 
-	      Look below to increment the day number
+		Script doing wrong things: 
+		--------------------------
+		- If you find the script sitting in the closet, it's because you didn't
+		  clear the gift inventory before you started.
+		  
+		- If you find your girl at the pool doing relax movie, it's because you 
+		  didn't synchronise the day number. you are at day 1 in the script. 
+		  Look below to increment the day number
 	
 		Logging and tracing: 
 		--------------------
-    - TRACE_3 displays the state where the script is.
-      Look at §State_Definition for the matching state
-
-    - TRACE_4 displays the day number. If the script is stuck or if something
-      goes wrong, stop the script, manually move the game to the next day
-      then adjust the day number inside TRACE_4 by pressing L1.
-
-    - If you want to test a specific set of Data, use the function DebugCombo
-      and press L2.
-
-    - Press R3 to test a whole State
-
-    - TRACE_1 displays the index of the step inside §DataSet (PS4_CIRCLE, 20)
+		- TRACE_3 displays the state where the script is.
+		  Look at §State_Definition for the matching state
+	
+		- TRACE_4 displays the day number. If the script is stuck or if something
+		  goes wrong, stop the script, manually move the game to the next day
+		  then adjust the day number inside TRACE_4 by pressing L1.
+	
+		- If you want to test a specific set of Data, use the function DebugCombo
+		  and press L2.
+	
+		- Press R3 to test a whole State
+	
+		- TRACE_1 displays the index of the step inside §DataSet (PS4_CIRCLE, 20)
 
 /*----------------------------------------------------------------------------*/
 
@@ -114,6 +114,28 @@ v0.1    First version
 
 ---------------------------------------------------------------------------*/
 
+  /*-----------------------*/
+ /*		Variable used     */
+/*------------------------/-------------------------------------------------
+	EEPROM  
+	------
+		PVAR_15 Checksum for item config		
+		SPVAR_2	index_item
+		SPVAR_3	CurrentItem
+		SPVAR_4	ItemPaper
+		SPVAR_5	index_char (CharacterSelected) 
+		SPVAR_6	Day number
+		SPVAR_7	Vacation number
+
+	TRACE  
+	------
+		TRACE_1 step in combo (cb_xxx)
+		TRACE_2 Vacation	
+		TRACE_3 State
+		TRACE_4	Numday
+		TRACE_5 Free for debug
+		TRACE_6 Free for debug
+---------------------------------------------------------------------------*/
 
 
   /*-----------------------*/
@@ -194,15 +216,15 @@ define Buy_At_X                   = 2;
 // ----------  selected characters are empty.
 int CharacterToPlay  // Don't touch this one
 
-int Character0 					= Kasumi;
-//int Character1 					= Momiji;
-//int Character2 					= Hitomi;
-int Character3 					= Helena;
-//int Character4 					= MarieRose;
-//int Character5 					= Honoka;
-//int Character6 					= NyoTengu;
-int Character7 					= Kokoro;
-int Character8 					= Ayane;
+int Character0					= Kasumi;
+//int Character1					= Momiji;
+//int Character2					= Hitomi;
+int Character3					= Helena;
+//int Character4					= MarieRose;
+//int Character5					= Honoka;
+//int Character6					= NyoTengu;
+int Character7					= Kokoro;
+int Character8					= Ayane;
 
 int EndOfChars = 255  // Don't touch this one
 
@@ -221,7 +243,7 @@ int Items;// dont' touch this one.
 // comment/uncomment / modify / add what you want
 
 // take all Asari in silver
-int Tab0 = 0, FromRow0 = -9,    ToRow0 = AsariI,   Paper0 = paper_Silver;  
+//int Tab0 = 0, FromRow0 = AsariaA,    ToRow0 = AsariI,   Paper0 = paper_Silver;  
  // only one for Helena
 //int Tab1 = 0, FromRow1 = MummyA,    ToRow1 = MummyI,   Paper1 = paper_Helena;
 // a range of tickets
@@ -232,11 +254,16 @@ int Tab0 = 0, FromRow0 = -9,    ToRow0 = AsariI,   Paper0 = paper_Silver;
 //int Tab5 = 2, FromRow5 = -3,        ToRow5 = 3,        Paper_5 = paper_Hitomi; 
 //int Tab5 = 2, FromRow5 = -3,        ToRow5 = 3,        Paper_5 = All;
 
+// perso
+int Tab0 = 0, FromRow0 = -13,    ToRow0 = AsariI,   Paper0 = paper_Silver;  
+int Tab1 = SandwichA, FromRow1 = SandwichA,    ToRow1 = SandwichI,   Paper1 = paper_Silver;
+
+
 int EndofItems = 255;// dont' touch this one. 
 
 
 int optionalSMovie		= FALSE; // put it to TRUE if you suspect that your character will 
-						// end in S+ optionnal movie. 
+						// end in S+ optionnal movie.FIXME: Is it really needed ? 
 						
 /*-------------  End of configuration ---------------------------------------------*/
 
@@ -541,27 +568,35 @@ init {
     SwitchLED(BLUE);
 
     //if (CharacterToPlay == All) Selected_Char = -2; // start with Kasumi
-    set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
 
-// FIXME: Find a better solution for PVAR
-/*    if (get_pvar(SPVAR_1,0,1,0)==1){ // if data were stored before
-        set_val(TRACE_6,50);  // Trace_6 available for debug
-        index_item  = get_pvar(SPVAR_2,0,20,0); 
-        Item_Tab    = Items[index_item];
-        CurrentItem = get_pvar(SPVAR_3,-50,50,Items[index_item + 1]);
-        ItemToRow   = Items[index_item + 2];
-        ItemPaper   = get_pvar(SPVAR_4,0,10,Items[index_item + 3]);
-        //if  (ItemPaper == All)  ItemPaper = 1;
-    }
-    else  { // first load of the script*/
     
-
-        Item_Tab    = Items[1];
+	// get what was already bought to avoid buying them again
+    if (itemConfigHasChanged()) { 
+		// there is a change in config => reload values from script
+        set_val(TRACE_6,-50);  // Trace_6 available for debug
+		Item_Tab    = Items[1];
         CurrentItem = Items[2];
         ItemToRow   = Items[3];
         if  (Items[4]== All)  ItemPaper = 1;
         else                  ItemPaper = Items[4];
- //   }
+	}
+	else {
+	// config seems to be the same => reload  from EEPROM
+        set_val(TRACE_6,50);  // Trace_6 available for debug
+        index_item		= get_pvar(SPVAR_2,0,20,0); 
+        Item_Tab		= Items[index_item];
+        CurrentItem		= get_pvar(SPVAR_3,-50,50,1);
+        ItemToRow		= Items[index_item + 2];
+        ItemPaper		= get_pvar(SPVAR_4,0,10,1);
+        //if  (ItemPaper == All)  ItemPaper = 1; // FIXME on paper = ALL
+
+	}
+	// load NumDay / event from EEPROM
+    index_char		= get_pvar(SPVAR_5,1,9,1);
+	NumDay			= get_pvar(SPVAR_6,1,14,1);
+	loop_vacation	= get_pvar(SPVAR_7,1,255,1);
+    set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
+    set_val(TRACE_2,loop_vacation);  // Trace 4 will display the # day
 }
 
 main {
@@ -646,13 +681,13 @@ main {
         {
             loop_event = loop_event - 1;
 			if (NumDay==1){ 
-				if (loop_event != 0)        run_State(cb_abort_rock_play, 0, S_Exit_Mission);
-	            if (loop_event == 0) {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
+				if (loop_event != 0)    run_State(cb_abort_rock_play, 0, S_Exit_Mission);
+				if (loop_event == 0) {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
 			} 
 			else {
 				if (loop_event == 2)   run_State(cb_abort_rock_play, 0, S_Start_RockPlay);
 				if (loop_event == 1)	run_State(cb_abort_rock_play, 0, S_Exit_Mission);
-	            if (loop_event == 0) {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
+				if (loop_event == 0) {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
 			}
 		}
         //if (State == S_Clear_Event)     Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, S_Hotel);
@@ -660,7 +695,6 @@ main {
 
         // At the Hotel
         if (State == S_Hotel) {
-        
             if ((NumDay == 1) && !(loop_vacation % Buy_At_X)) State = S_Owner_Shop;
             else run_State(cb_hotel, 0, S_Throw_Gift);
         }
@@ -668,15 +702,12 @@ main {
         // Shopping Items at X vacations
         if (State == S_Owner_Shop)      run_State(cb_owner_shop, 0, S_Select_Tab);
 
-        //if (State == S_Debug)           run_State(cb_owner_shop, 12, S_Select_Tab); //uncomment this to test items to buy
+        if (State == S_Debug)           run_State(cb_owner_shop, 12, S_Select_Tab); //uncomment this to test items to buy
 
         if (State == S_Select_Tab)      Repeat_ThenGoto(PS4_RIGHT, Item_Tab, 2, S_Select_Item);
         if (State == S_Select_Item)     select_Item_ThenGoto(S_Buy_Item);
         if (State == S_Buy_Item)        run_State(cb_buy_item, 0, S_Select_Paper);
-        if (State == S_Select_Paper)    {
-
-        Repeat_ThenGoto(PS4_RIGHT, ItemPaper, 2, S_Wrap);
-        }
+        if (State == S_Select_Paper)    Repeat_ThenGoto(PS4_RIGHT, ItemPaper, 2, S_Wrap);
         if (State == S_Wrap)            run_State(cb_paper, 0, S_Exit_Shop);
         if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Throw_Gift); //comment this to test items to buy
         //if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Debug);  // uncomment this to test items to buy
@@ -689,7 +720,7 @@ main {
 
         // End Vacation States
 
-        if (State == S_Clear_Movie)  Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, 4, S_S_Movie); // FIXME : really needed ? 
+        if (State == S_Clear_Movie)		Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, 4, S_S_Movie); // FIXME : really needed ? 
         if (State == S_S_Movie)         run_State(cb_end_vacation, 0, S_End_Vacation);
         if (State == S_End_Vacation) {
             loop_vacation = loop_vacation + 1;
@@ -698,17 +729,20 @@ main {
             else                                run_State(cb_end_vacation, 0, S_End_Game);
         }
 
-        if (State == S_Clear_Vacation)  Repeat_ThenGoto(PS4_CIRCLE,Nb_Notifs, 4, S_Return_Title);
+        if (State == S_Clear_Vacation){ Repeat_ThenGoto(PS4_CIRCLE,Nb_Notifs, 4, S_Return_Title);
+										set_pvar(SPVAR_7,loop_vacation); }
         if (State == S_Return_Title)    run_State(cb_return_title, 0, S_Start_Game);
 
         // End of vacation loop
         if (State == S_End_Game) {
-            loop_vacation = 1;
-            NumDay        = 1;
-            Play          = FALSE;
-            State         = S_IDLE;
-            SwitchLED(BLUE);
-        }
+										loop_vacation = 1;
+										set_pvar(SPVAR_7,loop_vacation);
+										NumDay        = 1;
+										set_pvar(SPVAR_6,NumDay);
+										Play          = FALSE;
+										State         = S_IDLE;
+										SwitchLED(BLUE); 
+		}
 
 
         //-----------------------------------------------------------------------------------
@@ -794,6 +828,8 @@ function StartGame(){
 	index_char = index_char + 1;
 	if (CharacterToPlay[index_char] == EndOfChars) index_char = 1;
 	Selected_Char = CharacterToPlay[index_char];
+	set_pvar(SPVAR_5,index_char);
+
     return (S_Start_Intro);
 }
 
@@ -802,11 +838,13 @@ function EndDay() {
     set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
     if (NumDay > Nb_Days) {
         NumDay  = 1;
+		set_pvar(SPVAR_6,NumDay);
         if (optionalSMovie == TRUE) return (S_Clear_Movie);
-        else 					    return (S_End_Vacation);
+        else						return (S_End_Vacation);
     }
     else {
         set_val(TRACE_4,NumDay);
+		set_pvar(SPVAR_6,NumDay);
         return (S_Start_Day);
     }
 }
@@ -838,16 +876,14 @@ function exit_Shop_ThenGoto(next){
     State = next;
     // save values for next cronus init
     // TODO : review this code 
- /*   
+    
  if (TRUE) { // TODO: concat all SPVAR with set_bit
-        set_pvar(SPVAR_1,1); // to tell init that EEPROM has data
         set_pvar(SPVAR_2,index_item);
         set_pvar(SPVAR_3,CurrentItem);
         set_pvar(SPVAR_4,ItemPaper);
         set_val(TRACE_6,100);  // Trace_6 available for debug
-        
     }
-*/
+
         set_val (TRACE_5,ItemPaper);
     return;
 }
@@ -888,29 +924,20 @@ function Repeat_ThenGoto(button, times, speed, next) {
     return;
 }
 
-function easyCheckSum(){
+function itemConfigHasChanged(){
 // try to detect if Items have changed in config  section
-// It's a BAD check sum code but it's not memory eater. 
+// It's a BAD check sum code but it's not greedy on memory . 
 	i = 1;
 	v = Items[i];
 	while (Items[i] != EndofItems) {
-		v = v + Items[i]; // sum every value 
+		v = v + abs(Items[i]); // sum every value 
 		i = i + 1;
 	}
-	savedCheckSum = get_pvar(PVAR_15, -255, 255,0);
-	if (v != savedCheckSum){ // compare it with the EEPROM saved before
-	// there is a change in config => reload values from script
-	    Item_Tab    = Items[1];
-        CurrentItem = Items[2];
-        ItemToRow   = Items[3];
-        if  (Items[4]== All)  ItemPaper = 1;
-        else                  ItemPaper = Items[4];
-	}
-	else {
-	// config seems to be the same => reload  from EEPROM
-	}
-	// load NumDay / event 
-	return;
+	savedCheckSum = get_pvar(PVAR_15, 0, 255,0);
+	
+	set_pvar(PVAR_15,v); // save it for next reboot
+	return (v != savedCheckSum); // compare it with the EEPROM saved before
+	// == True if different
 }
 
 function DebugCombo(combo_to_run,offset){
