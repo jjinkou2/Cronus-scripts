@@ -929,22 +929,22 @@ function Repeat_ThenGoto(button, times, speed, next) {
     return;
 }
 
-function rightshift_bit(byte_to_shift) {
+function rightshift_bit(int_to_shift) {
     // emulate this
     // checksum = (checksum >> 1) + ((checksum & 1) << 15);
     // save bit0
-    bit0 = get_bits(byte_to_shift,0,1);
+    bit0 = get_bits(int_to_shift,0,1);
 
     //  save MSB/LSB
-    LSB  = get_bits(byte_to_shift,1,127); 
-    MSB  = get_bits(byte_to_shift,8,255);
+    LSB  = get_bits(int_to_shift,1,127); 
+    MSB  = get_bits(int_to_shift,8,255);
 
     // right shift 
-    byte_to_shift = set_bits(LSB,MSB,7,127);
-    if (bit0) byte_to_shift = set_bit   (byte_to_shift,15);
-    else      byte_to_shift = clear_bit (byte_to_shift,15);
+    int_to_shift = set_bits(LSB,MSB,7,127);
+    if (bit0) int_to_shift = set_bit   (int_to_shift,15);
+    else      int_to_shift = clear_bit (int_to_shift,15);
 
-    return byte_to_shift;
+    return int_to_shift;
 }
 
 
