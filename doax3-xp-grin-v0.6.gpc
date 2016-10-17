@@ -264,7 +264,7 @@ int Items;// dont' touch this one.
 //int Tab5 = 2, FromRow5 = -3,        ToRow5 = 3,        Paper_5 = All;
 
 // perso
-int Tab0 = 0, FromRow0 = -13,    ToRow0 = AsariI,   Paper0 = paper_Silver;  
+//int Tab0 = 0, FromRow0 = -13,    ToRow0 = AsariI,   Paper0 = paper_Silver;  
 int Tab1 = 0, FromRow1 = SandwichA,    ToRow1 = SandwichI,   Paper1 = paper_Silver;
 
 
