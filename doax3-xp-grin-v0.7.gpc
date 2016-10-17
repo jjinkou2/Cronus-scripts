@@ -8,14 +8,15 @@
   / ___|_ __(_)_ __   \ \/ /  _ \
  | |  _| '__| | '_ \   \  /| |_) |
  | |_| | |  | | | | |  /  \|  __/
-  \____|_|  |_|_| |_| /_/\_\_|                                        V0.6
+  \____|_|  |_|_| |_| /_/\_\_|                                        V0.7
 ___________________________________________________________________________
 
 Licence : MIT
 Author  : jinkou
 Credits : Huge thanks to contributors: Zaykho; Morganite
 
-Total byte size: 2566 bytes (62.65%)
+Total byte size: 3041 bytes (74.24%)
+
 
   /*-------------------------*/
  /*  Quick start            */
@@ -49,6 +50,11 @@ Total byte size: 2566 bytes (62.65%)
     ----------
         - BLUE              : Script is Stopped
                               Only L1/Triangle/R2 are possible
+
+        - RED               : Script is Paused
+                              Only Triangle is possible.
+                              Note: Don't play an event. You can do anything but
+                              go back exactly where you left the script.
 
         - GREEN             : Script is Playing
                               R1 to stop and Triangle to pause.
@@ -85,22 +91,29 @@ Total byte size: 2566 bytes (62.65%)
   /*-----------------------*/
  /*      Backlog          */
 /*------------------------/-------------------------------------------------
-V0.6    New Feature: 
+V0.6    New Features: 
         - Characters to level up are selectable
           Now you can tell which characters to level up and the script will 
           loop from every characters at each vacation. 
 
             Important : Make sure the gifts inventories of your selected 
             ----------- characters are empty.
-        
-        A new parameter for optionnal S+ Movie is in config. Set it to TRUE 
-        if you think your girl will end with this movie. Personnally i never 
-        got it since this script never take a partner. So i let it to False. 
-        
-        The Pause feature has been removed to get some bytes. I never used it. 
 
-v 0.5.1 Huge boost in time thanks to Zaykho
-v 0.5   New Feature: Buy any item in the owner shop.
+        - No more double items bought when switching on your Cronus. 
+          Your config is saved in EEPROM. After switching off/On  Cronus max
+          the script will remember which items it bought and it will buy the 
+          next items in your config. 
+          If config has changed, it will detect it and will restart buying from
+          the beginning.
+        
+         
+
+v 0.5.1   Huge boost in time thanks to Zaykho: Script now turns in 27min (was 
+          around 47min before). 
+          And so far it's safer, currently 8 hours running. 
+
+v 0.5     New Feature: Buy any item in the owner shop.
+
 v0.4.2  Time adjustment at beginning, and at clearing notifications. 
 v0.4.1  You can choose a different wrapping paper for each vacations.
 v0.4    New Feature: Paper Wrapping: you can select paper wrapping color.
@@ -113,6 +126,17 @@ v0.1    First version
   /*-----------------------*/
  /*     Variable used     */
 /*------------------------/-------------------------------------------------
+
++---------+-----------------+----------------------+--------------------------+
+| EEPROM  |    Used For     |      Saved at        |      every x times       |
++---------+-----------------+----------------------+--------------------------+
+| PVAR_15 | Checksum config | ConfigHasChanged()   | 1 vacation               |
+| SPVAR_2 | index_item      | exit_Shop_ThenGoto() | 3 vacations              |
+| SPVAR_3 | CurrentItem     | "                    | "                        |
+| SPVAR_4 | ItemPaper       | "                    | "                        |
+| SPVAR_5 | Index_char      | StartGame()          | 1 vacations              |
+| SPVAR_6 | Day number      | EndDay()             | 1 Day = 14x per vacation |
++---------+-----------------+----------------------+--------------------------+
 
 +---------+-----------------+
 | TRACE   |    Used For     |
@@ -383,6 +407,12 @@ int idx_step;      // to circulate thru the data structure
 int i,v;
 int PressButton;
 
+
+// config save
+// ------------
+int savedCheckSum;
+int bit0,LSB,MSB;
+
 //-----------------------------------------------------
 
   /*--------------------------------------*/
@@ -521,7 +551,7 @@ data(
     cb_go_bed,
         PS4_DOWN,        1,         // Start go to bed
         PS4_DOWN,        1,         //
-        PS4_CIRCLE,      200,         // waiting for end of girl's speach
+        PS4_CIRCLE,      100,         //
         PS4_CIRCLE,      200,        // go to new morning
     EOC,
 
@@ -551,6 +581,11 @@ data(
 
 init {
     SwitchLED(BLUE);
+
+    // get what was already bought to avoid buying them again
+    if (ConfigHasChanged()) { 
+        // there is a change in config => reload values from script
+        set_val(TRACE_6,-50);  // Trace_6 available for debug
         Item_Tab    = Items[1];
         CurrentItem = Items[2];
         ItemToRow   = Items[3];
@@ -558,6 +593,22 @@ init {
         else                  ItemPaper = Items[4];
         index_char  = 0; // StartGame() will ++ it  
 
+    }
+    else {
+    // config seems to be the same => reload  from EEPROM
+        set_val(TRACE_6,50);  // Trace_6 available for debug
+        index_item      = get_pvar(SPVAR_2,0,20,0); 
+        Item_Tab        = Items[index_item];
+        CurrentItem     = get_pvar(SPVAR_3,-50,50,1);
+        ItemToRow       = Items[index_item + 2];
+        ItemPaper       = get_pvar(SPVAR_4,0,10,1);
+        //if  (ItemPaper == All)  ItemPaper = 1; // FIXME on paper = ALL
+
+        index_char      = get_pvar(SPVAR_5,1,9,1);
+    }
+    // load NumDay / event from EEPROM
+    NumDay          = get_pvar(SPVAR_6,1,14,1);
+    set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
 }
 
 main {
@@ -568,8 +619,14 @@ main {
     //Press Triangle to pause/play the script.
     if(event_press(PS4_TRIANGLE)) {
         Play = !Play;
-        SwitchLED(GREEN);
-        State = Next_State;  //Start or restart where we were.
+        if (Play) {
+            SwitchLED(GREEN);
+            State = Next_State;  //Start or restart where we were.
+        }
+        else {
+            Next_State = State;  // Save state
+            SwitchLED(RED_BLINK);
+        }
     }
 
     // Press R1 to Stop the script
@@ -691,6 +748,7 @@ main {
         if (State == S_End_Game) {
                                         loop_vacation = 1;
                                         NumDay        = 1;
+                                        set_pvar(SPVAR_6,NumDay);
                                         Play          = FALSE;
                                         State         = S_IDLE;
                                         SwitchLED(BLUE); 
@@ -780,6 +838,8 @@ function StartGame(){
     index_char = index_char + 1;
     if (CharacterToPlay[index_char] == EndOfChars) index_char = 1;
     Selected_Char = CharacterToPlay[index_char];
+    set_pvar(SPVAR_5,index_char);
+
     return (S_Start_Intro);
 }
 
@@ -788,11 +848,13 @@ function EndDay() {
     set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
     if (NumDay > Nb_Days) {
         NumDay  = 1;
+        set_pvar(SPVAR_6,NumDay);
         if (optionalSMovie == TRUE) return (S_Clear_Movie);
         else                        return (S_End_Vacation);
     }
     else {
         set_val(TRACE_4,NumDay);
+        set_pvar(SPVAR_6,NumDay);
         return (S_Start_Day);
     }
 }
@@ -822,7 +884,15 @@ function exit_Shop_ThenGoto(next){
     }
     else next_Item();
     State = next;
+    // save values for next cronus init
+    // TODO : review this code 
+    
+        set_pvar(SPVAR_2,index_item);
+        set_pvar(SPVAR_3,CurrentItem);
+        set_pvar(SPVAR_4,ItemPaper);
+        set_val(TRACE_6,100);  // Trace_6 available for debug
 
+        set_val (TRACE_5,ItemPaper);
     return;
 }
 
@@ -862,6 +932,74 @@ function Repeat_ThenGoto(button, times, speed, next) {
     return;
 }
 
+function rightshift_bit(int_to_shift) {
+    // emulate this
+    // checksum = (checksum >> 1) + ((checksum & 1) << 15);
+    // save bit0
+    bit0 = get_bits(int_to_shift,0,1);
+
+    //  save MSB/LSB
+    LSB  = get_bits(int_to_shift,1,127); 
+    MSB  = get_bits(int_to_shift,8,255);
+
+    // right shift 
+    int_to_shift = set_bits(LSB,MSB,7,127);
+    if (bit0) int_to_shift = set_bit   (int_to_shift,15);
+    else      int_to_shift = clear_bit (int_to_shift,15);
+
+    return int_to_shift;
+}
+
+
+function ConfigHasChanged(){
+    // try to detect if Items have changed in config  section
+    // This checksum could be better but it's not greedy on memory . 
+
+    i = 1;
+    v = Items[i];
+    while (Items[i] != EndofItems) {
+        v = rightshift_bit(v);
+        v = v + abs(Items[i]); // sum every value 
+        i = i + 1;
+    }
+
+    i=1;
+    while (CharacterToPlay[i] != EndOfChars) {
+        v = rightshift_bit(v);
+        v = v + abs(CharacterToPlay[i]); // sum every value 
+        i = i + 1;
+    }
+
+    savedCheckSum = get_pvar(PVAR_15, 0, 255,0);
+    set_pvar(PVAR_15,v); // save it for next  Cronus reboot
+
+    return (v != savedCheckSum); // compare it with the EEPROM saved before
+    // == True if different
+}
+/*
+function ConfigHasChanged(){
+    // try to detect if Items have changed in config  section
+    // It's a BAD check sum code but it's not greedy on memory . 
+    i = 1;
+    v = Items[i];
+    while (Items[i] != EndofItems) {
+        v = v + abs(Items[i]); // sum every value 
+        i = i + 1;
+    }
+
+    i=1;
+    while (CharacterToPlay[i] != EndOfChars) {
+        v = v + abs(CharacterToPlay[i]); // sum every value 
+        i = i + 1;
+    }
+
+    savedCheckSum = get_pvar(PVAR_15, 0, 255,0);
+    set_pvar(PVAR_15,v); // save it for next  Cronus reboot
+
+    return (v != savedCheckSum); // compare it with the EEPROM saved before
+    // == True if different
+}
+*/
 function DebugCombo(combo_to_run,offset){
     Play = TRUE;
     run_State (combo_to_run,offset,S_IDLE);

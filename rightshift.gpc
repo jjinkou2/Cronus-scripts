@@ -1,20 +1,40 @@
-int a = 10; 
+int a = -26937; 
 int b = 20;
 int c = 5;
 int d = 32767;
-int d = -32768;
+int e = -32768;
+int bit0,bit7,LSB,MSB;
+int i;
 
 
 main {
- set_val(TRACE_1, rightshift_bit(10)); // TRACE_1 = 5
- set_val(TRACE_2, rightshift_bit(20)); // TRACE_1 = 10
- set_val(TRACE_3, rightshift_bit(5)); // TRACE_1 = 2
- set_val(TRACE_3, rightshift_bit(5)); // TRACE_1 = 2
- set_val(TRACE_4, rightshift_bit(d)); // TRACE_1 = -1 (65535)
- set_val(TRACE_5, d+1); // TRACE_5 = -32768
+// set_val(TRACE_1, rightshift_bit(10)); // TRACE_1 = 5
+ //set_val(TRACE_2, rightshift_bit(20)); // TRACE_1 = 10
+ //set_val(TRACE_3, rightshift_bit(5)); // TRACE_1 = 2
+// set_val(TRACE_3, rightshift_bit(5)); // TRACE_1 = 2
+ //set_val(TRACE_4, rightshift_bit(d)); // TRACE_1 = -1 (65535)
+ //set_val(TRACE_5, d + 1); // TRACE_5 = -32768
+set_val(TRACE_4, get_bits(a,0,255));
+set_val(TRACE_5, get_bits(a,8,255));
+set_val(TRACE_6, test(a));
+
+ 
+}
 
 
+function test(int_to_shift){
+    LSB  = get_bits(int_to_shift,0,255); 
+    MSB = get_bits(int_to_shift,8,255); 
+    i = 8;
+    //while (i<=15) {
+    //	clear_bit(LSB,i);
+    //	i = i + 1;
+   // }
+    //set_bits(LSB,MSB,8,255);
     
+    return LSB;
+    
+
 }
 function rightshift_bit(int_to_shift) {
     // emulate this
