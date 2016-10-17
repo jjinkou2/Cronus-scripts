@@ -15,7 +15,7 @@ Licence : MIT
 Author  : jinkou
 Credits : Huge thanks to contributors: Zaykho; Morganite
 
-Total byte size: 2953 bytes (72.09%)
+Total byte size: 3041 bytes (74.24%)
 
 
   /*-------------------------*/
@@ -61,56 +61,56 @@ Total byte size: 2953 bytes (72.09%)
 
     Troubleshooting:
     ----------------
-		Script doing wrong things: 
-		--------------------------
-		- If you find the script sitting in the closet, it's because you didn't
-		  clear the gift inventory before you started.
-		  
-		- If you find your girl at the pool doing relax movie, it's because you 
-		  didn't synchronise the day number. you are at day 1 in the script. 
-		  Look below to increment the day number
-	
-		Logging and tracing: 
-		--------------------
-		- TRACE_3 displays the state where the script is.
-		  Look at §State_Definition for the matching state
-	
-		- TRACE_4 displays the day number. If the script is stuck or if something
-		  goes wrong, stop the script, manually move the game to the next day
-		  then adjust the day number inside TRACE_4 by pressing L1.
-	
-		- If you want to test a specific set of Data, use the function DebugCombo
-		  and press L2.
-	
-		- Press R3 to test a whole State
-	
-		- TRACE_1 displays the index of the step inside §DataSet (PS4_CIRCLE, 20)
+        Script doing wrong things: 
+        --------------------------
+        - If you find the script sitting in the closet, it's because you didn't
+          clear the gift inventory before you started.
+          
+        - If you find your girl at the pool doing relax movie, it's because you 
+          didn't synchronise the day number. you are at day 1 in the script. 
+          Look below to increment the day number
+    
+        Logging and tracing: 
+        --------------------
+        - TRACE_3 displays the state where the script is.
+          Look at §State_Definition for the matching state
+    
+        - TRACE_4 displays the day number. If the script is stuck or if something
+          goes wrong, stop the script, manually move the game to the next day
+          then adjust the day number inside TRACE_4 by pressing L1.
+    
+        - If you want to test a specific set of Data, use the function DebugCombo
+          and press L2.
+    
+        - Press R3 to test a whole State
+    
+        - TRACE_1 displays the index of the step inside §DataSet (PS4_CIRCLE, 20)
 
 /*----------------------------------------------------------------------------*/
 
   /*-----------------------*/
  /*      Backlog          */
 /*------------------------/-------------------------------------------------
-V0.6	New Features: 
-		- Characters to level up are selectable
-		  Now you can tell which characters to level up and the script will 
-		  loop from every characters at each vacation. 
+V0.6    New Features: 
+        - Characters to level up are selectable
+          Now you can tell which characters to level up and the script will 
+          loop from every characters at each vacation. 
 
-			Important : Make sure the gifts inventories of your selected 
-			----------- characters are empty.
+            Important : Make sure the gifts inventories of your selected 
+            ----------- characters are empty.
 
-		- No more double items bought when switching on your Cronus. 
-		  Your config is saved in EEPROM. After switching off/On  Cronus max
-		  the script will remember which items it bought and it will buy the 
-		  next items in your config. 
-		  If config has changed, it will detect it and will restart buying from
-		  the beginning.
-		
-		 
+        - No more double items bought when switching on your Cronus. 
+          Your config is saved in EEPROM. After switching off/On  Cronus max
+          the script will remember which items it bought and it will buy the 
+          next items in your config. 
+          If config has changed, it will detect it and will restart buying from
+          the beginning.
+        
+         
 
 v 0.5.1   Huge boost in time thanks to Zaykho: Script now turns in 27min (was 
-		  around 47min before). 
-		  And so far it's safer, currently 8 hours running. 
+          around 47min before). 
+          And so far it's safer, currently 8 hours running. 
 
 v 0.5     New Feature: Buy any item in the owner shop.
 
@@ -124,26 +124,26 @@ v0.1    First version
 ---------------------------------------------------------------------------*/
 
   /*-----------------------*/
- /*		Variable used     */
+ /*     Variable used     */
 /*------------------------/-------------------------------------------------
-	EEPROM  
-	------
-		PVAR_15 Checksum for item config		
-		SPVAR_2	index_item
-		SPVAR_3	CurrentItem
-		SPVAR_4	ItemPaper
-		SPVAR_5	index_char (CharacterSelected) 
-		SPVAR_6	Day number
-		SPVAR_7	Vacation number
+    EEPROM  
+    ------
+        PVAR_15 Checksum for item config        
+        SPVAR_2 index_item
+        SPVAR_3 CurrentItem
+        SPVAR_4 ItemPaper
+        SPVAR_5 index_char (CharacterSelected) 
+        SPVAR_6 Day number
+        SPVAR_7 Vacation number
 
-	TRACE  
-	------
-		TRACE_1 step in combo (cb_xxx)
-		TRACE_2 Vacation	
-		TRACE_3 State
-		TRACE_4	Numday
-		TRACE_5 Free for debug
-		TRACE_6 Free for debug
+    TRACE  
+    ------
+        TRACE_1 step in combo (cb_xxx)
+        TRACE_2 Vacation    
+        TRACE_3 State
+        TRACE_4 Numday
+        TRACE_5 Free for debug
+        TRACE_6 Free for debug
 ---------------------------------------------------------------------------*/
 
 
@@ -225,15 +225,15 @@ define Buy_At_X                   = 2;
 // ----------  selected characters are empty.
 int CharacterToPlay  // Don't touch this one
 
-int Character0					= Kasumi;
-//int Character1					= Momiji;
-//int Character2					= Hitomi;
-int Character3					= Helena;
-//int Character4					= MarieRose;
-//int Character5					= Honoka;
-//int Character6					= NyoTengu;
-int Character7					= Kokoro;
-int Character8					= Ayane;
+int Character0                  = Kasumi;
+//int Character1                    = Momiji;
+//int Character2                    = Hitomi;
+int Character3                  = Helena;
+//int Character4                    = MarieRose;
+//int Character5                    = Honoka;
+//int Character6                    = NyoTengu;
+int Character7                  = Kokoro;
+int Character8                  = Ayane;
 
 int EndOfChars = 255  // Don't touch this one
 
@@ -271,10 +271,10 @@ int Tab1 = 0, FromRow1 = SandwichA,    ToRow1 = SandwichI,   Paper1 = paper_Silv
 int EndofItems = 255;// dont' touch this one. 
 
 
-int optionalSMovie		= FALSE; // put it to TRUE if you suspect that your 
-								 // character will end in S+ optionnal movie.
-								 // FIXME: Is it really needed ? 
-						
+int optionalSMovie      = FALSE; // put it to TRUE if you suspect that your 
+                                 // character will end in S+ optionnal movie.
+                                 // FIXME: Is it really needed ? 
+                        
 /*-------------  End of configuration ---------------------------------------------*/
 
 
@@ -319,7 +319,7 @@ define S_Exit_Shop                  = 36;
 define S_Clear_Event                = 50;
 define S_Clear_Vacation             = 51;
 define S_S_Movie                    = 52;
-define S_Clear_Movie				= 53;
+define S_Clear_Movie                = 53;
 
 define S_Start_Game                 = 80;
 define S_End_Game                   = 81;
@@ -341,7 +341,7 @@ define cb_abort_rock_play          = 30;
 define cb_hotel                    = 35;
 define cb_throw_gift               = 40;
 define cb_owner_shop               = 42;
-define cb_buy_item				   = 44;
+define cb_buy_item                 = 44;
 define cb_paper                    = 45;
 define cb_go_bed                   = 47;
 define cb_end_vacation             = 50;
@@ -407,6 +407,7 @@ int PressButton;
 // config save
 // ------------
 int savedCheckSum;
+int bit0,LSB,MSB;
 
 //-----------------------------------------------------
 
@@ -464,17 +465,17 @@ data(
         PS4_LEFT,       1,         //  
         PS4_CIRCLE,     50,        //  Select Pool
         PS4_TOUCH,      10,        //  Owner mode
-		PS4_UP,			2,		   //  Select mission
-		PS4_UP,			2,
-		PS4_CIRCLE,		50,			// Kill ?
-		PS4_RIGHT,		10,			// Yes
-		PS4_CIRCLE,		50,
-		PS4_TOUCH,		2,			// exit Owner mode
-		PS4_CROSS,		50,			// exit menu
-		PS4_LEFT,        1,         //  Go to Rock Stage
+        PS4_UP,         2,         //  Select mission
+        PS4_UP,         2,
+        PS4_CIRCLE,     50,         // Kill ?
+        PS4_RIGHT,      10,         // Yes
+        PS4_CIRCLE,     50,
+        PS4_TOUCH,      2,          // exit Owner mode
+        PS4_CROSS,      50,         // exit menu
+        PS4_LEFT,        1,         //  Go to Rock Stage
         PS4_LEFT,        1,         //
         PS4_LEFT,        1,         //
-		EOC,
+        EOC,
 
 //       One Day event
     cb_select_rock_stage,
@@ -501,7 +502,7 @@ data(
         PS4_SQUARE,      50,        // End Of Dialogue
         PS4_SQUARE,      50,        // Start of Zack Gift
         PS4_SQUARE,      150,        // clear optional notification
-		PS4_SQUARE,      100,      // it will eventually enter inventory
+        PS4_SQUARE,      100,      // it will eventually enter inventory
     EOC,
 
     cb_throw_gift,
@@ -577,32 +578,32 @@ data(
 init {
     SwitchLED(BLUE);
 
-	// get what was already bought to avoid buying them again
+    // get what was already bought to avoid buying them again
     if (ConfigHasChanged()) { 
-		// there is a change in config => reload values from script
+        // there is a change in config => reload values from script
         set_val(TRACE_6,-50);  // Trace_6 available for debug
-		Item_Tab    = Items[1];
+        Item_Tab    = Items[1];
         CurrentItem = Items[2];
         ItemToRow   = Items[3];
         if  (Items[4]== All)  ItemPaper = 1;
         else                  ItemPaper = Items[4];
-		index_char	= 0; // StartGame() will ++ it 	
+        index_char  = 0; // StartGame() will ++ it  
 
-	}
-	else {
-	// config seems to be the same => reload  from EEPROM
+    }
+    else {
+    // config seems to be the same => reload  from EEPROM
         set_val(TRACE_6,50);  // Trace_6 available for debug
-        index_item		= get_pvar(SPVAR_2,0,20,0); 
-        Item_Tab		= Items[index_item];
-        CurrentItem		= get_pvar(SPVAR_3,-50,50,1);
-        ItemToRow		= Items[index_item + 2];
-        ItemPaper		= get_pvar(SPVAR_4,0,10,1);
+        index_item      = get_pvar(SPVAR_2,0,20,0); 
+        Item_Tab        = Items[index_item];
+        CurrentItem     = get_pvar(SPVAR_3,-50,50,1);
+        ItemToRow       = Items[index_item + 2];
+        ItemPaper       = get_pvar(SPVAR_4,0,10,1);
         //if  (ItemPaper == All)  ItemPaper = 1; // FIXME on paper = ALL
 
-		index_char		= get_pvar(SPVAR_5,1,9,1);
-	}
-	// load NumDay / event from EEPROM
-	NumDay			= get_pvar(SPVAR_6,1,14,1);
+        index_char      = get_pvar(SPVAR_5,1,9,1);
+    }
+    // load NumDay / event from EEPROM
+    NumDay          = get_pvar(SPVAR_6,1,14,1);
     set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
 }
 
@@ -677,28 +678,28 @@ main {
         if (State == S_Start_Vacation)  run_State(cb_start_vacation, 0, S_Exit_Mission);
 
         // Day States
-		if (State == S_Exit_Mission) {
-			if (NumDay == 1 && loop_event == 2)	run_State(cb_quit_mission,2,S_Start_RockPlay);
-			else						run_State(cb_quit_mission,0,S_Start_RockPlay);
-		}
+        if (State == S_Exit_Mission) {
+            if (NumDay == 1 && loop_event == 2) run_State(cb_quit_mission,2,S_Start_RockPlay);
+            else                        run_State(cb_quit_mission,0,S_Start_RockPlay);
+        }
 
         if (State == S_Start_Day)       run_State(cb_select_rock_stage, 0, S_Start_RockPlay);
 
         if (State == S_Start_RockPlay)
         {
             loop_event = loop_event - 1;
-			if (NumDay==1){ 
-				if (loop_event != 0)    run_State(cb_abort_rock_play, 0, S_Exit_Mission);
-				if (loop_event == 0) {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
-			} 
-			else {
-				if (loop_event == 2)   run_State(cb_abort_rock_play, 0, S_Start_RockPlay);
-				if (loop_event == 1)	run_State(cb_abort_rock_play, 0, S_Exit_Mission);
-				if (loop_event == 0) {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
-			}
-		}
+            if (NumDay==1){ 
+                if (loop_event != 0)    run_State(cb_abort_rock_play, 0, S_Exit_Mission);
+                if (loop_event == 0) {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
+            } 
+            else {
+                if (loop_event == 2)   run_State(cb_abort_rock_play, 0, S_Start_RockPlay);
+                if (loop_event == 1)    run_State(cb_abort_rock_play, 0, S_Exit_Mission);
+                if (loop_event == 0) {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
+            }
+        }
         //if (State == S_Clear_Event)     Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, S_Hotel);
-		
+        
 
         // At the Hotel
         if (State == S_Hotel) {
@@ -727,7 +728,7 @@ main {
 
         // End Vacation States
 
-        if (State == S_Clear_Movie)		Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, 4, S_S_Movie); // FIXME : really needed ? 
+        if (State == S_Clear_Movie)     Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, 4, S_S_Movie); // FIXME : really needed ? 
         if (State == S_S_Movie)         run_State(cb_end_vacation, 0, S_End_Vacation);
         if (State == S_End_Vacation) {
             loop_vacation = loop_vacation + 1;
@@ -741,13 +742,13 @@ main {
 
         // End of vacation loop
         if (State == S_End_Game) {
-										loop_vacation = 1;
-										NumDay        = 1;
-										set_pvar(SPVAR_6,NumDay);
-										Play          = FALSE;
-										State         = S_IDLE;
-										SwitchLED(BLUE); 
-		}
+                                        loop_vacation = 1;
+                                        NumDay        = 1;
+                                        set_pvar(SPVAR_6,NumDay);
+                                        Play          = FALSE;
+                                        State         = S_IDLE;
+                                        SwitchLED(BLUE); 
+        }
 
 
         //-----------------------------------------------------------------------------------
@@ -830,10 +831,10 @@ function get_combo_index(combo_id) {
 
 function StartGame(){
     loop_event = Nb_Events - 1;  // only Afternoon & evening
-	index_char = index_char + 1;
-	if (CharacterToPlay[index_char] == EndOfChars) index_char = 1;
-	Selected_Char = CharacterToPlay[index_char];
-	set_pvar(SPVAR_5,index_char);
+    index_char = index_char + 1;
+    if (CharacterToPlay[index_char] == EndOfChars) index_char = 1;
+    Selected_Char = CharacterToPlay[index_char];
+    set_pvar(SPVAR_5,index_char);
 
     return (S_Start_Intro);
 }
@@ -843,13 +844,13 @@ function EndDay() {
     set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
     if (NumDay > Nb_Days) {
         NumDay  = 1;
-		set_pvar(SPVAR_6,NumDay);
+        set_pvar(SPVAR_6,NumDay);
         if (optionalSMovie == TRUE) return (S_Clear_Movie);
-        else						return (S_End_Vacation);
+        else                        return (S_End_Vacation);
     }
     else {
         set_val(TRACE_4,NumDay);
-		set_pvar(SPVAR_6,NumDay);
+        set_pvar(SPVAR_6,NumDay);
         return (S_Start_Day);
     }
 }
@@ -929,29 +930,74 @@ function Repeat_ThenGoto(button, times, speed, next) {
     return;
 }
 
-function ConfigHasChanged(){
-// try to detect if Items have changed in config  section
-// It's a BAD check sum code but it's not greedy on memory . 
-	i = 1;
-	v = Items[i];
-	while (Items[i] != EndofItems) {
-		v = v + abs(Items[i]); // sum every value 
-		i = i + 1;
-	}
-	
-	i=1;
-	while (CharacterToPlay[i] != EndOfChars) {
-		v = v + abs(CharacterToPlay[i]); // sum every value 
-		i = i + 1;
-	}
+function rightshift_bit(byte_to_shift) {
+    // emulate this
+    // checksum = (checksum >> 1) + ((checksum & 1) << 15);
+    // save bit0
+    bit0 = get_bits(byte_to_shift,0,1);
 
-	savedCheckSum = get_pvar(PVAR_15, 0, 255,0);
-	set_pvar(PVAR_15,v); // save it for next  Cronus reboot
+    //  save MSB/LSB
+    LSB  = get_bits(byte_to_shift,1,127); 
+    MSB  = get_bits(byte_to_shift,8,255);
 
-	return (v != savedCheckSum); // compare it with the EEPROM saved before
-	// == True if different
+    // right shift 
+    byte_to_shift = set_bits(LSB,MSB,7,127);
+    if (bit0) byte_to_shift = set_bit   (byte_to_shift,15);
+    else      byte_to_shift = clear_bit (byte_to_shift,15);
+
+    return byte_to_shift;
 }
 
+
+function ConfigHasChanged(){
+    // try to detect if Items have changed in config  section
+    // This checksum could be better but it's not greedy on memory . 
+
+    i = 1;
+    v = Items[i];
+    while (Items[i] != EndofItems) {
+        v = rightshift_bit(v);
+        v = v + abs(Items[i]); // sum every value 
+        i = i + 1;
+    }
+
+    i=1;
+    while (CharacterToPlay[i] != EndOfChars) {
+        v = rightshift_bit(v);
+        v = v + abs(CharacterToPlay[i]); // sum every value 
+        i = i + 1;
+    }
+
+    savedCheckSum = get_pvar(PVAR_15, 0, 255,0);
+    set_pvar(PVAR_15,v); // save it for next  Cronus reboot
+
+    return (v != savedCheckSum); // compare it with the EEPROM saved before
+    // == True if different
+}
+/*
+function ConfigHasChanged(){
+    // try to detect if Items have changed in config  section
+    // It's a BAD check sum code but it's not greedy on memory . 
+    i = 1;
+    v = Items[i];
+    while (Items[i] != EndofItems) {
+        v = v + abs(Items[i]); // sum every value 
+        i = i + 1;
+    }
+
+    i=1;
+    while (CharacterToPlay[i] != EndOfChars) {
+        v = v + abs(CharacterToPlay[i]); // sum every value 
+        i = i + 1;
+    }
+
+    savedCheckSum = get_pvar(PVAR_15, 0, 255,0);
+    set_pvar(PVAR_15,v); // save it for next  Cronus reboot
+
+    return (v != savedCheckSum); // compare it with the EEPROM saved before
+    // == True if different
+}
+*/
 function DebugCombo(combo_to_run,offset){
     Play = TRUE;
     run_State (combo_to_run,offset,S_IDLE);

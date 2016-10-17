@@ -1,0 +1,36 @@
+int bsdChecksumFromFile(FILE *fp) /* The file handle for input data */
+{
+    int ch;                       /* Each character read. */
+    int checksum = 0;             /* The checksum mod 2^16. */
+
+    while ((ch = getc(fp)) != EOF) {
+        checksum = (checksum >> 1) + ((checksum & 1) << 15);
+        checksum += ch;
+        checksum &= 0xffff;       /* Keep it within bounds. */
+    }
+    return checksum;
+}
+
+
+equivalent in Cronus max:
+
+function checksum{
+
+checksum = (checksum >> 1) + ((checksum & 1) << 15);
+equivalent in Cronus max:
+
+checksum  = get_bits(checksum, 1, 32767) + set_bit (checksum,15);
+
+bit0 =get_bits(checksum,0,1)
+lowBits = get_bits(checksum,1,127); 
+highBits = get_bits(checksum,8,255);
+
+checksum = set_bits(lowBits,highBits,7,127);
+if (bit0) checksum = set_bit (checksum,15);
+
+
+checksum =  checksum & 0xffff;
+Cronus max equivalent:
+checksum =  get_bits(checksum, 65535);
+
+}
