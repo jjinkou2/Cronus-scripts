@@ -126,24 +126,29 @@ v0.1    First version
   /*-----------------------*/
  /*     Variable used     */
 /*------------------------/-------------------------------------------------
-    EEPROM  
-    ------
-        PVAR_15 Checksum for item config        
-        SPVAR_2 index_item
-        SPVAR_3 CurrentItem
-        SPVAR_4 ItemPaper
-        SPVAR_5 index_char (CharacterSelected) 
-        SPVAR_6 Day number
-        SPVAR_7 Vacation number
 
-    TRACE  
-    ------
-        TRACE_1 step in combo (cb_xxx)
-        TRACE_2 Vacation    
-        TRACE_3 State
-        TRACE_4 Numday
-        TRACE_5 Free for debug
-        TRACE_6 Free for debug
++---------+-----------------+----------------------+--------------------------+
+| EEPROM  |    Used For     |      Saved at        |      every x times       |
++---------+-----------------+----------------------+--------------------------+
+| PVAR_15 | Checksum config | ConfigHasChanged()   | 1 vacation               |
+| SPVAR_2 | index_item      | exit_Shop_ThenGoto() | 3 vacations              |
+| SPVAR_3 | CurrentItem     | "                    | "                        |
+| SPVAR_4 | ItemPaper       | "                    | "                        |
+| SPVAR_5 | Index_char      | StartGame()          | 1 vacations              |
+| SPVAR_6 | Day number      | EndDay()             | 1 Day = 14x per vacation |
++---------+-----------------+----------------------+--------------------------+
+
++---------+-----------------+
+| TRACE   |    Used For     |
++---------+-----------------+
+| TRACE_1 | combo step      |
+| TRACE_2 | Vacation number |
+| TRACE_3 | State           |
+| TRACE_4 | Num Day         |
+| TRACE_5 | Free for debug  |
+| TRACE_6 | Free for debug  |
++---------+-----------------+
+
 ---------------------------------------------------------------------------*/
 
 
@@ -882,12 +887,10 @@ function exit_Shop_ThenGoto(next){
     // save values for next cronus init
     // TODO : review this code 
     
- if (TRUE) { // TODO: concat all SPVAR with set_bit
         set_pvar(SPVAR_2,index_item);
         set_pvar(SPVAR_3,CurrentItem);
         set_pvar(SPVAR_4,ItemPaper);
         set_val(TRACE_6,100);  // Trace_6 available for debug
-    }
 
         set_val (TRACE_5,ItemPaper);
     return;
