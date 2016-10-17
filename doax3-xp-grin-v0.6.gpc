@@ -212,8 +212,7 @@ define All                        = 255;
 define Nb_Vacations               = 25;
 
 // will try to buy at every X vacations
-// You can switch off buying if you put 
-// a greater value than Nb_Vacation (50). 
+// You can switch off buying if you put a greater value than Nb_Vacation (50). 
 define Buy_At_X                   = 2;
 
 

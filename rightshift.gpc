@@ -1,0 +1,32 @@
+int a = 10; 
+int b = 20;
+int c = 5;
+
+
+main {
+ set_val(TRACE_1, rightshift_bit(10)); // TRACE_1 = 5
+ set_val(TRACE_2, rightshift_bit(20)); // TRACE_1 = 10
+ set_val(TRACE_3, rightshift_bit(5)); // TRACE_1 = 2
+ set_val(TRACE_3, rightshift_bit(5)); // TRACE_1 = 2
+ set_val(TRACE_4, rightshift_bit(65535)); // TRACE_1 = -1 (65535)
+
+    
+}
+function rightshift_bit(byte_to_shift) {
+    // emulate this
+    // checksum = (checksum >> 1) + ((checksum & 1) << 15);
+    // save bit0
+    bit0 = get_bits(byte_to_shift,0,1);
+
+    //  save MSB/LSB
+    LSB  = get_bits(byte_to_shift,1,127); 
+    MSB  = get_bits(byte_to_shift,8,255);
+
+    // right shift 
+    byte_to_shift = set_bits(LSB,MSB,7,127);
+    if (bit0) byte_to_shift = set_bit   (byte_to_shift,15);
+    else      byte_to_shift = clear_bit (byte_to_shift,15);
+
+    return byte_to_shift;
+}
+
