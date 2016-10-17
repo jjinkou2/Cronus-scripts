@@ -15,8 +15,7 @@ Licence : MIT
 Author  : jinkou
 Credits : Huge thanks to contributors: Zaykho; Morganite
 
-Total byte size: 2938 bytes (71.73%)
-
+Total byte size: 2953 bytes (72.09%)
 
 
   /*-------------------------*/
@@ -90,14 +89,24 @@ Total byte size: 2938 bytes (71.73%)
 /*----------------------------------------------------------------------------*/
 
   /*-----------------------*/
- /*      backlog          */
+ /*      Backlog          */
 /*------------------------/-------------------------------------------------
-V0.6	New Feature: Select one or several characters you want to level up.
-		Now you can tell which characters to level up and the script will 
-		loop from every characters at each vacation. 
+V0.6	New Features: 
+		- Characters to level up are selectable
+		  Now you can tell which characters to level up and the script will 
+		  loop from every characters at each vacation. 
 
-        Important : Make sure the gifts inventories of your selected characters 
-		are empty.
+			Important : Make sure the gifts inventories of your selected 
+			----------- characters are empty.
+
+		- No more double items bought when switching on your Cronus. 
+		  Your config is saved in EEPROM. After switching off/On  Cronus max
+		  the script will remember which items it bought and it will buy the 
+		  next items in your config. 
+		  If config has changed, it will detect it and will restart buying from
+		  the beginning.
+		
+		 
 
 v 0.5.1   Huge boost in time thanks to Zaykho: Script now turns in 27min (was 
 		  around 47min before). 
@@ -262,8 +271,9 @@ int Tab1 = SandwichA, FromRow1 = SandwichA,    ToRow1 = SandwichI,   Paper1 = pa
 int EndofItems = 255;// dont' touch this one. 
 
 
-int optionalSMovie		= FALSE; // put it to TRUE if you suspect that your character will 
-						// end in S+ optionnal movie.FIXME: Is it really needed ? 
+int optionalSMovie		= FALSE; // put it to TRUE if you suspect that your 
+								 // character will end in S+ optionnal movie.
+								 // FIXME: Is it really needed ? 
 						
 /*-------------  End of configuration ---------------------------------------------*/
 
@@ -567,11 +577,8 @@ data(
 init {
     SwitchLED(BLUE);
 
-    //if (CharacterToPlay == All) Selected_Char = -2; // start with Kasumi
-
-    
 	// get what was already bought to avoid buying them again
-    if (itemConfigHasChanged()) { 
+    if (ConfigHasChanged()) { 
 		// there is a change in config => reload values from script
         set_val(TRACE_6,-50);  // Trace_6 available for debug
 		Item_Tab    = Items[1];
@@ -579,6 +586,8 @@ init {
         ItemToRow   = Items[3];
         if  (Items[4]== All)  ItemPaper = 1;
         else                  ItemPaper = Items[4];
+		index_char	= 0; // StartGame() will ++ it 	
+
 	}
 	else {
 	// config seems to be the same => reload  from EEPROM
@@ -590,12 +599,11 @@ init {
         ItemPaper		= get_pvar(SPVAR_4,0,10,1);
         //if  (ItemPaper == All)  ItemPaper = 1; // FIXME on paper = ALL
 
+		index_char		= get_pvar(SPVAR_5,1,9,1);
 	}
 	// load NumDay / event from EEPROM
-    index_char		= get_pvar(SPVAR_5,1,9,1);
 	NumDay			= get_pvar(SPVAR_6,1,14,1);
     set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
-    set_val(TRACE_2,loop_vacation);  // Trace 4 will display the # day
 }
 
 main {
@@ -921,7 +929,7 @@ function Repeat_ThenGoto(button, times, speed, next) {
     return;
 }
 
-function itemConfigHasChanged(){
+function ConfigHasChanged(){
 // try to detect if Items have changed in config  section
 // It's a BAD check sum code but it's not greedy on memory . 
 	i = 1;
@@ -930,9 +938,16 @@ function itemConfigHasChanged(){
 		v = v + abs(Items[i]); // sum every value 
 		i = i + 1;
 	}
-	savedCheckSum = get_pvar(PVAR_15, 0, 255,0);
 	
-	set_pvar(PVAR_15,v); // save it for next reboot
+	i=1;
+	while (CharacterToPlay[i] != EndOfChars) {
+		v = v + abs(CharacterToPlay[i]); // sum every value 
+		i = i + 1;
+	}
+
+	savedCheckSum = get_pvar(PVAR_15, 0, 255,0);
+	set_pvar(PVAR_15,v); // save it for next  Cronus reboot
+
 	return (v != savedCheckSum); // compare it with the EEPROM saved before
 	// == True if different
 }
