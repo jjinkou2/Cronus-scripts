@@ -124,11 +124,14 @@ v0.1    First version
 | SPVAR_2 | purchase_nb     | exit_Shop_ThenGoto() | 1 at vacation = X     |
 +---------+-----------------+----------------------+-----------------------+
 
-X = Buy_At_X; often set to 3;
+Cronus Lifespan:
+----------------
+X = Buy_At_X; often set to 3.
 3 EEPROM write every 10 vacations.
-Each vacations = 30 min => 3 EEPROM write per 5 hours
-Cronus is guaranteed for 100 000 Writes 
-=> 20 years running this script before Cronus dies. 
+Each vacations = 30 min => 3 EEPROM write per 5 hours.
+Cronus is guaranteed for 100 000 Writes.
+
+=> 20 years running continuously this script before Cronus dies.
 
 +---------+-----------------+
 | TRACE   |    Used For     |
