@@ -72,19 +72,21 @@ Total byte size: 3041 bytes (74.24%)
     
         Logging and tracing: 
         --------------------
+        - TRACE_1 displays the index of the step inside §DataSet (PS4_CIRCLE, 20)
         - TRACE_3 displays the state where the script is.
-          Look at §State_Definition for the matching state
+                  Look at §State_Definition for the matching state
     
         - TRACE_4 displays the day number. If the script is stuck or if something
-          goes wrong, stop the script, manually move the game to the next day
-          then adjust the day number inside TRACE_4 by pressing L1.
+                  goes wrong, stop the script, manually move the game to the next day
+                  then adjust the day number inside TRACE_4 by pressing L1.
     
-        - If you want to test a specific set of Data, use the function DebugCombo
-          and press L2.
-    
-        - Press R3 to test a whole State
-    
-        - TRACE_1 displays the index of the step inside §DataSet (PS4_CIRCLE, 20)
+        - Press R3 to test a whole State or a combo 
+            - if you want to test a whole state, write this where needed
+                if (State == S_Debug) run_State(COMBO_TORUN, 0, NEXT_STATE_TOGO);
+
+            - if you want to test just a combo just do this
+                if (State == S_Debug) run_State(COMBO_TOTEST, 0, S_IDLE);
+
 
 /*----------------------------------------------------------------------------*/
 
@@ -115,12 +117,18 @@ v0.1    First version
  /*     Variable used     */
 /*------------------------/-------------------------------------------------
 
-+---------+-----------------+----------------------+--------------------------+
-| EEPROM  |    Used For     |      Saved at        |      every x times       |
-+---------+-----------------+----------------------+--------------------------+
-| PVAR_15 | Checksum config | ConfigHasChanged()   | 1 Cronus Reboot          |
-| SPVAR_2 | purchase_nb     | exit_Shop_ThenGoto() | 3 vacations              |
-+---------+-----------------+----------------------+--------------------------+
++---------+-----------------+----------------------+-----------------------+
+| EEPROM  |    Used For     |      Saved at        |      every x times    |
++---------+-----------------+----------------------+-----------------------+
+| PVAR_15 | Checksum config | ConfigHasChanged()   | 1 at Cronus Reboot    |
+| SPVAR_2 | purchase_nb     | exit_Shop_ThenGoto() | 1 at vacation = X     |
++---------+-----------------+----------------------+-----------------------+
+
+X = Buy_At_X; often set to 3;
+3 EEPROM write every 10 vacations.
+Each vacations = 30 min => 3 EEPROM write per 5 hours
+Cronus is guaranteed for 100 000 Writes 
+=> 20 years running this script before Cronus dies. 
 
 +---------+-----------------+
 | TRACE   |    Used For     |
@@ -578,7 +586,6 @@ init {
         if  (Items[4]== All)  ItemPaper = 1;
         else                  ItemPaper = Items[4];
         index_char  = 0; // StartGame() will ++ it  
-
     }
     else {
     // config seems to be the same => reload  from EEPROM
@@ -592,7 +599,6 @@ init {
         get_CurrentItem();
         index_char  = 0; // StartGame() will ++ it  
     }
-    // load NumDay / event from EEPROM
     set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
 }
 
@@ -707,8 +713,8 @@ main {
         if (State == S_Buy_Item)        run_State(cb_buy_item, 0, S_Select_Paper);
         if (State == S_Select_Paper)    Repeat_ThenGoto(PS4_RIGHT, ItemPaper, 2, S_Wrap);
         if (State == S_Wrap)            run_State(cb_paper, 0, S_Exit_Shop);
-        if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Throw_Gift); //comment this to test items to buy
-        //if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Debug);  // uncomment this to test items to buy
+        //if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Throw_Gift); //comment this to test items to buy
+        if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Debug);  // uncomment this to test items to buy
 
         // End of hotel
         if (State == S_Throw_Gift)      run_State(cb_throw_gift, 0, S_Go_Bed);
@@ -922,12 +928,6 @@ function ConfigHasChanged(){
         i = i + 4;
     }
 
-    i=1;
-    while (CharacterToPlay[i] != EndOfChars) {
-        v = v + CharacterToPlay[i]; // sum every value 
-        i = i + 1;
-    }
-
     savedCheckSum = get_pvar(PVAR_15, 0, 255,0);
     set_pvar(PVAR_15,v); // save it for next  Cronus reboot
 
@@ -955,19 +955,20 @@ function get_IndexItem() {
 }
 
 function get_CurrentItem() {
-    ItemToRow       = Items[index_item + 2];
     CurrentItem     = Items[index_item + 1]; // set CurrentItem at FromRowX
-    indexCurrent    = purchase_nb - NbPrevious; // find index current in range [FromRowX , ToRowX]
+    indexCurrent    = abs(purchase_nb - NbPrevious); // find index current in range [FromRowX , ToRowX]
+    if (indexCurrent != 0) {
+        if (abs(CurrentItem - ItemToRow) != 0)  {
+            if (CurrentItem <= ItemToRow) stepRow =  1; // next item is above
+            else                          stepRow = -1; //              below
 
-    if (abs(CurrentItem - ItemToRow) != 0)  {
-        if (CurrentItem <= ItemToRow) stepRow =  1; // next item is above
-        else                          stepRow = -1; //              below
-
-        i=1;
-        while (i<indexCurrent) {
-            CurrentItem = CurrentItem + stepRow;
-            i = i + 1;
+            i=1;
+            while (i<indexCurrent) {
+                CurrentItem = CurrentItem + stepRow;
+                i = i + 1;
+            }
         }
+        else CurrentItem = Items[index_item + 1];
     }
     else CurrentItem = Items[index_item + 1];
 
