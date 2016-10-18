@@ -15,7 +15,7 @@ Licence : MIT
 Author  : jinkou
 Credits : Huge thanks to contributors: Zaykho; Morganite
 
-Total byte size: 3041 bytes (74.24%)
+Total byte size: 3167 bytes (77.32%)
 
 
   /*-------------------------*/
@@ -224,8 +224,8 @@ define Buy_At_X                   = 2;
 // ----------  selected characters are empty.
 int CharacterToPlay  // Don't touch this one
 
-int Character0                  = Kasumi;
-//int Character1                    = Momiji;
+//int Character0                  = Kasumi;
+int Character1                    = Momiji;
 //int Character2                    = Hitomi;
 int Character3                  = Helena;
 //int Character4                    = MarieRose;
@@ -264,8 +264,8 @@ int Items;// dont' touch this one.
 
 // perso
 //int Tab0 = 0, FromRow0 = -13,    ToRow0 = AsariI,   Paper0 = paper_Silver;  
-int Tab1 = 0, FromRow1 = SandwichA,    ToRow1 = SandwichI,   Paper1 = paper_Silver;
-
+//int Tab1 = 0, FromRow1 = MummyA,    ToRow1 = MummyI,   Paper1 = paper_Silver;
+int Tab2 = 0, FromRow2 = SandwichA, ToRow2 = SandwichI,  Paper2 = paper_Silver;
 
 int EndofItems = 255;// dont' touch this one. 
 
@@ -582,7 +582,7 @@ init {
     // get what was already bought to avoid buying them again
     if (ConfigHasChanged()) { 
         // there is a change in config => reload values from script
-        set_val(TRACE_6,-50);  // Trace_6 available for debug
+
         Item_Tab    = Items[1];
         CurrentItem = Items[2];
         ItemToRow   = Items[3];
@@ -592,8 +592,7 @@ init {
     }
     else {
     // config seems to be the same => reload  from EEPROM
-        set_val(TRACE_6,50);  // Trace_6 available for debug
-        purchase_nb     = get_pvar(SPVAR_2,0,20,0);
+        set_val(TRACE_6,51);  // Trace_6 available for debug
         index_item      = get_IndexItem();
         Item_Tab        = Items[index_item];
         ItemToRow       = Items[index_item + 2];
@@ -716,8 +715,8 @@ main {
         if (State == S_Buy_Item)        run_State(cb_buy_item, 0, S_Select_Paper);
         if (State == S_Select_Paper)    Repeat_ThenGoto(PS4_RIGHT, ItemPaper, 2, S_Wrap);
         if (State == S_Wrap)            run_State(cb_paper, 0, S_Exit_Shop);
-        //if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Throw_Gift); //comment this to test items to buy
-        if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Debug);  // uncomment this to test items to buy
+        if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Throw_Gift); //comment this to test items to buy
+        //if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Debug);  // uncomment this to test items to buy
 
         // End of hotel
         if (State == S_Throw_Gift)      run_State(cb_throw_gift, 0, S_Go_Bed);
@@ -878,9 +877,9 @@ function exit_Shop_ThenGoto(next){
     purchase_nb = purchase_nb + 1;
     // save values for next cronus init
     // TODO : review this code 
-        
+     		set_val(TRACE_5,purchase_nb);   
         set_pvar(SPVAR_2,purchase_nb);
-        set_val(TRACE_6,100);  // Trace_6 available for debug
+
     return;
 }
 
@@ -924,22 +923,25 @@ function ConfigHasChanged(){
     // try to detect if Items have changed in config  section
     // It's a BAD check sum code but it's not greedy on memory . 
     i = 1;
-    v = Items[i];
+   // v = Items[i];
+        v = 15;
     while (Items[i] != EndofItems) {
         v = v + i + 2*Items[i] + 3*Items[i + 1]
               + 4*Items[i + 2] + 5*Items[i + 3]; // sum every value 
         i = i + 4;
     }
 
-    savedCheckSum = get_pvar(PVAR_15, 0, 255,0);
+	
+    savedCheckSum = get_pvar(PVAR_15, -32768, 32767,0);
     set_pvar(PVAR_15,v); // save it for next  Cronus reboot
-
+        set_val(TRACE_6,v);  // Trace_6 available for debug
     return (v != savedCheckSum); // compare it with the EEPROM saved before
     // == True if different
 }
  
 function get_IndexItem() {
     i=1;
+    purchase_nb     = get_pvar(SPVAR_2,0,20,0);
     while (Items[i]!=EndofItems) {
            //  Paper     != All                           (ToRowX     - FromRowX    + 1)
         if (Items[i + 3] != All) NbItem = NbPrevious + abs(Items[i + 2] - Items[i + 1]) + 1;
@@ -959,19 +961,21 @@ function get_IndexItem() {
 
 function get_CurrentItem() {
     CurrentItem     = Items[index_item + 1]; // set CurrentItem at FromRowX
+
     indexCurrent    = abs(purchase_nb - NbPrevious); // find index current in range [FromRowX , ToRowX]
+
     if (indexCurrent != 0) {
         if (abs(CurrentItem - ItemToRow) != 0)  {
             if (CurrentItem <= ItemToRow) stepRow =  1; // next item is above
             else                          stepRow = -1; //              below
 
             i=1;
-            while (i<indexCurrent) {
+            while (i<=indexCurrent) {
                 CurrentItem = CurrentItem + stepRow;
                 i = i + 1;
             }
         }
-        else CurrentItem = Items[index_item + 1];
+        else  CurrentItem = Items[index_item + 1];
     }
     else CurrentItem = Items[index_item + 1];
 
