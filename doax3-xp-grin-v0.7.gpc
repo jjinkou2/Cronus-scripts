@@ -15,7 +15,7 @@ Licence : MIT
 Author  : jinkou
 Credits : Huge thanks to contributors: Zaykho; Morganite
 
-Total byte size: 3167 bytes (77.32%)
+Total byte size: 3336 bytes (81.45%)
 
 
   /*-------------------------*/
@@ -43,10 +43,10 @@ Total byte size: 3167 bytes (77.32%)
        (look at TRACE_4 which displays the day number)
 
        Press L2 to start the next RCQ.
-    
+
     5) Normal Ending of script: Led is BLUE and the ending screen is
        Character's excitement screen (with maybe notifications).
-       Otherwise : look at Troubleshooting. 
+       Otherwise : look at Troubleshooting.
 
     Color Led:
     ----------
@@ -58,25 +58,25 @@ Total byte size: 3167 bytes (77.32%)
 
     Troubleshooting:
     ----------------
-        Script doing wrong things: 
+        Script doing wrong things:
         --------------------------
         - If you find the script sitting in the closet, it's because you didn't
           clear the gift inventory before you started.
-          
+
         - If you find your girl at the pool doing relax movie, it's because you 
           didn't synchronise the day number. you are at day 1 in the script. 
           Look below to increment the day number
-    
-        Logging and tracing: 
+
+        Logging and tracing:
         --------------------
         - TRACE_1 displays the index of the step inside §DataSet (PS4_CIRCLE, 20)
         - TRACE_3 displays the state where the script is.
                   Look at §State_Definition for the matching state
-    
+
         - TRACE_4 displays the day number. If the script is stuck or if something
                   goes wrong, stop the script, manually move the game to the next day
                   then adjust the day number inside TRACE_4 by pressing L1.
-    
+
         - Press R3 to test a whole State or a combo 
             - if you want to test a whole state, write this where needed
                 if (State == S_Debug) run_State(COMBO_TORUN, 0, NEXT_STATE_TOGO);
@@ -90,15 +90,17 @@ Total byte size: 3167 bytes (77.32%)
   /*-----------------------*/
  /*      Backlog          */
 /*------------------------/-------------------------------------------------
-V0.7    New Feature: 
-        - No more double items bought when switching on your Cronus. 
+V0.7    New Features: 
+        - No more double items bought when switching your Cronus On. 
           Your config is saved in EEPROM. After switching off/On  Cronus max
-          the script will remember which items it bought and it will buy the 
+          the script will remember which items were bought and it will buy the 
           next items in your config. 
           If config has changed, it will detect it and will restart buying from
           the beginning.
 
         - Press L2 if you want to re-launch the script at the next RCQ.
+        - You can take a partner (not fully tested) see §config
+        - Try to deal with end Save bug see §config
 
 V0.6    New Feature: Characters to level up are selectable
 v 0.5.1 Huge boost in time thanks to Zaykho:
@@ -116,12 +118,12 @@ v0.1    First version
  /*     Variable used     */
 /*------------------------/-------------------------------------------------
 
-+---------+-----------------+----------------------+-----------------------+
-| EEPROM  |    Used For     |      Saved at        |      every x times    |
-+---------+-----------------+----------------------+-----------------------+
-| PVAR_15 | Checksum config | ConfigHasChanged()   | 1 at Cronus Reboot    |
-| SPVAR_2 | purchase_nb     | exit_Shop_ThenGoto() | 1 at vacation = X     |
-+---------+-----------------+----------------------+-----------------------+
++---------+-----------------+----------------------+---------------------+
+| EEPROM  |    Used For      |      Saved at        |    Every X times     |
++---------+-----------------+----------------------+---------------------+
+| PVAR_15 | Checksum config  | ConfigHasChanged()   | 1 at Cronus Reboot   |
+| SPVAR_2 | purchase_nb      | exit_Shop_ThenGoto() | 1 at vacation = X    |
++---------+-----------------+----------------------+---------------------+
 
 Cronus Lifespan:
 ----------------
@@ -132,16 +134,16 @@ Cronus is guaranteed for 100 000 Writes.
 
 => 20 years running continuously this script before Cronus dies.
 
-+---------+-----------------+
-| TRACE   |    Used For     |
-+---------+-----------------+
-| TRACE_1 | combo step      |
-| TRACE_2 | Vacation number |
-| TRACE_3 | State           |
-| TRACE_4 | Num Day         |
-| TRACE_5 | Event Nb        |
-| TRACE_6 | Free for debug  |
-+---------+-----------------+
++---------+-----------------------+
+| TRACE   |       Used For         |
++---------+-----------------------+
+| TRACE_1 | combo step             |
+| TRACE_2 | Vacation number        |
+| TRACE_3 | State                  |
+| TRACE_4 | Num Day                |
+| TRACE_5 | Event Nb/purchase_nb   |
+| TRACE_6 | Free for debug         |
++---------+-----------------------+
 
 ---------------------------------------------------------------------------*/
 
@@ -203,24 +205,31 @@ define All                        = 255;
 
 
   /*------------------------------------*/
- /*  Configuration      (§Config)       */
+ /*  Configuration      (§Config)      */
 /*-------------------------------------/-----------------------------*/
 
+// --------------------------
 // number of Vacation to loop
 // --------------------------
+
 define Nb_Vacations               = 25;
+
 
 // will try to buy at every X vacations
 // You can switch off buying if you put a greater value than Nb_Vacation (50). 
+
 define Buy_At_X                   = 2;
 
 
+// ----------------------
 // Characters to Level up
 // ----------------------
+
 // Select one or several Characters to level up,
 // comment / uncomment the characters you want 
 // Important : Make sure the gifts inventories of your 
 // ----------  selected characters are empty.
+
 int CharacterToPlay  // Don't touch this one
 
 //int Character0                  = Kasumi;
@@ -237,18 +246,22 @@ int EndOfChars = 255  // Don't touch this one
 
 
 
+int Items;// dont' touch this one.
+
+// -------------------------
 // Items you want to collect
 // -------------------------
+
 // It's a range like
 //  [MummyA, ...., MummyH] for Helena
 //  [Ticket1 ...Ticket3] for All
 //  [Pose ticket] for honoka
 //  Possible values are pre-define Values (see above: list of item) 
 //                      or negative/positive numbers (see example below)
-int Items;// dont' touch this one.
 
 // comment/uncomment / modify / add what you want
 
+// Some Examples
 // take all Asari in silver
 //int Tab0 = 0, FromRow0 = AsariaA,    ToRow0 = AsariI,   Paper0 = paper_Silver;  
  // only one for Helena
@@ -263,21 +276,48 @@ int Items;// dont' touch this one.
 
 // perso
 //int Tab0 = 0, FromRow0 = -13,    ToRow0 = AsariI,   Paper0 = paper_Silver;  
-//int Tab1 = 0, FromRow1 = MummyA,    ToRow1 = MummyI,   Paper1 = paper_Silver;
-int Tab2 = 0, FromRow2 = SandwichA, ToRow2 = SandwichI,  Paper2 = paper_Silver;
+
+int Tab2 = 0, FromRow2 = 15, ToRow2 = 18,  Paper2 = paper_Silver;
+int Tab1 = 0, FromRow1 = 7,    ToRow1 = 7,   Paper1 = All;
 
 int EndofItems = 255;// dont' touch this one. 
 
+// ------------------
 
-define optionalSMovie      = FALSE; // put it to TRUE if you suspect that your 
-                                 // character will end in S+ optionnal movie.
-                                 // FIXME: Is it really needed ? 
 
-define takePartner         = FALSE; // set to TRUE if you want your girl to 
-                                    // play with a partner. not fully tested
-                                    // may break the script. 
+
+// --------
+// S+ Movie
+// --------
+// Set to TRUE if you suspect that your character will end in S+ movie.
+
+define optionalSMovie       = FALSE;
+
+
+// --------
+// Partner
+// --------
+// Set to TRUE if you want your girl to play with a partner. Not fully tested
+
+define takePartner          = FALSE;
+
+
+// ---------------
+// Troubleshooting
+// ---------------
+// set it to TRUE if you meet the deadly save bug at vacation ending
+// Until TN or Sony correct this random bug, this is a not-always working solution
+
+define SAVE_BUG_IS_PRESENT  = FALSE;
+define Nb_Cross             = 5; // how many times repeating cross (x 200ms)
+
+
+
 
 /*-------------  End of configuration ---------------------------------------------*/
+
+
+
 
 
   /*-----------------------*/
@@ -290,7 +330,7 @@ define Nb_Notifs                    = 20;
 
 
   /*---------------------------------------*/
- /* States           (§State_Definition)   */
+ /* States          (§State_Definition)   */
 /*---------------------------------------*/
 
 define S_Play_Combo                 = 1;
@@ -302,6 +342,7 @@ define S_Partner                    = 13;
 define S_End_Vacation               = 14;
 define S_Return_Title               = 15;
 define S_Exit_Mission               = 16;
+define S_SAVEBUG                    = 17;
 
 define S_Start_Day                  = 20;
 define S_End_Day                    = 21;
@@ -368,7 +409,7 @@ define RED_BLINK                    = 3;
 
 //-----------------------------------------------------
 
-  /*-----------------------*/
+  /*------------------------*/
  /*      Variables         */
 /*------------------------*/
 
@@ -458,7 +499,7 @@ data(
 //      Start Vacation
     cb_start_vacation,
         PS4_OPTIONS,     20,         //  skip character intro
-        PS4_OPTIONS,     240,         //  skip character intro
+        PS4_OPTIONS,     240,        //  skip character intro
         PS4_OPTIONS,     50,         //  wait longer
     EOC,
 
@@ -557,16 +598,16 @@ data(
     cb_go_bed,
         PS4_DOWN,        1,         // Start go to bed
         PS4_DOWN,        1,         //
-        PS4_CIRCLE,      200,         // waiting for end of girl's speach
-        PS4_CIRCLE,      200,        // go to new morning
+        PS4_CIRCLE,      200,       // waiting for end of girl's speach
+        PS4_CIRCLE,      200,       // go to new morning
     EOC,
 
 
 //       End Vacation
     cb_end_vacation,
         PS4_CIRCLE,      50,         //
-        PS4_OPTIONS,     20,         //
-        PS4_OPTIONS,     100,         //
+        PS4_OPTIONS,     20,         // skip movie
+        PS4_OPTIONS,     100,        //
         PS4_CIRCLE,      50,         //
     EOC,
 
@@ -576,7 +617,7 @@ data(
 
 // End of Data
     EOD
-);                           // end of combo2
+);                           // end of DataSet
 
 
 //-----------------------------------------------------
@@ -590,7 +631,7 @@ init {
 
     // get what was already bought to avoid buying them again
     if (ConfigHasChanged()) { 
-        // there is a change in config => reload values from script
+        // There is a change in config => reload values from script
 
         Item_Tab    = Items[1];
         CurrentItem = Items[2];
@@ -600,13 +641,14 @@ init {
         index_char  = 0; // StartGame() will ++ it  
     }
     else {
-    // config seems to be the same => reload  from EEPROM
+    // Config seems to be the same => reload  from EEPROM
         set_val(TRACE_6,51);  // Trace_6 available for debug
         index_item      = get_IndexItem();
         Item_Tab        = Items[index_item];
         ItemToRow       = Items[index_item + 2];
         set_CurrentItem_AndPaper();
         index_char  = 0; // StartGame() will ++ it  
+        set_val(TRACE_5,purchase_nb);
     }
     set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
 }
@@ -719,16 +761,20 @@ main {
         // Shopping Items at X vacations
         if (State == S_Owner_Shop)      run_State(cb_owner_shop, 0, S_Select_Tab);
 
-        if (State == S_Debug)           run_State(cb_owner_shop, 12, S_Select_Tab); //uncomment this to test items to buy
 
+        if (State == S_Debug)           run_State(cb_owner_shop, 12, S_Select_Tab); //uncomment this to test items to buy
+        // ============== Start loop Debug ===============================      
         if (State == S_Select_Tab)      Repeat_ThenGoto(PS4_RIGHT, Item_Tab, 2, S_Select_Item);
         if (State == S_Select_Item)     select_Item_ThenGoto(S_Buy_Item);
         if (State == S_Buy_Item)        run_State(cb_buy_item, 0, S_Select_Paper);
-        if (State == S_Select_Paper)    Repeat_ThenGoto(PS4_RIGHT, ItemPaper, 2, S_Wrap);
-        if (State == S_Wrap)            run_State(cb_paper, 0, S_Exit_Shop);
-        if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Throw_Gift); //comment this to test items to buy
-        //if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Debug);  // uncomment this to test items to buy
+        if (State == S_Select_Paper)    Repeat_ThenGoto(PS4_RIGHT, ItemPaper, 2, S_Wrap);      
+        //if (State == S_Debug)           run_State(cb_owner_shop, 12, S_Wrap); //uncomment this to test items to buy        
+        if (State == S_Wrap)            run_State(cb_paper, 0, S_Exit_Shop);      
+        // ============== END loop Debug ===============================
+        if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Debug);  // uncomment this to test items to buy
 
+        //if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Throw_Gift); //comment this to test items to buy
+        
         // End of hotel
         if (State == S_Throw_Gift)      run_State(cb_throw_gift, 0, S_Go_Bed);
         if (State == S_Go_Bed)          run_State(cb_go_bed, 0, S_End_Day);
@@ -746,7 +792,14 @@ main {
             else                                run_State(cb_end_vacation, 0, S_End_Game);
         }
 
-        if (State == S_Clear_Vacation)  Repeat_ThenGoto(PS4_CIRCLE,Nb_Notifs, 4, S_Return_Title);
+        if (State == S_Clear_Vacation)  Repeat_ThenGoto(PS4_CIRCLE,Nb_Notifs, 4, S_SAVEBUG);
+
+        if (State == S_SAVEBUG)  {      
+                                        // Adjust number and waiting time (4x50ms)
+            if (SAVE_BUG_IS_PRESENT)    Repeat_ThenGoto(PS4_CROSS,Nb_Cross, 4, S_Return_Title); 
+            else                        State = S_Return_Title;
+        }
+
         if (State == S_Return_Title)    run_State(cb_return_title, 0, S_Start_Game);
 
         // End of vacation loop
@@ -794,8 +847,8 @@ combo cb_Repeat_Button{
     loop_button = loop_button + 1;
 }
 
-/*-----------------------*/
-/*      Functions         */
+  /*------------------------*/
+ /*      Functions         */
 /*------------------------*/
 
 function SwitchLED(Color){
@@ -877,19 +930,20 @@ function select_Item_ThenGoto (next){
 
 function exit_Shop_ThenGoto(next){
     if (Items[index_item + 3] == All) {
-        if (ItemPaper%10 == 0){
+        ItemPaper   = ItemPaper + 1;
+        if (ItemPaper == 10){
             ItemPaper =  1;
             next_Item();
         }
-        else  ItemPaper   = ItemPaper % 10 + 1;
+        // else  ItemPaper   = ItemPaper + 1;
     }
     else next_Item();
     State = next;
     purchase_nb = purchase_nb + 1;
+
     // save values for next cronus init
-    // TODO : review this code 
-            set_val(TRACE_5,purchase_nb);   
-        set_pvar(SPVAR_2,purchase_nb);
+    set_val(TRACE_5,purchase_nb);
+    set_pvar(SPVAR_2,purchase_nb);
 
     return;
 }
@@ -907,12 +961,10 @@ function next_Item(){
         Item_Tab    = Items[index_item];
         CurrentItem = Items[index_item + 1];
         ItemToRow   = Items[index_item + 2];
-        ItemPaper   = Items[index_item + 3];
 
-        if  (ItemPaper == All)  ItemPaper = 1;
-        else                    ItemPaper = Items[index_item + 3];
+        if  (Items[index_item + 3] == All)  ItemPaper = 1;
+        else                                ItemPaper = Items[index_item + 3];
     }
-
     return;
 }
 
@@ -937,54 +989,55 @@ function ConfigHasChanged(){
     v = Items[i];
     while (Items[i] != EndofItems) {
         v = v + i + 2*Items[i] + 3*Items[i + 1]
-              + 4*Items[i + 2] + 5*Items[i + 3]; // sum every value 
+            + 4*Items[i + 2] + 5*Items[i + 3]; // sum every value 
         i = i + 4;
     }
 
     savedCheckSum = get_pvar(PVAR_15, -32768, 32767,0);
     set_pvar(PVAR_15,v); // save it for next  Cronus reboot
-        set_val(TRACE_6,v);  // Trace_6 available for debug
     return (v != savedCheckSum); // compare it with the EEPROM saved before
     // == True if different
 }
 
 function get_IndexItem() {
-    i=1;
-    purchase_nb     = get_pvar(SPVAR_2,0,20,0);
-    while (Items[i]!=EndofItems) {
-           //  Paper     != All                           (ToRowX     - FromRowX    + 1)
+    i = 1;
+    purchase_nb = get_pvar(SPVAR_2,0,20,0);
+
+    //  Paper    != All               ToRowX   - FromRowX
+    if (Items[4] != All) NbItem = abs(Items[3] - Items[2]) + 1;
+    //each item are wrapped into 9 colors
+    else NbItem = 9 * abs((Items[3] - Items[2]) + 1);
+
+    while (purchase_nb > NbItem) {
+        i = i + 4;
+        if (Items[i] == EndofItems) i = 1;
+        NbPrevious = NbItem;
+
         if (Items[i + 3] != All) NbItem = NbPrevious + abs(Items[i + 2] - Items[i + 1]) + 1;
-        //each item wrapped in 9 colors
         else NbItem = NbPrevious + abs((Items[i + 2] - Items[i + 1]) + 1) * 9;
-
-        if (purchase_nb <= NbItem) break;
-        else  {
-            i = i + 4;
-            NbPrevious = NbItem;
-        }
     }
-
-    if (Items[i] != EndofItems) return i;
-    else                        return 1;
+    return i;
 }
 
 function set_CurrentItem_AndPaper() {
     CurrentItem  = Items[index_item + 1]; // set CurrentItem at FromRowX
-    ItemPaper    = Items[index_item + 4];
+    ItemPaper    = Items[index_item + 3];
 
-    indexCurrent = abs(purchase_nb - NbPrevious); // find index current in range [FromRowX , ToRowX]
-                                                     // absolute value only for security
+    // find index of currentItem in range [FromRowX , ToRowX]
+    indexCurrent = abs(purchase_nb - NbPrevious); // absolute value for safety
+
     if (ItemPaper == All) {
         ItemPaper    = indexCurrent % 9;
         indexCurrent = indexCurrent / 9;
     }
+
     if (indexCurrent != 0) {
         if (abs(CurrentItem - ItemToRow) != 0)  {
             if (CurrentItem <= ItemToRow) stepRow =  1; // next item is above
             else                          stepRow = -1; //              below
 
             i=1;
-            while (i<=indexCurrent) {
+            while (i < indexCurrent) {
                 CurrentItem = CurrentItem + stepRow;
                 i = i + 1;
             }
@@ -992,5 +1045,7 @@ function set_CurrentItem_AndPaper() {
         else  CurrentItem = Items[index_item + 1];
     }
     else CurrentItem = Items[index_item + 1];
+        set_val(TRACE_6,CurrentItem);  // Trace_6 available for debug
     return;
 }
+
