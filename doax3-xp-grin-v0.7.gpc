@@ -41,6 +41,8 @@ Total byte size: 3167 bytes (77.32%)
 
        Note: You may have to resynchronise the day number by pressing several L1
        (look at TRACE_4 which displays the day number)
+
+       Press L2 to start the next RCQ.
     
     5) Normal Ending of script: Led is BLUE and the ending screen is
        Character's excitement screen (with maybe notifications).
@@ -49,15 +51,10 @@ Total byte size: 3167 bytes (77.32%)
     Color Led:
     ----------
         - BLUE              : Script is Stopped
-                              Only L1/Triangle/R2 are possible
-
-        - RED               : Script is Paused
-                              Only Triangle is possible.
-                              Note: Don't play an event. You can do anything but
-                              go back exactly where you left the script.
+                              Only L1/L2/R2 are possible
 
         - GREEN             : Script is Playing
-                              R1 to stop and Triangle to pause.
+                              R1 to stop.
 
     Troubleshooting:
     ----------------
@@ -100,6 +97,8 @@ V0.7    New Feature:
           next items in your config. 
           If config has changed, it will detect it and will restart buying from
           the beginning.
+
+        - Press L2 if you want to re-launch the script at the next RCQ.
 
 V0.6    New Feature: Characters to level up are selectable
 v 0.5.1 Huge boost in time thanks to Zaykho:
@@ -270,9 +269,13 @@ int Tab2 = 0, FromRow2 = SandwichA, ToRow2 = SandwichI,  Paper2 = paper_Silver;
 int EndofItems = 255;// dont' touch this one. 
 
 
-int optionalSMovie      = FALSE; // put it to TRUE if you suspect that your 
+define optionalSMovie      = FALSE; // put it to TRUE if you suspect that your 
                                  // character will end in S+ optionnal movie.
                                  // FIXME: Is it really needed ? 
+
+define takePartner         = FALSE; // set to TRUE if you want your girl to 
+                                    // play with a partner. not fully tested
+                                    // may break the script. 
 
 /*-------------  End of configuration ---------------------------------------------*/
 
@@ -295,9 +298,10 @@ define S_Play_Combo                 = 1;
 define S_Start_Intro                = 10;
 define S_Select_Char                = 11;
 define S_Start_Vacation             = 12;
-define S_End_Vacation               = 13;
-define S_Return_Title               = 14;
-define S_Exit_Mission               = 15;
+define S_Partner                    = 13;
+define S_End_Vacation               = 14;
+define S_Return_Title               = 15;
+define S_Exit_Mission               = 16;
 
 define S_Start_Day                  = 20;
 define S_End_Day                    = 21;
@@ -334,6 +338,7 @@ define cb_intro                    = 1;
 define cb_left_char                = 5;
 define cb_right_char               = 10;
 define cb_start_vacation           = 15;
+define cb_partner                  = 16;
 define cb_quit_mission             = 21;
 define cb_select_rock_stage        = 25;
 define cb_abort_rock_play          = 30;
@@ -455,11 +460,15 @@ data(
         PS4_OPTIONS,     20,         //  skip character intro
         PS4_OPTIONS,     240,         //  skip character intro
         PS4_OPTIONS,     50,         //  wait longer
-        PS4_LEFT,        5,         //  don't take a partner // TODO : Will try with a partner
-        PS4_CIRCLE,      240,         //
-
     EOC,
 
+//      Partner
+    cb_partner,
+        PS4_LEFT,        5,         //  don't take a partner
+        PS4_CIRCLE,      240,       //  offset = 2 for taking a partner
+    EOC,
+
+//      RCQ
     cb_quit_mission,
         PS4_LEFT,       1,         //  from Rock stage
         PS4_LEFT,       1,         //  offset from day 1 
@@ -548,7 +557,7 @@ data(
     cb_go_bed,
         PS4_DOWN,        1,         // Start go to bed
         PS4_DOWN,        1,         //
-        PS4_CIRCLE,      100,         //
+        PS4_CIRCLE,      200,         // waiting for end of girl's speach
         PS4_CIRCLE,      200,        // go to new morning
     EOC,
 
@@ -596,9 +605,7 @@ init {
         index_item      = get_IndexItem();
         Item_Tab        = Items[index_item];
         ItemToRow       = Items[index_item + 2];
-        //if  (ItemPaper == All)  ItemPaper = 1; // FIXME on paper = ALL
-        ItemPaper       = paper_Silver;
-        get_CurrentItem();
+        set_CurrentItem_AndPaper();
         index_char  = 0; // StartGame() will ++ it  
     }
     set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
@@ -643,10 +650,12 @@ main {
             SwitchLED(GREEN);
         }
 
-        // L2 to adjust the event
+        // L2 to start at the next RCQ
         if (event_press(PS4_L2)) {
             loop_event = loop_event % Nb_Events + 1 ;// adjust the event if script is stopped
             set_val(TRACE_5,loop_event);
+            Play  = TRUE;
+            State = S_Start_RockPlay;
         }
 
         // R3 to test a whole State
@@ -674,7 +683,9 @@ main {
         if (State == S_Start_Intro)     run_State(cb_intro, 0, S_Select_Char);
         if (State == S_Select_Char)     run_State(cb_left_char, Selected_Char, S_Start_Vacation);
 
-        if (State == S_Start_Vacation)  run_State(cb_start_vacation, 0, S_Exit_Mission);
+        if (State == S_Start_Vacation)  run_State(cb_start_vacation, 0, S_Partner);
+        if (State == S_Partner)         run_State(cb_partner, 2 * takePartner, //little trick 
+                                                  S_Exit_Mission);           // to save memory
 
         // Day States
         if (State == S_Exit_Mission) {
@@ -697,7 +708,7 @@ main {
             }
         }
         //if (State == S_Clear_Event)     Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, S_Hotel);
-        
+
 
         // At the Hotel
         if (State == S_Hotel) {
@@ -726,7 +737,7 @@ main {
 
         // End Vacation States
 
-        if (State == S_Clear_Movie)     Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, 4, S_S_Movie); // FIXME : really needed ? 
+        if (State == S_Clear_Movie)     Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, 4, S_S_Movie);
         if (State == S_S_Movie)         run_State(cb_end_vacation, 0, S_End_Vacation);
         if (State == S_End_Vacation) {
             loop_vacation = loop_vacation + 1;
@@ -877,7 +888,7 @@ function exit_Shop_ThenGoto(next){
     purchase_nb = purchase_nb + 1;
     // save values for next cronus init
     // TODO : review this code 
-     		set_val(TRACE_5,purchase_nb);   
+            set_val(TRACE_5,purchase_nb);   
         set_pvar(SPVAR_2,purchase_nb);
 
     return;
@@ -923,22 +934,20 @@ function ConfigHasChanged(){
     // try to detect if Items have changed in config  section
     // It's a BAD check sum code but it's not greedy on memory . 
     i = 1;
-   // v = Items[i];
-        v = 15;
+    v = Items[i];
     while (Items[i] != EndofItems) {
         v = v + i + 2*Items[i] + 3*Items[i + 1]
               + 4*Items[i + 2] + 5*Items[i + 3]; // sum every value 
         i = i + 4;
     }
 
-	
     savedCheckSum = get_pvar(PVAR_15, -32768, 32767,0);
     set_pvar(PVAR_15,v); // save it for next  Cronus reboot
         set_val(TRACE_6,v);  // Trace_6 available for debug
     return (v != savedCheckSum); // compare it with the EEPROM saved before
     // == True if different
 }
- 
+
 function get_IndexItem() {
     i=1;
     purchase_nb     = get_pvar(SPVAR_2,0,20,0);
@@ -959,11 +968,16 @@ function get_IndexItem() {
     else                        return 1;
 }
 
-function get_CurrentItem() {
-    CurrentItem     = Items[index_item + 1]; // set CurrentItem at FromRowX
+function set_CurrentItem_AndPaper() {
+    CurrentItem  = Items[index_item + 1]; // set CurrentItem at FromRowX
+    ItemPaper    = Items[index_item + 4];
 
-    indexCurrent    = abs(purchase_nb - NbPrevious); // find index current in range [FromRowX , ToRowX]
-
+    indexCurrent = abs(purchase_nb - NbPrevious); // find index current in range [FromRowX , ToRowX]
+                                                     // absolute value only for security
+    if (ItemPaper == All) {
+        ItemPaper    = indexCurrent % 9;
+        indexCurrent = indexCurrent / 9;
+    }
     if (indexCurrent != 0) {
         if (abs(CurrentItem - ItemToRow) != 0)  {
             if (CurrentItem <= ItemToRow) stepRow =  1; // next item is above
@@ -978,6 +992,5 @@ function get_CurrentItem() {
         else  CurrentItem = Items[index_item + 1];
     }
     else CurrentItem = Items[index_item + 1];
-
     return;
 }

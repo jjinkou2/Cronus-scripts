@@ -66,19 +66,21 @@ Total byte size: 2566 bytes (62.65%)
     
         Logging and tracing: 
         --------------------
+        - TRACE_1 displays the index of the step inside §DataSet (PS4_CIRCLE, 20)
         - TRACE_3 displays the state where the script is.
-          Look at §State_Definition for the matching state
+                  Look at §State_Definition for the matching state
     
         - TRACE_4 displays the day number. If the script is stuck or if something
-          goes wrong, stop the script, manually move the game to the next day
-          then adjust the day number inside TRACE_4 by pressing L1.
+                  goes wrong, stop the script, manually move the game to the next day
+                  then adjust the day number inside TRACE_4 by pressing L1.
     
-        - If you want to test a specific set of Data, use the function DebugCombo
-          and press L2.
-    
-        - Press R3 to test a whole State
-    
-        - TRACE_1 displays the index of the step inside §DataSet (PS4_CIRCLE, 20)
+        - Press R3 to test a whole State or a combo 
+            - if you want to test a whole state, write this where needed
+                if (State == S_Debug) run_State(COMBO_TORUN, 0, NEXT_STATE_TOGO);
+
+            - if you want to test just a combo just do this
+                if (State == S_Debug) run_State(COMBO_TOTEST, 0, S_IDLE);
+
 
 /*----------------------------------------------------------------------------*/
 
@@ -637,21 +639,21 @@ main {
             loop_event = loop_event - 1;
             if (NumDay==1){ 
                 if (loop_event != 0)    run_State(cb_abort_rock_play, 0, S_Exit_Mission);
-                if (loop_event == 0) {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
+                if (loop_event == 0)    {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
             } 
             else {
-                if (loop_event == 2)   run_State(cb_abort_rock_play, 0, S_Start_RockPlay);
+                if (loop_event == 2)    run_State(cb_abort_rock_play, 0, S_Start_RockPlay);
                 if (loop_event == 1)    run_State(cb_abort_rock_play, 0, S_Exit_Mission);
-                if (loop_event == 0) {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
+                if (loop_event == 0)    {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
             }
         }
         //if (State == S_Clear_Event)     Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, S_Hotel);
-        
+
 
         // At the Hotel
         if (State == S_Hotel) {
             if ((NumDay == 1) && !(loop_vacation % Buy_At_X)) State = S_Owner_Shop;
-            else run_State(cb_hotel, 0, S_Throw_Gift);
+            else                        run_State(cb_hotel, 0, S_Throw_Gift);
         }
 
         // Shopping Items at X vacations
@@ -828,7 +830,7 @@ function exit_Shop_ThenGoto(next){
 
 function next_Item(){
     if (abs(CurrentItem - ItemToRow) != 0)  {
-        if (CurrentItem <= ItemToRow) stepRow = 1;
+        if (CurrentItem <= ItemToRow) stepRow =  1; // next item is above
         else                          stepRow = -1;
         CurrentItem = CurrentItem + stepRow;
     }
