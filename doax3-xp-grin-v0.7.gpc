@@ -8,7 +8,7 @@
   / ___|_ __(_)_ __   \ \/ /  _ \
  | |  _| '__| | '_ \   \  /| |_) |
  | |_| | |  | | | | |  /  \|  __/
-  \____|_|  |_|_| |_| /_/\_\_|                                        V0.7
+  \____|_|  |_|_| |_| /_/\_\_|                                        V0.7.1
 ___________________________________________________________________________
 
 Licence : MIT
@@ -326,10 +326,10 @@ define Nb_Cross             = 5; // how many times repeating cross (x 200ms)
 
 define Nb_Days                      = 14;
 define Nb_Notifs                    = 20;
-define Night 						= 0;
-define Morning 						= 1;
-define Afternoon					= 2;
-define Evening 						= 3;
+define Night                        = 0;
+define Morning                      = 1;
+define Afternoon                    = 2;
+define Evening                      = 3;
 
 
   /*---------------------------------------*/
@@ -739,7 +739,6 @@ main {
             loop_event = loop_event + 1;
             if (NumDay==1){ 
                 if (loop_event == Evening)    run_State(cb_abort_rock_play, 0, S_Exit_Mission);
-//                if (loop_event == Evening)    {loop_event = Nb_Events; run_State(cb_abort_rock_play, 0, S_Hotel);}
                 else    {loop_event = Night; run_State(cb_abort_rock_play, 0, S_Hotel);}
             } 
             else {
@@ -753,7 +752,8 @@ main {
 
         // At the Hotel
         if (State == S_Hotel) {
-            if ((NumDay == 1) && !(loop_vacation % Buy_At_X)) State = S_Owner_Shop;
+            if ((NumDay == 1)  &&  (!(loop_vacation % Buy_At_X)
+                                  or (loop_vacation == 1))) State = S_Owner_Shop;
             else                        run_State(cb_hotel, 0, S_Throw_Gift);
         }
 
