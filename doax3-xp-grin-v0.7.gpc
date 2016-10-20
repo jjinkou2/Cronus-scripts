@@ -232,14 +232,14 @@ define Buy_At_X                   = 2;
 
 int CharacterToPlay  // Don't touch this one
 
-//int Character0                  = Kasumi;
+int Character0                  = Kasumi;
 int Character1                    = Momiji;
 //int Character2                    = Hitomi;
 int Character3                  = Helena;
 //int Character4                    = MarieRose;
-//int Character5                    = Honoka;
+int Character5                    = Honoka;
 //int Character6                    = NyoTengu;
-int Character7                  = Kokoro;
+//int Character7                  = Kokoro;
 int Character8                  = Ayane;
 
 int EndOfChars = 255  // Don't touch this one
@@ -277,8 +277,7 @@ int Items;// dont' touch this one.
 // perso
 //int Tab0 = 0, FromRow0 = -13,    ToRow0 = AsariI,   Paper0 = paper_Silver;  
 
-int Tab2 = 0, FromRow2 = 15, ToRow2 = 18,  Paper2 = paper_Silver;
-int Tab1 = 0, FromRow1 = 7,    ToRow1 = 7,   Paper1 = All;
+int Tab2 = 2, FromRow2 = Dangerous, ToRow2 = Tempting,  Paper2 = paper_Silver;
 
 int EndofItems = 255;// dont' touch this one. 
 
@@ -299,7 +298,7 @@ define optionalSMovie       = FALSE;
 // --------
 // Set to TRUE if you want your girl to play with a partner. Not fully tested
 
-define takePartner          = TRUE;
+define takePartner          = FALSE;
 
 
 // ---------------
@@ -743,7 +742,10 @@ main {
             } 
             else {
                 if (loop_event == Morning)    run_State(cb_abort_rock_play, 0, S_Start_RockPlay);
-                if (loop_event == Afternoon)  run_State(cb_abort_rock_play, 0, S_Exit_Mission);
+                if (loop_event == Afternoon){  
+                	if (NumDay !=14) 		  run_State(cb_abort_rock_play, 0, S_Exit_Mission);
+                	else  		  			  run_State(cb_abort_rock_play, 0, S_Start_RockPlay);
+                }
                 if (loop_event == Evening)    {loop_event = Night; run_State(cb_abort_rock_play, 0, S_Hotel);}
             }
         }
@@ -752,8 +754,8 @@ main {
 
         // At the Hotel
         if (State == S_Hotel) {
-            if ((NumDay == 1)  &&  (!(loop_vacation % Buy_At_X)
-                                  or (loop_vacation == 1))) State = S_Owner_Shop;
+            if ((NumDay == 1)  &&  (!(loop_vacation % Buy_At_X)  ||
+                                     (loop_vacation == 1))) 		State = S_Owner_Shop;
             else                        run_State(cb_hotel, 0, S_Throw_Gift);
         }
 
