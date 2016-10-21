@@ -178,7 +178,7 @@ define paper_Premium               = 10;
  /*      List of Items      */
 /*-------------------------*/
 // tab 0
-define MummyA                    =  2;
+define MummyA                     =  2;
 define MummyI                     = -6;
 define PeaceD                     =  8;
 define PeaceH                     =  6;
@@ -193,10 +193,10 @@ define SandwichI                  = -24;
 define Sidecar                    =  2;
 
 //tab2
-define Dangerous                  = -1;
-define Tempting                   =  2;
-define Forbidden                  =  1;
-define Secret                     =  0;
+define Ticket1                    = -1;
+define Ticket2                    =  0;
+define Ticket3                    =  1;
+define Ticket4                    =  2;
 define MoebieusSlow               =  3;
 define HardGelEx                  = -6;
 
@@ -276,7 +276,7 @@ int Items;// dont' touch this one.
 // perso
 //int Tab0 = 0, FromRow0 = -13,    ToRow0 = AsariI,   Paper0 = paper_Silver;  
 
-int Tab2 = 2, FromRow2 = Dangerous, ToRow2 = Tempting,  Paper2 = paper_Silver;
+int Tab2 = 2, FromRow2 = Ticket1, ToRow2 = Ticket4,  Paper2 = paper_Silver;
 
 int EndofItems = 255;// dont' touch this one. 
 
@@ -405,7 +405,6 @@ define EOD                          = 255; // End of Data Segment
 
 define GREEN                        = 1;
 define BLUE                         = 2;
-define RED_BLINK                    = 3;
 
 //-----------------------------------------------------
 
@@ -416,8 +415,7 @@ define RED_BLINK                    = 3;
 // State variables
 // ---------------
 int State                           = S_IDLE;
-int Next_State                      = S_Start_Game;
-int Play                            = FALSE;
+int Next_State;
 
 //
 // Items Swimsuit and characters
@@ -658,18 +656,11 @@ main {
     // Set script commands
    //---------------------
 
-    //Press Triangle to pause/play the script.
-    if(event_press(PS4_TRIANGLE)) {
-        Play = !Play;
-        SwitchLED(GREEN);
-        State = Next_State;  //Start or restart where we were.
-    }
+
 
     // Press R1 to Stop the script
     if(event_press(PS4_R1)) {
         State       = S_IDLE;
-        Next_State  = S_Start_Game;  // restart game
-        Play        = FALSE;
         if (combo_running(cb_Send_Input)) combo_stop (cb_Send_Input);
         SwitchLED(BLUE);
     }
@@ -677,11 +668,17 @@ main {
     // If the script is stopped,
     if (State == S_IDLE) {
         set_val(TRACE_3,State);  // Look at the state definition to know where the automata is stuck
+        
+            //Press Triangle to pause/play the script.
+    	if(event_press(PS4_L3)) {
+        	SwitchLED(GREEN);
+        	State = S_Start_Game;  //Start.
+    	}
+        
         // pressing R2
         // will restart it at the beginning of the day
         if (event_press(PS4_R2)) {
             loop_event = Night; // correction from Morganite
-            Play       = TRUE;
             State      = S_Start_Day;
             SwitchLED(GREEN);
         }
@@ -690,13 +687,12 @@ main {
         if (event_press(PS4_L2)) {
             loop_event = loop_event % 3 + 1 ;// adjust the event if script is stopped
             set_val(TRACE_5,loop_event);
-            Play  = TRUE;
             SwitchLED(GREEN);
             State = S_Start_RockPlay;
         }
 
         // R3 to test a whole State
-        if (event_press(PS4_R3))  {Play  = TRUE;State = S_Debug;} // test a whole state
+        if (event_press(PS4_R3))  State = S_Debug; // test a whole state
 
         // L1 to adjust the numday (look at TRACE_4)
         if (event_press(PS4_L1))  {
@@ -712,7 +708,7 @@ main {
 
     // Main Loop of the State automata
     // -------------------------------
-    if (Play) {
+    else {
 
         // intro States
 
@@ -764,7 +760,7 @@ main {
         if (State == S_Owner_Shop)      run_State(cb_owner_shop, 0, S_Select_Tab);
 
 
-       // if (State == S_Debug)           run_State(cb_owner_shop, 12, S_Select_Tab); //uncomment this to test items to buy
+        //if (State == S_Debug)           run_State(cb_owner_shop, 12, S_Select_Tab); //uncomment this to test items to buy
         // ============== Start loop Debug ===============================      
         if (State == S_Select_Tab)      Repeat_ThenGoto(PS4_RIGHT, Item_Tab, 2, S_Select_Item);
         if (State == S_Select_Item)     select_Item_ThenGoto(S_Buy_Item);
@@ -808,7 +804,6 @@ main {
         if (State == S_End_Game) {
                                         loop_vacation = 1;
                                         NumDay        = 1;
-                                        Play          = FALSE;
                                         State         = S_IDLE;
                                         SwitchLED(BLUE); 
         }
@@ -862,11 +857,6 @@ function SwitchLED(Color){
     else if (Color==BLUE){
         set_led(LED_1, 1);
         set_led(LED_2, 0);
-        set_led(LED_3, 0);
-    }
-    else if (Color==RED_BLINK){
-        set_led(LED_1, 0);
-        set_led(LED_2, 1);
         set_led(LED_3, 0);
     }
     return;
