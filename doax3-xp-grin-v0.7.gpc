@@ -216,7 +216,7 @@ define Nb_Vacations               = 25;
 
 
 // will try to buy at every X vacations
-define IwantToBuyItem			= TRUE;// You can switch off buying if you put FALSE.
+define IwantToBuyItem			= TRUE;// False = switch off autobuying.
 define Buy_At_X                 = 2;  // At 2 vacations
 
 
@@ -289,7 +289,7 @@ int EndofItems = 255;// dont' touch this one.
 // --------
 // Set to TRUE if you suspect that your character will end in S+ movie.
 
-define optionalSMovie       = FALSE;
+define optionalSMovie       = TRUE;
 
 
 // --------
@@ -297,7 +297,7 @@ define optionalSMovie       = FALSE;
 // --------
 // Set to TRUE if you want your girl to play with a partner. Not fully tested
 
-define takePartner          = FALSE;
+define takePartner          = TRUE;
 
 
 // ---------------
@@ -752,9 +752,11 @@ main {
 
         // At the Hotel
         if (State == S_Hotel) {
-        	if (IwantToBuyItem) 
+        	if (IwantToBuyItem) {
             	if ((NumDay == 1)  &&  (!(loop_vacation % Buy_At_X)  ||
                 	                     (loop_vacation == 1))) 		State = S_Owner_Shop;
+	            else                    run_State(cb_hotel, 0, S_Throw_Gift);
+			}                	                     
             else                        run_State(cb_hotel, 0, S_Throw_Gift);
         }
 
