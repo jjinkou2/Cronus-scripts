@@ -232,7 +232,7 @@ define Buy_At_X                 = 2;  // At 2 vacations
 int CharacterToPlay  // Don't touch this one
 
 int Character0                  = Kasumi;
-int Character1                    = Momiji;
+int Character1                  = Momiji;
 //int Character2                    = Hitomi;
 int Character3                  = Helena;
 //int Character4                    = MarieRose;
@@ -655,9 +655,6 @@ main {
 
     // Set script commands
    //---------------------
-
-
-
     // Press R1 to Stop the script
     if(event_press(PS4_R1)) {
         State       = S_IDLE;
@@ -670,7 +667,7 @@ main {
         set_val(TRACE_3,State);  // Look at the state definition to know where the automata is stuck
         
             //Press Triangle to pause/play the script.
-    	if(event_press(PS4_L3)) {
+    	if(event_press(PS4_TRIANGLE)) {
         	SwitchLED(GREEN);
         	State = S_Start_Game;  //Start.
     	}
@@ -782,7 +779,7 @@ main {
         // End Vacation States
 
         if (State == S_Clear_Movie)     Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, 4, S_S_Movie);
-        if (State == S_S_Movie)         run_State(cb_end_vacation, 0, S_End_Vacation);
+        if (State == S_S_Movie)         Repeat_ThenGoto(PS4_OPTIONS,2,100, S_End_Vacation);
         if (State == S_End_Vacation) {
             loop_vacation = loop_vacation + 1;
             set_val(TRACE_2,loop_vacation);
@@ -893,16 +890,15 @@ function StartGame(){
 
 function EndDay() {
     NumDay = NumDay + 1;
-    set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
     if (NumDay > Nb_Days) {
         NumDay  = 1;
+
         if (optionalSMovie == TRUE) return (S_Clear_Movie);
         else                        return (S_End_Vacation);
     }
-    else {
-        set_val(TRACE_4,NumDay);
-        return (S_Start_Day);
-    }
+    else return (S_Start_Day);
+    
+    set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
 }
 
 function run_State(combo_to_run,offset,next) {
