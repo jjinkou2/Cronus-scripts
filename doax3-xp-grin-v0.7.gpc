@@ -430,10 +430,10 @@ int ItemToRow;
 int ItemPaper;
 int stepRow;
 
-int purchase_nb                     = 0;        // nb time we enter in owner shop
-int NbItem                          = 0;
-int NbPrevious                      = 0;
-int indexCurrent                    = 0;
+int purchase_nb;        // nb time we enter in owner shop
+int NbItem;
+int NbPrevious;
+int indexCurrent;
 
 // Days and loop vacation
 //-----------------------
@@ -441,7 +441,7 @@ int NumDay                          = 1;
 int loop_event                      = Night; // Morning , Afternoon, Evening
 int loop_vacation                   = 1;
 int loop_notif                      = 1;
-int loop_button                     = 0;
+int loop_button;
 int wait_time;                                  // time used between repeating button
 
 // combo
@@ -597,7 +597,8 @@ data(
         PS4_DOWN,        1,         // Start go to bed
         PS4_DOWN,        1,         //
         PS4_CIRCLE,      250,       // waiting for end of girl's speach
-        PS4_CIRCLE,      200,       // go to new morning
+        PS4_CROSS,		 100,		// wait longer random longer speach 
+		PS4_CIRCLE,      200,       // go to new morning
     EOC,
 
 
@@ -779,7 +780,7 @@ main {
         // End Vacation States
 
         if (State == S_Clear_Movie)     Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, 4, S_S_Movie);
-        if (State == S_S_Movie)         Repeat_ThenGoto(PS4_OPTIONS,2,100, S_End_Vacation);
+        if (State == S_S_Movie)         Repeat_ThenGoto(PS4_OPTIONS,2,20, S_End_Vacation);
         if (State == S_End_Vacation) {
             loop_vacation = loop_vacation + 1;
             set_val(TRACE_2,loop_vacation);
