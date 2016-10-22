@@ -322,7 +322,7 @@ define Nb_Cross             = 5; // how many times repeating cross
 /*-----------------------*/
 
 define Nb_Days                      = 14;
-define Nb_Notifs                    = 20;
+define Nb_Notifs                    = 25;
 define Night                        = 0;
 define Morning                      = 1;
 define Afternoon                    = 2;
@@ -364,10 +364,11 @@ define S_End_Vacation               = 60;
 define S_Clear_Vacation             = 61;
 define S_S_Movie                    = 62;
 define S_Clear_Movie                = 63;
-define S_Return_Title               = 64;
+define S_Clear_Movie2               = 64;
 
 
-define S_End_Game                   = 70;
+define S_Return_Title               = 70;
+define S_End_Game                   = 71;
 
 define S_Debug                      = 90;
 define S_SAVEBUG                    = 91;
@@ -391,7 +392,9 @@ define cb_owner_shop               = 42;
 define cb_buy_item                 = 44;
 define cb_paper                    = 45;
 define cb_go_bed                   = 47;
+
 define cb_end_vacation             = 50;
+define cb_skip_movies			   = 51;
 define cb_return_title             = 55;
 
 // End Flags. 254 and 255 should never be used in the
@@ -530,7 +533,7 @@ data(
 
 //       One Day event
     cb_select_rock_stage,
-        PS4_CIRCLE,      30,         //  greetings
+        PS4_CIRCLE,      30,         // good morning !
         PS4_LEFT,        1,         //  Go to Rock Stage
         PS4_LEFT,        1,         //
         PS4_LEFT,        1,         //
@@ -601,15 +604,22 @@ data(
         PS4_CIRCLE,      250,       // waiting for end of girl's speach
         PS4_CROSS,		 100,		// wait longer random longer speach
 		PS4_CIRCLE,      200,       // go to new morning
+
     EOC,
 
-
+//       skip end movie
+	cb_skip_movies,
+	    PS4_CIRCLE,      30,         // sigh i have to go !		
+        PS4_OPTIONS,     20,         // skip movie S+ optionnal
+        PS4_OPTIONS,     100,        //	
+    EOC,
+    
 //       End Vacation
     cb_end_vacation,
-        PS4_CIRCLE,      50,         //
-        PS4_OPTIONS,     20,         // skip movie
-        PS4_OPTIONS,     100,        //
-        PS4_CIRCLE,      50,         //
+    	PS4_CIRCLE,      30,         // sigh i have to go !		
+        PS4_OPTIONS,     20,         // skip End movie
+        PS4_OPTIONS,     100,        //	
+        //PS4_CIRCLE,      50,         //
     EOC,
 
     cb_return_title,
@@ -781,17 +791,20 @@ main {
         if (State == S_End_Day)         State = EndDay();
 
         // End Vacation States
-
+        if (State == S_Debug)           State = S_End_Day; //uncomment this to test the end 
+        
         if (State == S_Clear_Movie)     Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, 4, S_S_Movie);
-        if (State == S_S_Movie)         Repeat_ThenGoto(PS4_OPTIONS,2,50, S_End_Vacation);
+        if (State == S_S_Movie)         run_State(cb_skip_movies, 0, S_Clear_Movie2);
+        if (State == S_Clear_Movie2)    Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, 4, S_End_Vacation);
+
         if (State == S_End_Vacation) {
             loop_vacation = loop_vacation + 1;
             set_val(TRACE_2,loop_vacation);
             if (loop_vacation < Nb_Vacations)   run_State(cb_end_vacation, 0, S_Clear_Vacation);
             else                                run_State(cb_end_vacation, 0, S_End_Game);
         }
+        if (State == S_Clear_Vacation)  Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, 4, S_SAVEBUG);
 
-        if (State == S_Clear_Vacation)  Repeat_ThenGoto(PS4_CIRCLE,Nb_Notifs, 4, S_SAVEBUG);
 
         if (State == S_SAVEBUG)  {
                                         // Adjust number and waiting time (4x50ms)
