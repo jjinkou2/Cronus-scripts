@@ -15,7 +15,7 @@ Licence : MIT
 Author  : jinkou
 Credits : Huge thanks to contributors: Zaykho; Morganite
 
-Total byte size: 3336 bytes (81.45%)
+Total byte size: 3223 bytes (78.69%)
 
 
   /*-------------------------*/
@@ -90,14 +90,14 @@ Total byte size: 3336 bytes (81.45%)
   /*-----------------------*/
  /*      Backlog          */
 /*------------------------/-------------------------------------------------
+V0.7.1  - It's possible to adjust the day while the script is playing. You no more
+		  have to stop the script to do that. 
+		- Change in config section : adding a new parameter to switch buying On/Off
+		- Bug fix for S+ movie.
+		- Code refactoring for memory optimisation. 
+		
 V0.7    New Features: 
         - No more double items bought when switching your Cronus On. 
-          Your config is saved in EEPROM. After switching off/On  Cronus max
-          the script will remember which items were bought and it will buy the 
-          next items in your config. 
-          If config has changed, it will detect it and will restart buying from
-          the beginning.
-
         - Press L2 if you want to re-launch the script at the next RCQ.
         - You can take a partner (not fully tested) see §config
         - Try to deal with end Save bug see §config
@@ -611,6 +611,7 @@ data(
     EOC,
 
     cb_return_title,
+    	PS4_SQUARE,		 20,		// view excitement level
         PS4_CIRCLE,      250,         // return to title
     EOC,
 
@@ -662,7 +663,12 @@ main {
         if (combo_running(cb_Send_Input)) combo_stop (cb_Send_Input);
         SwitchLED(BLUE);
     }
-
+    // L1 to adjust the numday (look at TRACE_4)
+    if (event_press(PS4_L1))  {
+         NumDay = NumDay  % 14 + 1 ;// adjust the numDay if script is stopped
+         set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
+    }
+    
     // If the script is stopped,
     if (State == S_IDLE) {
         set_val(TRACE_3,State);  // Look at the state definition to know where the automata is stuck
@@ -692,11 +698,7 @@ main {
         // R3 to test a whole State
         if (event_press(PS4_R3))  State = S_Debug; // test a whole state
 
-        // L1 to adjust the numday (look at TRACE_4)
-        if (event_press(PS4_L1))  {
-            NumDay = NumDay  % 15 + 1 ;// adjust the numDay if script is stopped
-            set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
-        }
+
         /*    if (event_press(PS4_UP))  {
               loop_vacation = loop_vacation  % Nb_Vacations + 1 ;
               set_val(TRACE_2,loop_vacation);  
@@ -780,7 +782,7 @@ main {
         // End Vacation States
 
         if (State == S_Clear_Movie)     Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, 4, S_S_Movie);
-        if (State == S_S_Movie)         Repeat_ThenGoto(PS4_OPTIONS,2,20, S_End_Vacation);
+        if (State == S_S_Movie)         Repeat_ThenGoto(PS4_OPTIONS,2,50, S_End_Vacation);
         if (State == S_End_Vacation) {
             loop_vacation = loop_vacation + 1;
             set_val(TRACE_2,loop_vacation);
@@ -893,13 +895,13 @@ function EndDay() {
     NumDay = NumDay + 1;
     if (NumDay > Nb_Days) {
         NumDay  = 1;
-
-        if (optionalSMovie == TRUE) return (S_Clear_Movie);
-        else                        return (S_End_Vacation);
+        if (optionalSMovie == TRUE) Next_State = S_Clear_Movie;
+        else                        Next_State  = S_End_Vacation;
     }
-    else return (S_Start_Day);
+    else 							Next_State  = S_Start_Day;
     
     set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
+    return Next_State;
 }
 
 function run_State(combo_to_run,offset,next) {
