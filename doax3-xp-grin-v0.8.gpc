@@ -8,7 +8,7 @@
   / ___|_ __(_)_ __   \ \/ /  _ \
  | |  _| '__| | '_ \   \  /| |_) |
  | |_| | |  | | | | |  /  \|  __/
-  \____|_|  |_|_| |_| /_/\_\_|                                        V0.7.1
+  \____|_|  |_|_| |_| /_/\_\_|                                        V0.8
 ___________________________________________________________________________
 
 Licence : MIT
@@ -90,18 +90,18 @@ Total byte size: 3223 bytes (78.69%)
   /*-----------------------*/
  /*      Backlog          */
 /*------------------------/-------------------------------------------------
+v.0.8 	New features: 
+		- Playing with a partner is possible. Fully tested at hotel.  
+		- You don't need to clear girls' gift anymore. Script will delete gifts at 
+		   every X vacation. X is defined in config section 
+
 V0.7.1  - It's possible to adjust the day while the script is playing. You no more
           have to stop the script to do that.
         - Change in config section : adding a new parameter to switch buying On/Off
         - Bug fix for S+ movie.
         - Code refactoring for memory optimisation.
 
-V0.7    New Features:
-        - No more double items bought when switching your Cronus On.
-        - Press L2 if you want to re-launch the script at the next RCQ.
-        - You can take a partner (not fully tested) see §config
-        - Try to deal with end Save bug see §config
-
+V0.7    New Features: No more double items bought when switching your Cronus On.
 V0.6    New Feature: Characters to level up are selectable
 v 0.5.1 Huge boost in time thanks to Zaykho:
 v 0.5   New Feature: Buy any item in the owner shop.
@@ -305,7 +305,7 @@ define takePartner          = TRUE;
 // Set to TRUE if you want to clear girl's gifts inventory
 define IWantToDeleteGift    = TRUE;
 define DeleteAt             = 1;  // every X vacations will delete at day 14
-define NbToDelete           = 2; // Number of gifts to delete
+define NbToDelete           = 1; // Number of gifts to delete
 
 // ---------------
 // Troubleshooting
@@ -380,6 +380,7 @@ define S_End_Game                   = 71;
 
 define S_Debug                      = 90;
 define S_SAVEBUG                    = 91;
+define S_Repeat_Button				= 92;
 
 define S_IDLE                       = 100;
 
@@ -457,7 +458,7 @@ int loop_vacation                   = 1;
 int loop_notif                      = 1;
 int loop_button;
 int wait_time;                                  // time used between repeating button
-int loop_delete						= 1;       // delete gift
+int loop_delete						= 0;       // delete gift
 
 // combo
 // -----
@@ -809,12 +810,10 @@ main {
 
         if (State == S_Debug)           run_State(cb_girl_closet, 0, S_Delete_Gift); //uncomment this to test deletion
         if (State == S_Delete_Gift) {
-            
-            if (!loop_delete)           
-            {loop_delete = (loop_delete + 1) % NbToDelete;
-            run_State(cb_throw_gift,0,S_Delete_Gift);}
-            
-            else                        Repeat_ThenGoto(PS4_CROSS,1,50, S_Go_Bed);
+            loop_delete = (loop_delete + 1);
+            set_val(TRACE_6,loop_delete);
+            if (loop_delete<=NbToDelete) run_State(cb_throw_gift,0,S_Delete_Gift);
+            else            			 {loop_delete=0;Repeat_ThenGoto(PS4_CROSS,1,50, S_Go_Bed);}
         }
 
         // End of hotel
@@ -1008,17 +1007,18 @@ function next_Item(){
 
 
 function Repeat_ThenGoto(button, times, speed, next) {
+    State = S_Repeat_Button;
     PressButton = button;
     wait_time   = speed * 50; // x * 50 ms of waiting
-    if (abs(loop_button) < times ) {
-        if (!combo_running(cb_Repeat_Button)) combo_restart (cb_Repeat_Button);
-    }
-    else {
-        loop_button = 0;
-        State = next;
-    }
+    if (!combo_running(cb_Repeat_Button)){
+    	if (loop_button < times )     	combo_restart (cb_Repeat_Button);
+        else {
+			loop_button = 0;
+		    State = next;
+		}
+	}
     return;
-}
+}  
 
 function ConfigHasChanged(){
     // try to detect if Items have changed in config  section
