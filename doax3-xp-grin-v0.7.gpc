@@ -15,7 +15,7 @@ Licence : MIT
 Author  : jinkou
 Credits : Huge thanks to contributors: Zaykho; Morganite
 
-Total byte size: 3223 bytes (78.69%)
+Total byte size: 3277 bytes (80.00%)
 
 
   /*-------------------------*/
@@ -90,10 +90,11 @@ Total byte size: 3223 bytes (78.69%)
   /*-----------------------*/
  /*      Backlog          */
 /*------------------------/-------------------------------------------------
-V0.7.1  - It's possible to adjust the day while the script is playing. You no more
+V0.7.1  - Bug fix for S+ movie. Script is fully tested at the end game with or 
+		  without a partner.
+		- It's possible to adjust the day while the script is playing. You no more
 		  have to stop the script to do that.
 		- Change in config section : adding a new parameter to switch buying On/Off
-		- Bug fix for S+ movie.
 		- Code refactoring for memory optimisation.
 
 V0.7    New Features:
