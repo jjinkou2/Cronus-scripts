@@ -22,20 +22,17 @@ Total byte size: 3392 bytes (82.81%)
  /*  Quick start            */
 /*--------------------------/----------------------------------------------
 
-    1) Important : Make sure the gifts inventories of your selected characters
-       ----------  are empty.
-
-    2) Before starting the script, just change the character/swimsuit/Ticket
+    1) Before starting the script, just change the character/swimsuit/Ticket
        in the config paragraph below (§Config)
 
-    3) Start the script :
+    2) Start the script :
         a) with Triangle if you are at the beginning of the game.
            (Screen "Press a button")
            You can Pause/Play the script too with triangle.
 
         b) with R2 if you are at the beginning of the day.
 
-    4) Stop the script with R1.
+    3) Stop the script with R1.
        If the script broke, manually move the game to the beginning of the next day
        and press R2 to restart it. (don't forget to clear zack's gift).
 
@@ -44,9 +41,24 @@ Total byte size: 3392 bytes (82.81%)
 
        Press L2 to start the next RCQ.
 
-    5) Normal Ending of script: Led is BLUE and the ending screen is
+    4) Normal Ending of script: Led is BLUE and the ending screen is
        Character's excitement screen (with maybe notifications).
        Otherwise : look at Troubleshooting.
+
+    Script commands
+    ---------------
+
+      +----------+------------+------------------+---------------------------+
+      | Button   | Script is   |      Action      |           Screen           |
+      +----------+------------+------------------+---------------------------+
+      | Triangle | Stopped    | Start the script  | "Press a button"           |
+      | R1       | Running    | Stop the script   | Every where                |
+      | R2       | Stopped    | Start a day       | Is at beginning of the day |
+      | L1       | Whatever   | Day+1 in Trace_4  | Every where                |
+      | L2       | Stopped    | Start RCQ         | is at RCQ stage            |
+      | L3       | Stopped    | Delete Gift       | At hotel                   |
+      | R3       | Stopped    | Debug a state     | Every where                |
+      +----------+------------+------------------+---------------------------+
 
     Color Led:
     ----------
@@ -85,15 +97,49 @@ Total byte size: 3392 bytes (82.81%)
                 if (State == S_Debug) run_State(COMBO_TOTEST, 0, S_IDLE);
 
 
+            +---------+-----------------------+
+            | TRACE   |       Used For         |
+            +---------+-----------------------+
+            | TRACE_1 | combo step             |
+            | TRACE_2 | Vacation number        |
+            | TRACE_3 | State                  |
+            | TRACE_4 | Num Day                |
+            | TRACE_5 | Event Nb/purchase_nb   |
+            | TRACE_6 | Free for debug         |
+            +---------+-----------------------+
+
+
+          /*-----------------------*/
+         /*     Variable used     */
+        /*------------------------/
+
+        +---------+-----------------+----------------------+---------------------+
+        | EEPROM  |    Used For      |      Saved at        |    Every X times     |
+        +---------+-----------------+----------------------+---------------------+
+        | PVAR_15 | Checksum config  | ConfigHasChanged()   | 1 at Cronus Reboot   |
+        | SPVAR_2 | purchase_nb      | exit_Shop_ThenGoto() | 1 at vacation = X    |
+        +---------+-----------------+----------------------+---------------------+
+
+        Cronus Lifespan:
+        ----------------
+        X = Buy_At_X; often set to 3.
+        3 EEPROM write every 10 vacations.
+        Each vacations = 30 min => 3 EEPROM write per 5 hours.
+        Cronus is guaranteed for 100 000 Writes.
+
+        => 20 years running continuously this script before Cronus dies.
+
+
 /*----------------------------------------------------------------------------*/
 
   /*-----------------------*/
  /*      Backlog          */
 /*------------------------/-------------------------------------------------
-v.0.8 	New features: 
-		- Playing with a partner is possible. Fully tested at hotel.  
-		- You don't need to clear girls' gift anymore. Script will delete gifts at 
-		   every X vacation. X is defined in config section 
+v.0.8   New features: 
+        - Playing with a partner is possible. Fully tested at hotel.
+        - You don't need to clear girls' gift anymore. Script will delete gifts at 
+           every X vacation. X is defined in config section 
+        - Press L3 to delete gifts at the hotel
 
 V0.7.1  - It's possible to adjust the day while the script is playing. You no more
           have to stop the script to do that.
@@ -113,40 +159,6 @@ v0.3    You can buy swimsuits/ticket
 v0.1    First version
 
 ---------------------------------------------------------------------------*/
-
-  /*-----------------------*/
- /*     Variable used     */
-/*------------------------/-------------------------------------------------
-
-+---------+-----------------+----------------------+---------------------+
-| EEPROM  |    Used For      |      Saved at        |    Every X times     |
-+---------+-----------------+----------------------+---------------------+
-| PVAR_15 | Checksum config  | ConfigHasChanged()   | 1 at Cronus Reboot   |
-| SPVAR_2 | purchase_nb      | exit_Shop_ThenGoto() | 1 at vacation = X    |
-+---------+-----------------+----------------------+---------------------+
-
-Cronus Lifespan:
-----------------
-X = Buy_At_X; often set to 3.
-3 EEPROM write every 10 vacations.
-Each vacations = 30 min => 3 EEPROM write per 5 hours.
-Cronus is guaranteed for 100 000 Writes.
-
-=> 20 years running continuously this script before Cronus dies.
-
-+---------+-----------------------+
-| TRACE   |       Used For         |
-+---------+-----------------------+
-| TRACE_1 | combo step             |
-| TRACE_2 | Vacation number        |
-| TRACE_3 | State                  |
-| TRACE_4 | Num Day                |
-| TRACE_5 | Event Nb/purchase_nb   |
-| TRACE_6 | Free for debug         |
-+---------+-----------------------+
-
----------------------------------------------------------------------------*/
-
 
   /*-----------------------*/
  /*      Characters       */
@@ -380,7 +392,7 @@ define S_End_Game                   = 71;
 
 define S_Debug                      = 90;
 define S_SAVEBUG                    = 91;
-define S_Repeat_Button				= 92;
+define S_Repeat_Button              = 92;
 
 define S_IDLE                       = 100;
 
@@ -457,8 +469,8 @@ int loop_event                      = Night; // Morning , Afternoon, Evening
 int loop_vacation                   = 1;
 int loop_notif                      = 1;
 int loop_button;
-int wait_time;                      		// time used between repeating button
-int loop_delete;					       // delete gift
+int wait_time;                              // time used between repeating button
+int loop_delete;                           // delete gift
 int Times;
 
 // combo
@@ -583,7 +595,7 @@ data(
         PS4_CIRCLE,      5,         //
         PS4_LEFT,        2,         //
         PS4_CIRCLE,      5,         // throw gift away
-        PS4_SQUARE,		 2,			// Re-select first gift 
+        PS4_SQUARE,      2,         // Re-select first gift 
     //    PS4_CROSS,       50,        // exit girl's closet
     EOC,
 
@@ -812,8 +824,8 @@ main {
        // if (State == S_Debug)           run_State(cb_girl_closet, 0, S_Delete_Gift); //uncomment this to test deletion
         if (State == S_Delete_Gift) {
             loop_delete = (loop_delete + 1)  %  (NbToDelete + 1);
-            if (loop_delete) 			run_State(cb_throw_gift,0,S_Delete_Gift);
-            else            			Repeat_ThenGoto(PS4_CROSS,1,50, S_Go_Bed);
+            if (loop_delete)            run_State(cb_throw_gift,0,S_Delete_Gift);
+            else                        Repeat_ThenGoto(PS4_CROSS,1,50, S_Go_Bed);
                         set_val(TRACE_6,loop_delete);
         }
 
@@ -870,9 +882,9 @@ main {
         // State when repeating buttons
         if (State == S_Repeat_Button) {  
            if (!combo_running(cb_Repeat_Button)) { 
-           		if (loop_button<Times) 	combo_restart (cb_Repeat_Button);
-        		else 					State = Next_State;	 		
-			}
+                if (loop_button<Times)  combo_restart (cb_Repeat_Button);
+                else                    State = Next_State;         
+            }
         }
     } // end of State automata
 }
@@ -1015,13 +1027,13 @@ function next_Item(){
 
 
 function Repeat_ThenGoto(button, times, speed, next) {
-    State 		= S_Repeat_Button;
+    State       = S_Repeat_Button;
     PressButton = button;
-    Times 		= times;
+    Times       = times;
     wait_time   = speed * 50; // x * 50 ms of waiting
     set_val(TRACE_5,times);
 
-	Next_State 	= next;
+    Next_State  = next;
     return;
 }  
 
