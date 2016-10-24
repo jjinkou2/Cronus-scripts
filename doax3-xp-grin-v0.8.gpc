@@ -28,7 +28,6 @@ Total byte size: 3392 bytes (82.81%)
     2) Start the script :
         a) with Triangle if you are at the beginning of the game.
            (Screen "Press a button")
-           You can Pause/Play the script too with triangle.
 
         b) with R2 if you are at the beginning of the day.
 
@@ -72,12 +71,12 @@ Total byte size: 3392 bytes (82.81%)
     ----------------
         Script doing wrong things:
         --------------------------
-        - If you find the script sitting in the closet, it's because you didn't
-          clear the gift inventory before you started.
-
         - If you find your girl at the pool doing relax movie, it's because you
           didn't synchronise the day number. you are at day 1 in the script.
           Look below to increment the day number
+          
+        - If the script doesn't restart the vacation try adjusting the parameter SaveBUG
+          in config section. 
 
         Logging and tracing:
         --------------------
@@ -325,9 +324,9 @@ define NbToDelete           = 3; // Number of gifts to delete
 // set it to TRUE if you meet the deadly save bug at vacation ending
 // Until TN or Sony correct this random bug, this is a not-always working solution
 
-define SAVE_BUG_IS_PRESENT  = FALSE;
-define Nb_Cross             = 5; // how many times repeating cross
-                                // each cross will pause the script during 200ms
+define SAVE_BUG_IS_PRESENT  = TRUE;
+define Nb_Cross             = 10; // how many times repeating cross
+                                // each cross will pause the script during 1s
 
 
 /*-------------  End of configuration ---------------------------------------------*/
@@ -699,7 +698,8 @@ main {
     // Press R1 to Stop the script
     if(event_press(PS4_R1)) {
         State       = S_IDLE;
-        if (combo_running(cb_Send_Input)) combo_stop (cb_Send_Input);
+        if (combo_running(cb_Send_Input))   combo_stop (cb_Send_Input);
+        if (combo_running(cb_Repeat_Button))combo_stop (cb_Repeat_Button);
         SwitchLED(BLUE);
     }
     // L1 to adjust the numday (look at TRACE_4)
@@ -846,17 +846,16 @@ main {
             if (loop_vacation < Nb_Vacations)   run_State(cb_end_vacation, 0, S_Clear_Vacation);
             else                                run_State(cb_end_vacation, 0, S_End_Game);
         }
-        if (State == S_Clear_Vacation)  Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, 4, S_SAVEBUG);
-
-
-        if (State == S_SAVEBUG)  {
-                                        // Adjust number and waiting time (4x50ms)
-            if (SAVE_BUG_IS_PRESENT)    Repeat_ThenGoto(PS4_CROSS,Nb_Cross, 4, S_Return_Title);
-            else                        State = S_Return_Title;
-        }
+        if (State == S_Clear_Vacation)  Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, 4, S_Return_Title);
 
         //if (State == S_Return_Title)    run_State(cb_return_title, 0, S_Start_Game);
-        if (State == S_Return_Title)    Repeat_ThenGoto(PS4_CIRCLE,1,250, S_Start_Game);
+        if (State == S_Debug)           State = S_Return_Title;
+        if (State == S_Return_Title)    Repeat_ThenGoto(PS4_CIRCLE,1,250, S_SAVEBUG);
+        if (State == S_SAVEBUG)  {
+                                        // Adjust number and waiting time (Nb_Crossx20x50ms)
+            if (SAVE_BUG_IS_PRESENT)    Repeat_ThenGoto(PS4_CROSS,Nb_Cross, 20, S_Start_Game);
+            else                        State = S_Start_Game;
+        }
 
         // End of vacation loop
         if (State == S_End_Game) {
@@ -878,12 +877,12 @@ main {
                 else State = Next_State;
             }
         }
-        
+
         // State when repeating buttons
         if (State == S_Repeat_Button) {  
            if (!combo_running(cb_Repeat_Button)) { 
                 if (loop_button<Times)  combo_restart (cb_Repeat_Button);
-                else                    State = Next_State;         
+                else                    {loop_button=0;State = Next_State;}
             }
         }
     } // end of State automata
@@ -1031,7 +1030,6 @@ function Repeat_ThenGoto(button, times, speed, next) {
     PressButton = button;
     Times       = times;
     wait_time   = speed * 50; // x * 50 ms of waiting
-    set_val(TRACE_5,times);
 
     Next_State  = next;
     return;
