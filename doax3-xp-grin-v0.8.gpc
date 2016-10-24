@@ -15,7 +15,7 @@ Licence : MIT
 Author  : jinkou
 Credits : Huge thanks to contributors: Zaykho; Morganite
 
-Total byte size: 3392 bytes (82.81%)
+Total byte size: 3446 bytes (84.13%)
 
   /*-------------------------*/
  /*  Quick start            */
@@ -133,12 +133,20 @@ Total byte size: 3392 bytes (82.81%)
   /*-----------------------*/
  /*      Backlog          */
 /*------------------------/-------------------------------------------------
-v.0.8   New features: 
-        - Playing with a partner is possible. Fully tested at hotel.
+v.0.8   New features :
+		(used only 170 bytes more from v0.7.1, still 16% left in memory (554 bytes)) 
+        - Playing with a partner is possible. Fully tested at hotel with gift 
+          that expires.
+          
         - You don't need to clear girls' gift anymore. Script will delete gifts at 
-           every X vacation. X is defined in config section 
-        - Press L3 to delete gifts at the hotel
-        - If SaveBug is selected in config, Trace_1 will pulse the waiting seconds.
+           every X vacation. X is defined in config section. You can switch off 
+           deletion too. 
+           
+        - It has a mini script inside that will help you clear your girls' gift. 
+          In the config section, write how much you want to delete and press L3 
+          to delete them (you must be at the hotel, girls blue menu).
+          
+        - If EndSaveBug is selected in config, Trace_1 will pulse the waiting seconds.
 
 V0.7.1  - It's possible to adjust the day while the script is playing. You no more
           have to stop the script to do that.
@@ -314,9 +322,9 @@ define takePartner          = TRUE;
 // Gift Inventory management
 // -------------------------
 // Set to TRUE if you want to clear girl's gifts inventory
-define IWantToDeleteGift    = TRUE;
-define DeleteAt             = 1;  // every X vacations will delete at day 14
-define NbToDelete           = 5; // Number of gifts to delete
+define IWantToDeleteGift    = FALSE;
+define DeleteAt             = 2;  // every X vacations will delete at day 14
+define NbToDelete           = 15; // Number of gifts to delete
 
 // ---------------
 // Troubleshooting
