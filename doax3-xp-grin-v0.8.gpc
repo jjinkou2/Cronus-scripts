@@ -236,7 +236,7 @@ define Nb_Vacations               = 25;
 
 // will try to buy at every X vacations
 define IWantToBuyItem           = TRUE;// False = switch off autobuying.
-define Buy_At_X                 = 1;  // At 2 vacations
+define Buy_At_X                 = 2;  // At 2 vacations
 
 
 // ----------------------
@@ -322,9 +322,10 @@ define takePartner          = TRUE;
 // Gift Inventory management
 // -------------------------
 // Set to TRUE if you want to clear girl's gifts inventory
-define IWantToDeleteGift    = FALSE;
+define IWantToDeleteGift    = TRUE;
 define DeleteAt             = 2;  // every X vacations will delete at day 14
-define NbToDelete           = 15; // Number of gifts to delete
+define NbToDelete           = 15; // Number of gifts to delete (Note: choose less than 10
+								  // per vacation bc of the expired gifts)
 
 // ---------------
 // Troubleshooting
