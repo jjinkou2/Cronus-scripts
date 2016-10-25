@@ -134,7 +134,7 @@ Total byte size: 3446 bytes (84.13%)
  /*      Backlog          */
 /*------------------------/-------------------------------------------------
 v.0.8   New features :
-		(used only 170 bytes more from v0.7.1, still 16% left in memory (554 bytes)) 
+        (used only 170 bytes more from v0.7.1, still 16% left in memory (554 bytes)) 
         - Playing with a partner is possible. Fully tested at hotel with gift 
           that expires.
           
@@ -245,8 +245,7 @@ define Buy_At_X                 = 2;  // At 2 vacations
 
 // Select one or several Characters to level up,
 // comment / uncomment the characters you want
-// Important : Make sure the gifts inventories of your
-// ----------  selected characters are empty.
+
 
 int CharacterToPlay  // Don't touch this one
 
@@ -325,7 +324,7 @@ define takePartner          = TRUE;
 define IWantToDeleteGift    = TRUE;
 define DeleteAt             = 2;  // every X vacations will delete at day 14
 define NbToDelete           = 15; // Number of gifts to delete (Note: choose less than 10
-								  // per vacation bc of the expired gifts)
+                                  // per vacation bc of the expired gifts)
 
 // ---------------
 // Troubleshooting
@@ -373,7 +372,7 @@ define S_Start_Stage                = 30;
 define S_Start_RockPlay             = 31;
 define S_Exit_Mission               = 32;
 
-define S_Clear_Hotel 				= 40
+define S_Clear_Hotel                = 40
 define S_Hotel                      = 41;
 define S_Throw_Gift                 = 42;
 define S_Delete_Gift                = 43;
@@ -414,7 +413,7 @@ define cb_partner                  = 16;
 define cb_quit_mission             = 21;
 define cb_select_rock_stage        = 25;
 define cb_abort_rock_play          = 30;
-define cb_clear_hotel			   = 34;
+define cb_clear_hotel              = 34;
 define cb_hotel                    = 35;
 define cb_girl_closet              = 40;
 define cb_throw_gift               = 41;
@@ -424,7 +423,7 @@ define cb_paper                    = 45;
 define cb_go_bed                   = 47;
 
 define cb_end_vacation             = 50;
-define cb_skip_movies              = 51;
+define cb_skip_movies              = cb_end_vacation;
 define cb_return_title             = 55;
 
 // End Flags. 254 and 255 should never be used in the
@@ -642,12 +641,13 @@ data(
 
     EOC,
 
-//       skip end movie
-    cb_skip_movies,
+//       skip end movie same as End Vacation
+
+/*    cb_skip_movies,
         PS4_CIRCLE,      30,         // sigh i have to go !
         PS4_OPTIONS,     20,         // skip movie S+ optionnal
         PS4_OPTIONS,     100,        //
-    EOC,
+    EOC,*/
 
 //       End Vacation
     cb_end_vacation,
@@ -772,14 +772,14 @@ main {
         // Day States
         if (State == S_Exit_Mission) {
             if (NumDay == 1 && loop_event == Afternoon) 
-            							run_State(cb_quit_mission,2,S_Start_RockPlay);
+                                        run_State(cb_quit_mission,2,S_Start_RockPlay);
             else                        run_State(cb_quit_mission,0,S_Start_RockPlay);
         }
         if (State == S_Start_Day)       run_State(cb_select_rock_stage, 0, S_Start_RockPlay);
         if (State == S_Start_RockPlay)  run_State(cb_abort_rock_play, 0, RCQ());
         if (State == S_Debug)         State = S_Clear_Hotel;
         // At the Hotel
-        if (State == S_Clear_Hotel)		run_State(cb_clear_hotel, 0,S_Hotel);
+        if (State == S_Clear_Hotel)     run_State(cb_clear_hotel, 0,S_Hotel);
         if (State == S_Hotel) {
             if (IWantToBuyItem && NumDay == 1 && (!(loop_vacation % Buy_At_X)||(loop_vacation == 1)))         
                                         run_State(cb_hotel, 0, S_Owner_Shop);
@@ -814,18 +814,18 @@ main {
 
        // if (State == S_Debug)           run_State(cb_girl_closet, 0, S_Delete_Gift); //uncomment this to test deletion
         if (State == S_Delete_Gift) {
-            							loop_delete = (loop_delete + 1)  %  (NbToDelete + 1);
+                                        loop_delete = (loop_delete + 1)  %  (NbToDelete + 1);
             if (loop_delete)            run_State(cb_throw_gift,0,S_Delete_Gift);
             else                        Repeat_ThenGoto(PS4_CROSS,1,50, S_Go_Bed);
-                        				set_val(TRACE_6,loop_delete);
+                                        set_val(TRACE_6,loop_delete);
         }
 
         // End of hotel
         if (State == S_Go_Bed)  {        
-        	if (NumDay != 14) 			run_State(cb_go_bed, 0, S_End_Day);
-        	else 						run_State(cb_go_bed, 2, S_End_Day);
+            if (NumDay != 14)           run_State(cb_go_bed, 0, S_End_Day);
+            else                        run_State(cb_go_bed, 2, S_End_Day);
         }
-        	
+            
         if (State == S_End_Day)         State = EndDay();
 
         // End Vacation States
@@ -836,10 +836,10 @@ main {
         if (State == S_Clear_Movie2)    Repeat_ThenGoto(PS4_SQUARE,Nb_Notifs, 10, S_End_Vacation);
 
         if (State == S_End_Vacation) {
-            							loop_vacation = loop_vacation + 1;  
-            							set_val(TRACE_2,loop_vacation);
+                                        loop_vacation = loop_vacation + 1;  
+                                        set_val(TRACE_2,loop_vacation);
             if (loop_vacation < Nb_Vacations)   
-            							run_State(cb_end_vacation, 0, S_Clear_Vacation);
+                                        run_State(cb_end_vacation, 0, S_Clear_Vacation);
             else                        run_State(cb_end_vacation, 0, S_End_Game);
         }
 
@@ -970,18 +970,18 @@ function EndDay() {
 function RCQ(){
     loop_event = (loop_event + 1) % 4;
     if (NumDay == 1){
-    	if (loop_event == Evening)    Next_State = S_Exit_Mission;
+        if (loop_event == Evening)    Next_State = S_Exit_Mission;
         else                          Next_State = S_Clear_Hotel;
     }
     else {
         if (loop_event == Morning)  Next_State = S_Start_RockPlay;
         if (loop_event == Afternoon){
-    	    if (NumDay != 14)       Next_State = S_Exit_Mission;
+            if (NumDay != 14)       Next_State = S_Exit_Mission;
             else                    Next_State = S_Start_RockPlay;
         }
         if (loop_event == Evening)  {
-        							loop_event = Night; 
-        							Next_State = S_Clear_Hotel;
+                                    loop_event = Night; 
+                                    Next_State = S_Clear_Hotel;
         }
     }
     return Next_State;
