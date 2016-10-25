@@ -696,7 +696,6 @@ init {
         index_char  = 0; // StartGame() will ++ it
         set_val(TRACE_5,purchase_nb);
     }
-    set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
 }
 
 main {
@@ -946,6 +945,8 @@ function get_combo_index(combo_id) {
 }//-----------------------------------
 
 function StartGame(){
+    NumDay = 1;
+    set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
     loop_event = Afternoon;  // only Afternoon & evening
     index_char = index_char + 1;
     if (CharacterToPlay[index_char] == EndOfChars) index_char = 1;
@@ -957,7 +958,6 @@ function StartGame(){
 function EndDay() {
     NumDay = NumDay + 1;
     if (NumDay > Nb_Days) {
-        NumDay  = 1;
         if (optionalSMovie == TRUE) Next_State = S_Clear_Movie;
         else                        Next_State = S_End_Vacation;
     }
