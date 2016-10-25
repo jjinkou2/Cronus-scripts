@@ -15,7 +15,7 @@ Licence : MIT
 Author  : jinkou
 Credits : Huge thanks to contributors: Zaykho; Morganite
 
-Total byte size: 3446 bytes (84.13%)
+Total byte size: 3465 bytes (84.59%)
 
   /*-------------------------*/
  /*  Quick start            */
@@ -222,8 +222,20 @@ define HardGelEx                  = -6;
 
 define All                        = 255;
 
+  /*-----------------------------------*/
+ /*      Other  parameters            */
+/*-----------------------------------*/
+// which game to be selected in config
+define VolleyBall = 0; // don't modify this
+define Rock       = 2; // don't modify this
 
-  /*------------------------------------*/
+
+
+// ########################################################
+// You can modify below  ##################################
+// ########################################################
+
+/*------------------------------------*/
  /*  Configuration      (§Config)      */
 /*-------------------------------------/-----------------------------*/
 
@@ -238,6 +250,9 @@ define Nb_Vacations               = 25;
 define IWantToBuyItem           = TRUE;// False = switch off autobuying.
 define Buy_At_X                 = 2;  // At 2 vacations
 
+// Which game to play
+// possible values [VolleyBall, Rock]
+define PlayActivity             = VolleyBall;
 
 // ----------------------
 // Characters to Level up
@@ -369,8 +384,9 @@ define S_Start_Day                  = 20;
 define S_End_Day                    = 21;
 
 define S_Start_Stage                = 30;
-define S_Start_RockPlay             = 31;
-define S_Exit_Mission               = 32;
+define S_Start_Activity             = 31;
+define S_Select_Stage               = 32;
+define S_Exit_Mission               = 33;
 
 define S_Clear_Hotel                = 40
 define S_Hotel                      = 41;
@@ -411,8 +427,9 @@ define cb_right_char               = 10;
 define cb_start_vacation           = 15;
 define cb_partner                  = 16;
 define cb_quit_mission             = 21;
-define cb_select_rock_stage        = 25;
-define cb_abort_rock_play          = 30;
+define cb_goto_rock_stage          = 25;
+define cb_select_stage             = 30;
+define cb_abort_play               = 31;
 define cb_clear_hotel              = 34;
 define cb_hotel                    = 35;
 define cb_girl_closet              = 40;
@@ -563,17 +580,21 @@ data(
     EOC,
 
 //       One Day event
-    cb_select_rock_stage,
+    cb_goto_rock_stage,
         PS4_CIRCLE,      30,         // good morning !
         PS4_LEFT,        1,         //  Go to Rock Stage
         PS4_LEFT,        1,         //
         PS4_LEFT,        1,         //
     EOC,
 
-    cb_abort_rock_play,
+    cb_select_stage,
         PS4_CIRCLE,      15,        //  Select Rock Stage
-        PS4_DOWN,        1,         //
-        PS4_CIRCLE,      80,        //  Select Rock Game
+    EOC,
+
+    cb_abort_play,
+        PS4_DOWN,        1,         // Select Volley Ball
+        PS4_DOWN,        1,         // Select Rock Game
+        PS4_CIRCLE,      80,        //  
 
         PS4_OPTIONS,     1,         //  Abort Mission
         PS4_UP,          1,         //
@@ -737,7 +758,7 @@ main {
         if (event_press(PS4_L2)) {
             set_val(TRACE_5,loop_event);
             SwitchLED(GREEN);
-            State = S_Start_RockPlay;
+            State = S_Select_Stage;
         }
 
         // R3 to test a whole State
@@ -771,18 +792,21 @@ main {
         // Day States
         if (State == S_Exit_Mission) {
             if (NumDay == 1 && loop_event == Afternoon) 
-                                        run_State(cb_quit_mission,2,S_Start_RockPlay);
-            else                        run_State(cb_quit_mission,0,S_Start_RockPlay);
+                                        run_State(cb_quit_mission,2,S_Select_Stage);
+            else                        run_State(cb_quit_mission,0,S_Select_Stage);
         }
-        if (State == S_Start_Day)       run_State(cb_select_rock_stage, 0, S_Start_RockPlay);
-        if (State == S_Start_RockPlay)  run_State(cb_abort_rock_play, 0, RCQ());
+        if (State == S_Start_Day)       run_State(cb_goto_rock_stage, 0, S_Select_Stage);
+        //if (State == S_Select_Stage)    run_State(cb_select_stage, 0, S_Start_Activity);
+        if (State == S_Select_Stage)    Repeat_ThenGoto(PS4_CIRCLE,1,15, S_Start_Activity);
+        if (State == S_Start_Activity)  run_State(cb_abort_play, PlayActivity, RCQ());
+
         if (State == S_Debug)         State = S_Clear_Hotel;
         // At the Hotel
         if (State == S_Clear_Hotel)     run_State(cb_clear_hotel, 0,S_Hotel);
         if (State == S_Hotel) {
-            if (IWantToBuyItem && NumDay == 1 && (!(loop_vacation % Buy_At_X)||(loop_vacation == 1)))         
+            if (IWantToBuyItem && NumDay == 1 && (!(loop_vacation % Buy_At_X)||(loop_vacation == 1)))
                                         run_State(cb_hotel, 0, S_Owner_Shop);
-                                        
+
             else                        run_State(cb_hotel, 0, S_Throw_Gift);
         }
 
@@ -974,10 +998,10 @@ function RCQ(){
         else                          Next_State = S_Clear_Hotel;
     }
     else {
-        if (loop_event == Morning)  Next_State = S_Start_RockPlay;
+        if (loop_event == Morning)  Next_State = S_Select_Stage;
         if (loop_event == Afternoon){
             if (NumDay != 14)       Next_State = S_Exit_Mission;
-            else                    Next_State = S_Start_RockPlay;
+            else                    Next_State = S_Select_Stage;
         }
         if (loop_event == Evening)  {
                                     loop_event = Night; 
