@@ -207,6 +207,11 @@ define EelE                       = 18;
 define DecupleI                   = 21;
 define SweetyA                    = -16;
 define SweetyI                    = -24;
+define PistachioA                 = -16;
+define PistachioI                 = -24;
+define ScallopsA                  = -16;
+define ScallopsI                 = -24;
+
 
 // tab 1
 define Sidecar                    =  2;
@@ -493,8 +498,8 @@ int savedCheckSum;
 //---------------
 int loop_delete;                           // delete gift counter
    // array that stores each character vacation counter
-int Nb_Vacation_Character;
-int Vacation_Character_1;
+int Nb_Vacation_Character[9];
+/*int Vacation_Character_1;
 int Vacation_Character_2;
 int Vacation_Character_3;
 int Vacation_Character_4;
@@ -502,7 +507,7 @@ int Vacation_Character_5;
 int Vacation_Character_6;
 int Vacation_Character_7;
 int Vacation_Character_8;
-int Vacation_Character_9;
+int Vacation_Character_9;*/
 
 
 
@@ -692,7 +697,6 @@ init {
         ItemToRow   = Items[3];
         if  (Items[4]== All)  ItemPaper = 1;
         else                  ItemPaper = Items[4];
-        index_char  = 0; // StartGame() will ++ it
     }
     else {
     // Config seems to be the same => reload  from EEPROM
@@ -700,7 +704,6 @@ init {
         Item_Tab        = Items[index_item];
         ItemToRow       = Items[index_item + 2];
         set_CurrentItem_AndPaper();
-        index_char  = 0; // StartGame() will ++ it
         set_val(TRACE_5,purchase_nb);
     }
 }
@@ -795,7 +798,7 @@ main {
         // Shopping Items at X vacations
         if (State == S_Owner_Shop)      run_State(cb_owner_shop, 0, S_Select_Tab);
 
-        if (State == S_Debug)           run_State(cb_owner_shop, 0, S_Select_Tab); //uncomment this to test items to buy
+        //if (State == S_Debug)           run_State(cb_owner_shop, 0, S_Select_Tab); //uncomment this to test items to buy
         // ============== Start loop Debug ===============================
         if (State == S_Select_Tab)      Repeat_ThenGoto(PS4_RIGHT, Item_Tab, 2, S_Select_Item);
         if (State == S_Select_Item)     select_Item_ThenGoto(S_Buy_Item);
@@ -803,9 +806,9 @@ main {
         if (State == S_Select_Paper)    Repeat_ThenGoto(PS4_RIGHT, ItemPaper, 2, S_Wrap);
         if (State == S_Wrap)            run_State(cb_paper, 0, S_Exit_Shop);
         // ============== END loop Debug ===============================
-        if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Debug);  // uncomment this to test items to buy
+        //if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Debug);  // uncomment this to test items to buy
 
-        //if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Throw_Gift); //comment this to test items to buy
+        if (State == S_Exit_Shop)       exit_Shop_ThenGoto(S_Throw_Gift); //comment this to test items to buy
 
 
         // Delete gift ?
@@ -954,11 +957,13 @@ function StartGame(){
     NumDay = 1;
     set_val(TRACE_4,NumDay);  // Trace 4 will display the # day
     loop_event = Afternoon;  // only Afternoon & evening
-    index_char = index_char + 1;
+	index_char = index_char + 1;
     if (CharacterToPlay[index_char] == EndOfChars) index_char = 1;
     Selected_Char = CharacterToPlay[index_char];
     // inc nb of vacation of next character => used for gift deletion
-    Nb_Vacation_Character[index_char] = Nb_Vacation_Character[index_char] + 1; 
+	  = Nb_Vacation_Character[index_char - 1] + 1; 
+
+
     return (S_Start_Intro);
 }
 
