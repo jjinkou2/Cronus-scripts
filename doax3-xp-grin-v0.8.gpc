@@ -8,7 +8,7 @@
   / ___|_ __(_)_ __   \ \/ /  _ \
  | |  _| '__| | '_ \   \  /| |_) |
  | |_| | |  | | | | |  /  \|  __/
-  \____|_|  |_|_| |_| /_/\_\_|                                        V0.8
+  \____|_|  |_|_| |_| /_/\_\_|                                        V0.8.1
 ___________________________________________________________________________
 
 Licence : MIT
@@ -133,27 +133,27 @@ Total byte size: 3446 bytes (84.13%)
   /*-----------------------*/
  /*      Backlog          */
 /*------------------------/-------------------------------------------------
+V.0.8.1 - various bug fix and time adjustment to play with "EndSaveBug". 
+            - Script is less aggressive in timer in "now loading" screens. 
+            - Delete gifts: add an array that count each character vacation, so
+                            that the script only activate deletion on specific 
+                            character.
 v.0.8   New features :
         (used only 170 bytes more from v0.7.1, still 16% left in memory (554 bytes)) 
         - Playing with a partner is possible. Fully tested at hotel with gift 
           that expires.
-          
+
         - You don't need to clear girls' gift anymore. Script will delete gifts at 
            every X vacation. X is defined in config section. You can switch off 
            deletion too. 
-           
+
         - It has a mini script inside that will help you clear your girls' gift. 
           In the config section, write how much you want to delete and press L3 
           to delete them (you must be at the hotel, girls blue menu).
-          
+
         - If EndSaveBug is selected in config, Trace_1 will pulse the waiting seconds.
 
-V0.7.1  - It's possible to adjust the day while the script is playing. You no more
-          have to stop the script to do that.
-        - Change in config section : adding a new parameter to switch buying On/Off
-        - Bug fix for S+ movie.
-        - Code refactoring for memory optimisation.
-
+V0.7.1  Adjust the day while the script is playing. Switch buying On/Off.
 V0.7    New Features: No more double items bought when switching your Cronus On.
 V0.6    New Feature: Characters to level up are selectable
 v 0.5.1 Huge boost in time thanks to Zaykho:
@@ -205,7 +205,7 @@ define AsariA                     = -7;
 define AsariI                     = -15;
 define EelE                       = 18;
 define DecupleI                   = 21;
-define SweetyA	                  = -16;
+define SweetyA                    = -16;
 define SweetyI                    = -24;
 
 // tab 1
@@ -414,7 +414,6 @@ define cb_partner                  = 16;
 define cb_quit_mission             = 21;
 define cb_select_rock_stage        = 25;
 define cb_abort_rock_play          = 30;
-//define cb_clear_hotel              = 34;
 define cb_hotel                    = 35;
 define cb_girl_closet              = 40;
 define cb_throw_gift               = 41;
@@ -478,7 +477,6 @@ int loop_vacation                   = 1;
 int loop_notif                      = 1;
 int loop_button;
 int wait_time;                              // time used between repeating button
-int loop_delete;                           // delete gift
 int Times;
 
 // combo
@@ -493,6 +491,8 @@ int savedCheckSum;
 
 // Deleting Gift
 //---------------
+int loop_delete;                           // delete gift counter
+   // array that stores each character vacation counter
 int Nb_Vacation_Character;
 int Vacation_Character_1;
 int Vacation_Character_2;
@@ -523,7 +523,7 @@ data(
         PS4_CIRCLE,      50,         //  Travel to zack island
         PS4_CIRCLE,      100,        //
         PS4_OPTIONS,     10,         //  skip intro video
-        PS4_OPTIONS,     100,        //
+        PS4_OPTIONS,     150,        //
     EOC,
 
 //      ...
@@ -598,7 +598,6 @@ data(
         PS4_CIRCLE,      150,       //  Play Aborted
     EOC,
 
-//    cb_clear_hotel,
     cb_hotel,
         PS4_CIRCLE,      200,         // End Of Day
         PS4_SQUARE,      80,        // clear optional notification
@@ -625,7 +624,6 @@ data(
         PS4_LEFT,        2,         //
         PS4_CIRCLE,      5,         // throw gift away
         PS4_SQUARE,      2,         // Re-select first gift 
-    //    PS4_CROSS,       50,        // exit girl's closet
     EOC,
 
     // Buy swimsuit / Ticket
@@ -658,20 +656,12 @@ data(
 
     EOC,
 
-//       skip end movie same as End Vacation
-
-/*    cb_skip_movies,
-        PS4_CIRCLE,      30,         // sigh i have to go !
-        PS4_OPTIONS,     20,         // skip movie S+ optionnal
-        PS4_OPTIONS,     100,        //
-    EOC,*/
-
+//       skip end movie is the same as End Vacation
 //       End Vacation
     cb_end_vacation,
         PS4_CIRCLE,      30,         // sigh i have to go !
         PS4_OPTIONS,     20,         // skip End movie
         PS4_OPTIONS,     100,        //
-        //PS4_CIRCLE,      50,         //
     EOC,
 
     cb_return_title,
@@ -822,7 +812,7 @@ main {
         // if (State == S_Debug)         State = S_Throw_Gift;
         if (State == S_Throw_Gift) {
             if (IWantToDeleteGift  && NumDay == 14  
-            	&&  !(Nb_Vacation_Character[index_char] % DeleteAt)) // Nb vacation == DeleteAt
+                &&  !(Nb_Vacation_Character[index_char] % DeleteAt)) // Nb vacation == DeleteAt
                                         run_State(cb_girl_closet,0, S_Delete_Gift);
             else                        State = S_Go_Bed;
         }
@@ -968,7 +958,7 @@ function StartGame(){
     if (CharacterToPlay[index_char] == EndOfChars) index_char = 1;
     Selected_Char = CharacterToPlay[index_char];
     // inc nb of vacation of next character => used for gift deletion
-	Nb_Vacation_Character[index_char] = Nb_Vacation_Character[index_char] + 1; 
+    Nb_Vacation_Character[index_char] = Nb_Vacation_Character[index_char] + 1; 
     return (S_Start_Intro);
 }
 
