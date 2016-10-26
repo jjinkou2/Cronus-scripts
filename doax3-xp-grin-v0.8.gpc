@@ -588,9 +588,9 @@ data(
     cb_abort_rock_play,
         PS4_CIRCLE,      15,        //  Select Rock Stage
         PS4_DOWN,        1,         //
-        PS4_CIRCLE,      80,        //  Select Rock Game
+        PS4_CIRCLE,      100,        //  Select Rock Game
 
-        PS4_OPTIONS,     1,         //  Abort Play
+        PS4_OPTIONS,     5,         //  Abort Play
         PS4_UP,          1,         //
         PS4_CIRCLE,      1,         //
         PS4_LEFT,        1,         //
@@ -833,7 +833,7 @@ main {
                                         loop_delete = (loop_delete + 1)  %  (NbToDelete + 1);
             if (loop_delete)            run_State(cb_throw_gift,0,S_Delete_Gift);
             else                        Repeat_ThenGoto(PS4_CROSS,1,50, S_Go_Bed);
-                                        set_val(TRACE_6,loop_delete);
+            set_val(TRACE_6,loop_delete);
         }
 
         // End of hotel
