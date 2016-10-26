@@ -352,7 +352,7 @@ define Nb_sec               = 60; // how many sec to wait, Trace_1 will pulse th
 /*-----------------------*/
 
 define Nb_Days                      = 14;
-define Nb_Notifs                    = 10;
+define Nb_Notifs                    = 3;
 define Night                        = 0;
 define Morning                      = 1;
 define Afternoon                    = 2;
@@ -656,7 +656,7 @@ data(
     cb_end_vacation,
         PS4_CIRCLE,      30,         // sigh i have to go !
         PS4_OPTIONS,     20,         // skip End movie
-        PS4_OPTIONS,     100,        //
+        PS4_OPTIONS,     80,        //
     EOC,
 
     cb_return_title,
