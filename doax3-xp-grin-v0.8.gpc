@@ -197,20 +197,18 @@ define paper_Premium               = 10;
  /*      List of Items      */
 /*-------------------------*/
 // tab 0
-define MummyA                     =  2;
-define MummyI                     = -6;
-define PeaceD                     =  8;
-define PeaceH                     =  6;
-define AsariA                     = -7;
-define AsariI                     = -15;
-define EelE                       = 18;
-define DecupleI                   = 21;
+define PistachioA                 =  2;
+define PistachioI                 = -6;
+define ScallopsA                  = -7;
+define ScallopsI                  = -15;
+define LabyrinthA                 =  14;
+define LabyrinthF                 =  12;
 define SweetyA                    = -16;
 define SweetyI                    = -24;
-define PistachioA                 = -16;
-define PistachioI                 = -24;
-define ScallopsA                  = -16;
-define ScallopsI                 = -24;
+define MillsA                     = 29;
+define MillsI                     = 21;
+define NorimakiE				  = 18;
+define NorimakiA                  = 20
 
 
 // tab 1
@@ -285,7 +283,7 @@ int Items;// dont' touch this one.
 
 // Some Examples
 // take all Asari in silver
-int Tab0 = 0, FromRow0 = AsariA,    ToRow0 = AsariI,   Paper0 = paper_Silver;
+//int Tab0 = 0, FromRow0 = AsariA,    ToRow0 = AsariI,   Paper0 = paper_Silver;
  // only one for Helena
 //int Tab1 = 0, FromRow1 = MummyA,    ToRow1 = MummyI,   Paper1 = paper_Helena;
 // a range of tickets
@@ -297,10 +295,8 @@ int Tab0 = 0, FromRow0 = AsariA,    ToRow0 = AsariI,   Paper0 = paper_Silver;
 //int Tab5 = 2, FromRow5 = -3,        ToRow5 = 3,        Paper_5 = All;
 
 // perso
-//int Tab0 = 0, FromRow0 = -13,    ToRow0 = AsariI,   Paper0 = paper_Silver;
-//int Tab0 = 0, FromRow0 = SweetyA, ToRow0 = SweetyI, Paper0 = paper_Momiji;
-
-//int Tab2 = 2, FromRow2 = Ticket1, ToRow2 = Ticket4,  Paper2 = paper_Silver;
+int Tab0 = 0, FromRow0 = PistachioA, ToRow0 = ScallopsI,   Paper0 = paper_Silver;
+int Tab2 = 2, FromRow2 = LabyrinthF, ToRow2 = LabyrinthA,  Paper2 = paper_Silver;
 
 int EndofItems = 255;// dont' touch this one.
 
