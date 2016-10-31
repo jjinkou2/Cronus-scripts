@@ -8,14 +8,14 @@
   / ___|_ __(_)_ __   \ \/ /  _ \
  | |  _| '__| | '_ \   \  /| |_) |
  | |_| | |  | | | | |  /  \|  __/
-  \____|_|  |_|_| |_| /_/\_\_|                                        V0.8.1
+  \____|_|  |_|_| |_| /_/\_\_|                                        V0.8.2
 ___________________________________________________________________________
 
 Licence : MIT
 Author  : jinkou
-Credits : Huge thanks to contributors: Zaykho; Morganite
+Credits : Huge thanks to contributors: Zaykho; Morganite; Corax77
 
-Total byte size: 3446 bytes (84.18%)
+Total byte size: 3481 bytes (84.99%)
 
   /*-------------------------*/
  /*  Quick start            */
@@ -133,6 +133,10 @@ Total byte size: 3446 bytes (84.18%)
   /*-----------------------*/
  /*      Backlog          */
 /*------------------------/-------------------------------------------------
+v.0.8.2 Bug fix : 
+		- Safer gifts deletion thanks to Corax77.
+		- Ending will works either with presence or not of the end save bug.
+	
 V.0.8.1 - various bug fix and time adjustment to play with "EndSaveBug". 
             - Script is less aggressive in timer in "now loading" screens. 
             - Delete gifts: add an array that count each character vacation, so
@@ -234,7 +238,7 @@ define All                        = 255;
 // number of Vacation to loop
 // --------------------------
 
-define Nb_Vacations               = 25;
+define Nb_Vacations               = 30;
 
 
 // will buy at the 1rst vacation then at every X vacations
@@ -250,7 +254,7 @@ define Buy_At_X                 = 2;  // At 2 vacations
 // comment / uncomment the characters you want
 
 
-int CharacterToPlay  // Don't touch this one
+int CharacterToPlay;  // Don't touch this one
 
 //int Character0                    = Kasumi;
 //int Character1                    = Momiji;
@@ -262,7 +266,7 @@ int Character6                    = NyoTengu;
 //int Character7                    = Kokoro;
 int Character8                    = Ayane;
 
-int EndOfChars = 255  // Don't touch this one
+int EndOfChars = 255;  // Don't touch this one
 
 
 
@@ -295,8 +299,8 @@ int Items;// dont' touch this one.
 //int Tab5 = 2, FromRow5 = -3,        ToRow5 = 3,        Paper_5 = All;
 
 // perso
-int Tab0 = 0, FromRow0 = PistachioA, ToRow0 = ScallopsI,   Paper0 = paper_Silver;
-int Tab2 = 2, FromRow2 = LabyrinthF, ToRow2 = LabyrinthA,  Paper2 = paper_Silver;
+int Tab0 = 0, FromRow0 = NorimakiE, ToRow0 = NorimakiA,   Paper0 = paper_Silver;
+int Tab2 = 0, FromRow2 = LabyrinthF, ToRow2 = LabyrinthA,  Paper2 = paper_Silver;
 
 int EndofItems = 255;// dont' touch this one.
 
@@ -324,8 +328,8 @@ define takePartner          = TRUE;
 // -------------------------
 // Set to TRUE if you want to clear girl's gifts inventory
 define IWantToDeleteGift    = TRUE;
-define DeleteAt             = 2;  // every X vacations will delete at day 14
-define NbToDelete           = 10; // Number of gifts to delete (Note: choose less than 10
+define DeleteAt             = 3;  // every X vacations will delete at day 14
+define NbToDelete           = 36; // Number of gifts to delete (Note: choose less than 12
                                   // per vacation bc of the expired gifts)
 
 // ---------------
@@ -335,7 +339,7 @@ define NbToDelete           = 10; // Number of gifts to delete (Note: choose les
 // Until TN or Sony correct this random bug, this is a not-always working solution
 
 define SAVE_BUG_IS_PRESENT  = TRUE;
-define Nb_sec               = 60; // how many sec to wait, Trace_1 will pulse the second
+define Nb_sec               = 90; // how many sec to wait, Trace_1 will pulse the second
 
 /*-------------  End of configuration ---------------------------------------------*/
 
@@ -610,7 +614,7 @@ data(
     EOC,
     cb_throw_gift,
         PS4_CIRCLE,      10,         // select gift
-        PS4_LEFT,        2,         //
+        PS4_RIGHT,        2,         //
         PS4_CIRCLE,      5,         //
         PS4_LEFT,        2,         //
         PS4_CIRCLE,      5,         // throw gift away
@@ -656,7 +660,6 @@ data(
     EOC,
 
     cb_return_title,
-        PS4_SQUARE,      20,        // view excitement level
         PS4_CIRCLE,      250,         // return to title
     EOC,
 
