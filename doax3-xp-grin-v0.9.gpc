@@ -37,7 +37,7 @@ Total byte size: 3481 bytes (84.99%)
        Note: You may have to resynchronise the day number by pressing several L1
        (look at TRACE_4 which displays the day number)
 
-       Press L2 to start the next RCQ.
+       Press L2 to start the next PSRQ.
 
     4) Normal Ending of script: Led is BLUE and the ending screen is
        Character's excitement screen (with maybe notifications).
@@ -46,14 +46,14 @@ Total byte size: 3481 bytes (84.99%)
     Script commands
     ---------------
 
-      +----------+------------+------------------+---------------------------+
-      | Button   | Script is   |      Action      |           Screen           |
-      +----------+------------+------------------+---------------------------+
-      | Triangle | Stopped    | Start the script  | "Press a button"           |
+      +----------+-----------+-------------------+---------------------------+
+      | Button   | Script is  |      Action       |           Screen           |
+      +----------+-----------+-------------------+---------------------------+
+      | Triangle | Stopped    | Start the script  | "Press any button"         |
       | R1       | Running    | Stop the script   | Every where                |
       | R2       | Stopped    | Start a day       | Is at beginning of the day |
       | L1       | Whatever   | Day+1 in Trace_4  | Every where                |
-      | L2       | Stopped    | Start RCQ         | is at RCQ stage            |
+      | L2       | Stopped    | Start PSRQ        | is at PSRQ stage           |
       | L3       | Stopped    | Delete Gift       | At hotel                   |
       | R3       | Stopped    | Debug a state     | Every where                |
       +----------+------------+------------------+---------------------------+
@@ -174,15 +174,18 @@ v0.1    First version
   /*-----------------------*/
  /*      Characters       */
 /*-----------------------*/
-define Kasumi                      = 0;
-define Momiji                      = 2;
-define Hitomi                      = 4;
-define Helena                      = 6;
-define MarieRose                   = 8;
-define Ayane                       = 12;
-define Kokoro                      = 14;
-define NyoTengu                    = 16;
-define Honoka                      = 18;
+define Ayane                       = 0;
+define Kokoro                      = 2;
+define Misaki                      = 4;
+define NyoTengu                    = 6;
+define Honoka                      = 8;
+define MarieRose                   = 10;
+define Helena                      = 12;
+define Hitomi                      = 14;
+define Leifang                     = 16;
+define Momiji                      = 18;
+define Kasumi                      = 20;
+
 
 // Paper wrapping
 define paper_Silver                = 0;
@@ -200,6 +203,10 @@ define paper_Premium               = 10;
   /*-------------------------*/
  /*      List of Items      */
 /*-------------------------*/
+define TabSwimsuit             = 0;
+define TabItem                 = 1;
+define TabTicket               = 2;
+
 // tab 0
 define SalmonA                 = -1;
 define SalmonI                 = -9;
@@ -219,10 +226,10 @@ define NorimakiA                  = 20
 define Sidecar                    =  2;
 
 //tab2
-define Ticket1                    = -1;
-define Ticket2                    =  0;
-define Ticket3                    =  1;
-define Ticket4                    =  2;
+define DangerousTicket            = -1;
+define TemptingTicket             = -2;
+define ForbiddenTicket            = -3;
+define SecretTicket               = -4;
 define MoebieusSlow               =  3;
 define HardGelEx                  = -6;
 
@@ -258,13 +265,15 @@ int CharacterToPlay;  // Don't touch this one
 
 //int Character0                    = Kasumi;
 //int Character1                    = Momiji;
-int Character2                    = Hitomi;
-//int Character3                    = Helena;
-//int Character4                    = MarieRose;
-int Character5                    = Honoka;
-int Character6                    = NyoTengu;
-//int Character7                    = Kokoro;
-int Character8                    = Ayane;
+//int Character2                    = Leifang;
+int Character3                    = Hitomi;
+//int Character4                    = Helena;
+//int Character5                    = MarieRose;
+//int Character6                    = Honoka;
+//int Character7                    = NyoTengu;
+//int Character8                    = Misaki;
+//int Character9                    = Kokoro;
+//int Character10                    = Ayane;
 
 int EndOfChars = 255;  // Don't touch this one
 
@@ -299,7 +308,7 @@ int Items;// dont' touch this one.
 //int Tab5 = 2, FromRow5 = -3,        ToRow5 = 3,        Paper_5 = All;
 
 // perso
-int Tab0 = 0, FromRow0 = SalmonA, ToRow0 = SalmonI,   Paper0 = paper_Silver;
+int Tab0 = TabTicket, FromRow0 = DangerousTicket, ToRow0 = SecretTicket,   Paper0 = paper_Silver;
 //int Tab2 = 0, FromRow2 = PistachioA, ToRow2 = PistachioI,  Paper2 = paper_Silver;
 
 int EndofItems = 255;// dont' touch this one.
@@ -375,7 +384,7 @@ define S_Start_Day                  = 20;
 define S_End_Day                    = 21;
 
 define S_Start_Stage                = 30;
-define S_Start_RockPlay             = 31;
+define S_Start_Poolside             = 31;
 define S_Exit_Mission               = 32;
 
 define S_Clear_Hotel                = 40
@@ -417,8 +426,8 @@ define cb_right_char               = 10;
 define cb_start_vacation           = 15;
 define cb_partner                  = 16;
 define cb_quit_mission             = 21;
-define cb_select_rock_stage        = 25;
-define cb_abort_rock_play          = 30;
+define cb_select_poolside          = 25;
+define cb_abort_relax              = 30;
 define cb_hotel                    = 35;
 define cb_girl_closet              = 40;
 define cb_throw_gift               = 41;
@@ -525,20 +534,17 @@ data(
 //      Select Character
 //            Left Side of Marie Rose
     cb_left_char,
-        PS4_LEFT,        1,         //  Kasumi
-        PS4_LEFT,        1,         //  Momiji
-        PS4_LEFT,        1,         //  Hitomi
-        PS4_LEFT,        1,         //  Helena
-        PS4_CIRCLE,      150,       //  Confirm choice
-    EOC,
-
-//            Right Side of Marie Rose
-    cb_right_char,
-        PS4_RIGHT,       1,         //  Ayane
-        PS4_RIGHT,       1,         //  Kokoro
-        PS4_RIGHT,       1,         //  NyoTengu
-        PS4_RIGHT,       1,         //  Honoka
-        PS4_CIRCLE,      150,       //  Confirm choice
+        PS4_RIGHT,        1,         //  To reach Ayane
+        PS4_RIGHT,        1,         //  Kokoro
+        PS4_RIGHT,        1,         //  Misaki
+        PS4_RIGHT,        1,         //  Nyo
+        PS4_RIGHT,        1,         //  Honoka
+        PS4_RIGHT,        1,         //  MR
+        PS4_RIGHT,       1,         //  Helena
+        PS4_RIGHT,       1,         //  Hitomi
+        PS4_RIGHT,       1,         //  Leifang
+        PS4_RIGHT,       1,         //  Momiji
+        PS4_CIRCLE,      150,       //  Kasumi Confirm choice
     EOC,
 
 //      Start Vacation
@@ -554,12 +560,11 @@ data(
         PS4_CIRCLE,      240,       //  offset = 2 for taking a partner
     EOC,
 
-//      RCQ
+//      PSRQ
     cb_quit_mission,
-        PS4_LEFT,       1,         //  from Rock stage
-        PS4_LEFT,       1,         //  offset from day 1
+        PS4_LEFT,       1,         //  from Nikki beach
         PS4_LEFT,       1,         //
-        PS4_CIRCLE,     80,        //  Select Pool
+        PS4_CIRCLE,     80,        //  Select Pool        
         PS4_TOUCH,      10,        //  Owner mode
         PS4_UP,         2,         //  Select mission
         PS4_UP,         2,
@@ -567,30 +572,20 @@ data(
         PS4_RIGHT,      10,         // Yes
         PS4_CIRCLE,     50,
         PS4_TOUCH,      2,          // exit Owner mode
-        PS4_CROSS,      50,         // exit menu
-        PS4_LEFT,        1,         //  Go to Rock Stage
-        PS4_LEFT,        1,         //
-        PS4_LEFT,        1,         //
     EOC,
 
 //       One Day event
-    cb_select_rock_stage,
+    cb_select_poolside,
         PS4_CIRCLE,      80,         // good morning !
-        PS4_LEFT,        1,         //  Go to Rock Stage
-        PS4_LEFT,        1,         //
-        PS4_LEFT,        1,         //
+        PS4_CIRCLE,      80,        //  Select poolside
     EOC,
 
-    cb_abort_rock_play,
-        PS4_CIRCLE,      15,        //  Select Rock Stage
+	cb_abort_relax,
         PS4_DOWN,        1,         //
-        PS4_CIRCLE,      100,        //  Select Rock Game
+        PS4_CIRCLE,      100,        //  Select Relax
 
-        PS4_OPTIONS,     5,         //  Abort Play
-        PS4_UP,          1,         //
-        PS4_CIRCLE,      1,         //
-        PS4_LEFT,        1,         //
-        PS4_CIRCLE,      150,       //  Play Aborted
+        PS4_OPTIONS,     5,         //  skip
+        PS4_OPTIONS,     150,        //  skip
     EOC,
 
     cb_hotel,
@@ -738,11 +733,11 @@ main {
             SwitchLED(GREEN);
         }
 
-        // L2 to start at the next RCQ
+        // L2 to start at the next PSRQ
         if (event_press(PS4_L2)) {
             set_val(TRACE_5,loop_event); 
             SwitchLED(GREEN);
-            State = S_Start_RockPlay;
+            State = S_Start_Poolside;
         }
 
         // R3 to test a whole State
@@ -772,12 +767,12 @@ main {
         // ------------
         if (State == S_Exit_Mission) {
             if (NumDay == 1 && loop_event == Afternoon) 
-                                        run_State(cb_quit_mission,2,S_Start_RockPlay);
-            else                        run_State(cb_quit_mission,0,S_Start_RockPlay);
+                                        run_State(cb_quit_mission,0,S_Start_Poolside);
+            else                        run_State(cb_quit_mission,6,S_Start_Poolside);
         }
-        if (State == S_Start_Day)       run_State(cb_select_rock_stage, 0, S_Start_RockPlay);
-        if (State == S_Start_RockPlay)  run_State(cb_abort_rock_play, 0, RCQ());
-        //if (State == S_Debug)         State = S_Hotel;
+        if (State == S_Start_Day)       run_State(cb_select_poolside, 0, S_Start_Poolside);
+        if (State == S_Start_Poolside)  run_State(cb_abort_relax, 0, PSRQ());
+        if (State == S_Debug)         State = S_Start_Poolside;
 
 		// At the Hotel
         // ------------
@@ -973,7 +968,7 @@ function EndDay() {
     return Next_State;
 }
 
-function RCQ(){
+function PSRQ(){
     loop_event = (loop_event + 1) % 4;
     if (NumDay == 1){
         if (loop_event == Evening)    Next_State = S_Exit_Mission;
@@ -981,10 +976,10 @@ function RCQ(){
        //         else                          Next_State = S_Clear_Hotel;
     }
     else {
-        if (loop_event == Morning)  Next_State = S_Start_RockPlay;
+        if (loop_event == Morning)  Next_State = S_Start_Poolside;
         if (loop_event == Afternoon){
             if (NumDay != 14)       Next_State = S_Exit_Mission;
-            else                    Next_State = S_Start_RockPlay;
+            else                    Next_State = S_Start_Poolside;
         }
         if (loop_event == Evening)  {
                                     loop_event = Night; 
