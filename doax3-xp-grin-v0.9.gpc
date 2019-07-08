@@ -8,14 +8,14 @@
   / ___|_ __(_)_ __   \ \/ /  _ \
  | |  _| '__| | '_ \   \  /| |_) |
  | |_| | |  | | | | |  /  \|  __/
-  \____|_|  |_|_| |_| /_/\_\_|                                        V0.8.2
+  \____|_|  |_|_| |_| /_/\_\_|                                        V0.9
 ___________________________________________________________________________
 
 Licence : MIT
 Author  : jinkou
 Credits : Huge thanks to contributors: Zaykho; Morganite; Corax77
 
-Total byte size: 3481 bytes (84.99%)
+Total byte size: 3425 bytes (83,62%)
 
   /*-------------------------*/
  /*  Quick start            */
@@ -26,7 +26,7 @@ Total byte size: 3481 bytes (84.99%)
 
     2) Start the script :
         a) with Triangle if you are at the beginning of the game.
-           (Screen "Press a button")
+           (Screen "Press any button")
 
         b) with R2 if you are at the beginning of the day.
 
@@ -133,6 +133,9 @@ Total byte size: 3481 bytes (84.99%)
   /*-----------------------*/
  /*      Backlog          */
 /*------------------------/-------------------------------------------------
+v.0.9   Updated with Leifang and Misaki.
+		Use now Pool side relax quit (PSRQ) instead of rock climb quit
+
 v.0.8.2 Bug fix : 
 		- Safer gifts deletion thanks to Corax77.
 		- Ending will works either with presence or not of the end save bug.
@@ -143,7 +146,6 @@ V.0.8.1 - various bug fix and time adjustment to play with "EndSaveBug".
                             that the script only activate deletion on specific 
                             character.
 v.0.8   New features :
-        (used only 170 bytes more from v0.7.1, still 16% left in memory (554 bytes)) 
         - Playing with a partner is possible. Fully tested at hotel with gift 
           that expires.
 
