@@ -53,7 +53,7 @@ Total byte size: 3425 bytes (83,62%)
       | R1       | Running    | Stop the script   | Every where                |
       | R2       | Stopped    | Start a day       | Is at beginning of the day |
       | L1       | Whatever   | Day+1 in Trace_4  | Every where                |
-      | L2       | Stopped    | Start PSRQ        | is at PSRQ stage           |
+      | L2       | Stopped    | Start PSRQ        | at poolside girlmode       |
       | L3       | Stopped    | Delete Gift       | At hotel                   |
       | R3       | Stopped    | Debug a state     | Every where                |
       +----------+------------+------------------+---------------------------+
