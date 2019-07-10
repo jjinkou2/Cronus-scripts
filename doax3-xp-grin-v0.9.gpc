@@ -112,10 +112,10 @@ Total byte size: 3425 bytes (83,62%)
         /*------------------------/
 
         +---------+-----------------+----------------------+---------------------+
-        | EEPROM  |    Used For      |      Saved at        |    Every X times     |
+        | EEPROM  |    Used For     |      Saved at        |    Every X times    |
         +---------+-----------------+----------------------+---------------------+
-        | PVAR_15 | Checksum config  | ConfigHasChanged()   | 1 at Cronus Reboot   |
-        | SPVAR_2 | purchase_nb      | exit_Shop_ThenGoto() | 1 at vacation = X    |
+        | PVAR_15 | Checksum config | ConfigHasChanged()   | 1 at Cronus Reboot  |
+        | SPVAR_2 | purchase_nb     | exit_Shop_ThenGoto() | 1 at vacation = X   |
         +---------+-----------------+----------------------+---------------------+
 
         Cronus Lifespan:
@@ -340,7 +340,7 @@ define takePartner          = TRUE;
 // Set to TRUE if you want to clear girl's gifts inventory
 define IWantToDeleteGift    = TRUE;
 define DeleteAt             = 3;  // every X vacations will delete at day 14
-define NbToDelete           = 28; // Number of gifts to delete (Note: choose less than 12
+define NbToDelete           = 20; // Number of gifts to delete (Note: choose less than 12
                                   // per vacation bc of the expired gifts)
 
 // ---------------
